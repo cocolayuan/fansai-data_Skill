@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>账号中心 · Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1b2430; --ink2:#0f3132; --muted:#64748b; --muted2:#94a3b8; --line:#e8efef;
+    --teal:#008aa8; --blue:#49B6D8; --green:#3FB36A; --info:#2563EB;
+    --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+    --en:"Outfit","Noto Sans SC",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--cn);font-weight:500;color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh;
+    background:
+      radial-gradient(1100px 680px at 88% -12%, rgba(73,182,216,.18), transparent 60%),
+      radial-gradient(900px 620px at -8% 12%, rgba(139,217,140,.16), transparent 60%),
+      radial-gradient(820px 560px at 50% 118%, rgba(0,138,168,.10), transparent 60%),
+      #E8F3EF;}
+  .wrap{padding:30px 36px 60px}
+
+  /* glass */
+  .glass{background:linear-gradient(160deg,rgba(255,255,255,.74),rgba(255,255,255,.54));
+    backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.78);
+    box-shadow:0 24px 54px -30px rgba(20,60,60,.26), inset 0 1px 0 rgba(255,255,255,.6)}
+
+  /* ---------- header (面包屑) ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;height:46px}
+  .bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;border:2px solid #f5fffe;
+    box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+  .bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9ADCCB,#49B6D8)}
+  .bmain{font-family:var(--en);font-weight:700;font-size:18px;letter-spacing:1.08px;color:var(--ink);line-height:24px}
+  .bsub{font-family:var(--en);font-weight:300;font-size:18px;letter-spacing:1.08px;color:var(--ink);line-height:24px}
+  .tb-right{display:flex;align-items:center;gap:14px}
+  .bellbtn{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px -10px rgba(15,49,50,.18);position:relative}
+  .bellbtn svg{width:19px;height:19px}
+  .bellbtn i{position:absolute;top:9px;right:11px;width:7px;height:7px;border-radius:50%;background:#FF6B6B;border:2px solid #fff}
+  .uwrap{position:relative}
+  .uchip{display:flex;align-items:center;gap:9px;padding:6px 14px 6px 6px;border-radius:22px;background:#fff;border:2px solid #f5fffe;
+    cursor:pointer;box-shadow:0 6px 18px -10px rgba(15,49,50,.18);transition:.18s}
+  .uchip:hover{box-shadow:0 8px 22px -10px rgba(15,49,50,.26)}
+  .avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--en);font-weight:700;
+    background:linear-gradient(140deg,#A7E885,var(--teal));flex:0 0 auto;object-fit:cover;overflow:hidden}
+  .uchip .avatar{width:30px;height:30px;font-size:13px}
+  .uchip .uname{font-size:15px;color:var(--ink)}
+  .uchip .cv{width:7px;height:7px;border-right:1.8px solid var(--muted2);border-bottom:1.8px solid var(--muted2);transform:rotate(45deg);margin:-3px 2px 0 0;transition:transform .2s}
+  .uwrap.open .uchip .cv{transform:rotate(225deg);margin-top:2px}
+
+  /* user dropdown */
+  .umenu{position:absolute;top:calc(100% + 12px);right:0;width:312px;border-radius:20px;padding:8px;z-index:40;
+    opacity:0;transform:translateY(-6px);pointer-events:none;transition:.2s}
+  .uwrap.open .umenu{opacity:1;transform:none;pointer-events:auto;animation:menuIn .22s cubic-bezier(.2,.7,.2,1)}
+  @keyframes menuIn{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+  .um-prof{display:flex;align-items:center;gap:12px;padding:14px 14px 14px;border-radius:14px}
+  .um-prof .avatar{width:46px;height:46px;font-size:17px}
+  .um-prof .nm{font-size:16px;color:var(--ink)}
+  .um-prof .em{font-family:var(--en);font-size:12.5px;color:var(--muted2);margin-top:3px;font-weight:400}
+  .um-edit{margin-left:auto;width:34px;height:34px;border-radius:11px;background:rgba(0,138,168,.1);color:var(--teal);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex:0 0 auto}
+  .um-edit:hover{background:rgba(0,138,168,.18)}
+  .um-edit svg{width:16px;height:16px}
+  .um-div{height:1px;background:rgba(15,49,50,.08);margin:6px 10px}
+  .um-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;transition:.15s;font-size:14.5px;color:var(--ink)}
+  .um-row:hover{background:rgba(255,255,255,.7)}
+  .um-row.cur{background:rgba(0,138,168,.08);color:var(--teal)}
+  .um-row svg.ic{width:18px;height:18px;color:var(--muted);flex:0 0 auto}
+  .um-row.cur svg.ic{color:var(--teal)}
+  .um-row .rt{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted2)}
+  .um-row .rt .cv{width:6px;height:6px;border-right:1.6px solid var(--muted2);border-bottom:1.6px solid var(--muted2);transform:rotate(-45deg)}
+  .um-row.logout{color:#D6455B}
+  .um-row.logout svg.ic{color:#D6455B}
+
+  /* ---------- content ---------- */
+  .content{max-width:940px;margin:34px auto 0;display:flex;flex-direction:column;gap:24px}
+  .page-h{font-size:22px;font-weight:500;color:var(--ink);letter-spacing:.3px;margin:2px 2px 2px}
+
+  /* profile hero */
+  .hero{border-radius:24px;padding:24px 28px;display:flex;align-items:center;gap:20px}
+  .hero .avatar{width:66px;height:66px;font-size:25px;box-shadow:0 12px 26px -10px rgba(0,138,168,.5)}
+  .hero .hname{font-size:22px;color:var(--ink);display:flex;align-items:center;gap:11px}
+  .rolechip{font-size:12px;font-weight:500;color:var(--teal);background:rgba(0,138,168,.1);border-radius:8px;padding:4px 11px}
+  .hero .hem{font-family:var(--en);font-size:14px;color:var(--muted2);margin-top:7px;font-weight:400}
+  .hero-act{margin-left:auto}
+  .ghost{display:inline-flex;align-items:center;gap:8px;font-family:var(--cn);font-weight:500;font-size:13.5px;color:var(--ink);
+    background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:12px;padding:10px 16px;cursor:pointer;transition:.15s}
+  .ghost:hover{background:#fff;border-color:#cfe0e0}
+  .ghost svg{width:15px;height:15px;color:var(--muted)}
+
+  /* form card */
+  .form{border-radius:24px;padding:28px 30px}
+  .ftitle{font-size:18px;font-weight:500;color:var(--ink)}
+  .fsub{font-size:13px;color:var(--muted2);margin-top:7px;margin-bottom:24px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:22px}
+  label.lb{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:10px}
+  label.lb svg{width:15px;height:15px;color:var(--muted2)}
+  .inp{width:100%;font-family:var(--cn);font-weight:500;font-size:14px;color:var(--ink);background:rgba(255,255,255,.62);
+    border:1px solid var(--line);border-radius:13px;padding:13px 16px;outline:none;transition:.18s}
+  .inp:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.16);background:#fff}
+  .field:focus-within>.lb{color:var(--teal)}
+  .inp.ro{background:rgba(15,49,50,.035);color:var(--muted);cursor:not-allowed;font-family:var(--en);font-weight:400}
+  .inp.ro.cn{font-family:var(--cn);font-weight:500}
+  .lock{margin-left:auto;font-size:11px;color:var(--muted2);font-weight:400;display:inline-flex;align-items:center;gap:5px}
+  .lock svg{width:12px;height:12px}
+
+  /* avatar picker field */
+  .ava-field{display:flex;align-items:center;gap:16px}
+  .ava-pick{position:relative;width:54px;height:54px;flex:0 0 auto}
+  .ava-pick .avatar{width:54px;height:54px;font-size:20px}
+  .ava-cam{position:absolute;right:-3px;bottom:-3px;width:24px;height:24px;border-radius:50%;background:var(--ink);
+    border:2px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer}
+  .ava-cam svg{width:12px;height:12px}
+  /* 头像选择器 */
+  .ava-pickwrap{position:relative}
+  .ava-pop{position:absolute;top:calc(100% + 12px);left:0;z-index:30;border-radius:18px;padding:16px;display:none;animation:apIn .18s ease}
+  .ava-pickwrap.open .ava-pop{display:block}
+  @keyframes apIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  .ava-pop .pt{font-size:12.5px;font-weight:500;color:var(--muted);margin-bottom:12px}
+  .ava-pop .row{display:flex;gap:13px}
+  .ava-opt{width:54px;height:54px;border-radius:50%;cursor:pointer;border:2px solid transparent;position:relative;transition:.15s;overflow:hidden}
+  .ava-opt img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+  .ava-opt:hover{transform:translateY(-2px)}
+  .ava-opt.on{border-color:var(--blue);box-shadow:0 0 0 3px rgba(73,182,216,.2)}
+  .ava-opt.on::after{content:"";position:absolute;right:-2px;bottom:-2px;width:18px;height:18px;border-radius:50%;background:var(--blue);
+    border:2px solid #fff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");background-size:13px;background-repeat:no-repeat;background-position:center}
+  .ava-up{width:54px;height:54px;border-radius:50%;border:1.5px dashed rgba(0,138,168,.4);display:flex;align-items:center;justify-content:center;
+    color:var(--teal);cursor:pointer;background:rgba(0,138,168,.04);transition:.15s}
+  .ava-up:hover{background:rgba(0,138,168,.1)}
+  .ava-up svg{width:20px;height:20px}
+
+  .ffoot{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:6px;padding-top:20px;border-top:1px solid rgba(15,49,50,.08)}
+  .saved{font-size:13px;color:var(--green);display:none;align-items:center;gap:6px}
+  .saved.show{display:inline-flex}
+  .saved svg{width:15px;height:15px}
+  .btn-primary{font-family:var(--cn);font-weight:500;font-size:14px;color:#fff;background:var(--ink);border:none;border-radius:13px;
+    padding:12px 26px;cursor:pointer;box-shadow:0 14px 28px -12px rgba(27,36,48,.5);transition:.18s}
+  .btn-primary:hover{transform:translateY(-1px)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- HEADER -->
+    <div class="topbar">
+      <div class="bcrumb"><span class="bdot"></span><span class="bmain">Accounts</span><span class="bsub">/ 账号中心</span></div>
+      <div class="tb-right">
+        <button class="bellbtn"><i></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+        <div class="uwrap open" id="uwrap">
+          <div class="uchip" id="uchip"><img class="avatar av" alt="艺术" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:this.className,textContent:'艺'}))"><span class="uname">艺术</span><i class="cv"></i></div>
+          <div class="umenu glass">
+            <div class="um-prof">
+              <img class="avatar av" alt="艺术" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:this.className,textContent:'艺'}))">
+              <div><div class="nm">艺术</div><div class="em">fansai@fscity.art</div></div>
+              <div class="um-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+            </div>
+            <div class="um-div"></div>
+            <div class="um-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h7M5 8l2-2m-2 2 2 2M8 6c0 5 4 9 9 9"/><path d="m12 20 4.5-9 4.5 9M14 16h5"/></svg>语言<span class="rt">中文<span class="cv"></span></span></div>
+            <div class="um-row cur"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>账号中心</div>
+            <div class="um-div"></div>
+            <div class="um-row logout"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>退出登录</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <div class="page-h">账号中心</div>
+
+      <!-- profile hero -->
+      <div class="card hero glass">
+        <img class="avatar av" alt="艺术" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:this.className,textContent:'艺'}))">
+        <div>
+          <div class="hname">艺术 <span class="rolechip">管理员</span></div>
+          <div class="hem">fansai@fscity.art</div>
+        </div>
+        <div class="hero-act">
+          <div class="ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>编辑资料</div>
+        </div>
+      </div>
+
+      <!-- 账号信息 form -->
+      <div class="card form glass">
+        <div class="ftitle">账号信息</div>
+        <div class="fsub">名称和头像保存后会同步到右上角用户菜单。</div>
+
+        <div class="grid2">
+          <div class="field">
+            <label class="lb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>管理员名称</label>
+            <input class="inp" id="nameInp" value="艺术" placeholder="显示名称">
+          </div>
+          <div class="field">
+            <label class="lb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg>头像</label>
+            <div class="ava-field">
+              <div class="ava-pick">
+                <img class="avatar av" alt="艺术" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:this.className,textContent:'艺'}))">
+                <div class="ava-cam" id="avaCam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg></div>
+              </div>
+              <div class="ava-pickwrap" id="avaWrap">
+                <div class="ghost" id="avaBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>选择头像</div>
+                <div class="ava-pop glass">
+                  <div class="pt">从默认头像中选择</div>
+                  <div class="row" id="avaRow"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label class="lb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>邮箱<span class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>不可修改</span></label>
+            <input class="inp ro" value="fansai@fscity.art" readonly>
+          </div>
+          <div class="field">
+            <label class="lb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>角色<span class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>不可修改</span></label>
+            <input class="inp ro cn" value="管理员" readonly>
+          </div>
+        </div>
+
+        <div class="ffoot">
+          <span class="saved" id="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>已保存</span>
+          <button class="btn-primary" id="saveBtn">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// user menu toggle
+const uwrap=document.getElementById('uwrap'), uchip=document.getElementById('uchip');
+uchip.addEventListener('click',e=>{e.stopPropagation(); uwrap.classList.toggle('open');});
+document.addEventListener('click',()=>uwrap.classList.remove('open'));
+document.querySelector('.umenu').addEventListener('click',e=>e.stopPropagation());
+// ---------- 头像:默认库 + hash(id)%N 确定性分配 + 选择器 ----------
+const DEFAULT_AVATARS=['avatar01.jpg','avatar02.jpg','avatar03.jpg','avatar04.jpg','avatar05.jpg'];
+function hashId(id){let h=0;id=String(id);for(let i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return h;}
+const user={id:'fansai@fscity.art',avatar:null};                 // avatar=null → 用默认
+function avatarFor(u){return u.avatar||DEFAULT_AVATARS[hashId(u.id)%DEFAULT_AVATARS.length];}
+let current=avatarFor(user);
+function renderAvatars(){document.querySelectorAll('.av').forEach(img=>{if(img.tagName==='IMG')img.src=current;});}
+renderAvatars();
+
+// 选择器
+const avaRow=document.getElementById('avaRow'), avaWrap=document.getElementById('avaWrap');
+function buildPicker(){
+  avaRow.innerHTML=DEFAULT_AVATARS.map(a=>`<div class="ava-opt${a===current?' on':''}" data-a="${a}"><img src="${a}" alt=""></div>`).join("")
+    +`<div class="ava-up" title="上传自定义"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></div>`;
+  avaRow.querySelectorAll('.ava-opt').forEach(o=>o.onclick=e=>{
+    e.stopPropagation(); current=o.dataset.a; user.avatar=current;   // 用户主动选 → 覆盖默认
+    renderAvatars(); buildPicker();
+  });
+}
+buildPicker();
+function togglePicker(e){e.stopPropagation(); avaWrap.classList.toggle('open');}
+document.getElementById('avaBtn').addEventListener('click',togglePicker);
+document.getElementById('avaCam').addEventListener('click',togglePicker);
+avaWrap.querySelector('.ava-pop').addEventListener('click',e=>e.stopPropagation());
+document.addEventListener('click',()=>avaWrap.classList.remove('open'));
+
+// save feedback
+const saved=document.getElementById('saved');
+document.getElementById('saveBtn').addEventListener('click',()=>{
+  renderAvatars();   // 名称/头像保存后同步右上角(此处已实时同步)
+  saved.classList.add('show'); setTimeout(()=>saved.classList.remove('show'),2200);
+});
+</script>
+</body>
+</html>

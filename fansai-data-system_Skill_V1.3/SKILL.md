@@ -1,0 +1,217 @@
+---
+name: fansai-data-system_Skill_V1.3
+description: >
+  Design system for FansAI 数据中台 secondary/tertiary pages (二级/三级页面) — a mint-glass clean-SaaS UI
+  with Apple-style data visualization. Use this whenever building, redesigning, or converting ANY FansAI
+  数据中台 page — 数据总览/创意数据/投放/内容资产/账号管理/客户跟踪/AI 生成弹窗, a dashboard, a detail page,
+  a KPI card row, or a data chart — even when the user only says things like "重构这页 UI", "做个数据页",
+  "把这页做得有呼吸感/设计感", "画个趋势图/排名/占比", or pastes a 功能与字段文档 and asks for a high-fidelity
+  page. It nails the things easy to get wrong: page margins (左右 36px), 字重(Noto Sans SC 用 500,别更粗),
+  面包屑式 header(一级 Materials;二三级 Materials / AI-generated / …), 多个数字同屏布局(KPI 卡、前缀+值+
+  单位基线对齐、metric tile), 图表处理与主次(圆环表盘、横条、平滑多线、厚环、领先高亮排名), 表单与弹窗(玻璃
+  模态、**自定义瓦片下拉替代原生 select**、标签 chips、多指标录入网格按状态锁定、必填校验), 图标(IconPark,
+  内联 SVG 不用 web 组件), fonts(含「万」数值走中文字体), and HTML→SVG→Figma delivery rules.
+---
+
+# FansAI 数据中台 · 页面系统规范 V1.3
+
+产出 FansAI 内容投放中台高保真页面的统一规范。基调:**Apple-fitness / clean-SaaS / 液态玻璃**,浅色薄荷弥散背景,**无紫无粉**,**呼吸感强**。绿色是强调色不是底色。
+
+工作流:**HTML 高保真 → cairosvg 自检 → Figma 导入版 SVG**。
+
+> 重点(也是最易翻车的两块):**多个数字的同屏布局**、**图表的处理与主次**。配方代码与范例:
+> - `references/numbers-and-charts.md` — 数字 6 模式 + 图表 7 类配方(含 SVG/CSS/JS 代码)
+> - `references/customer_tracking_reference.html` — 间距/数字/图表的标杆范例
+> - `references/header_and_system_reference.html` — **header 面包屑 + 系统 UI** 的标准实现(对照它写 header)
+> - `references/forms-and-modals.md` — **表单 / 弹窗 / 瓦片下拉**配方(含完整代码)
+> - `references/content_asset_modal_reference.html` — 弹窗范例(新增内容资产)
+
+## V1.3 变更
+1. 新增**头像规范**(§1):默认头像库 `assets/avatars/avatar01–05.jpg`(5 个抽象渐变);**分配 = `hash(id) % N` 确定性选默认头像**(同一用户固定、换设备一致,不每次随机),上传自定义后覆盖;圆形、方形交付、中心安全区。
+2. 命名 `fansai-data-system_Skill_V1.3`。
+
+## V1.2 变更
+1. 新增**图标规范**(§1):统一用 **IconPark**(Apache-2.0 可商用);**取 SVG 内联,不用 `<iconpark-icon>` Web 组件/字体**(否则 SVG→Figma 不可编辑);outline 描边、`currentColor`、放进色块锚点。
+2. 命名 `fansai-data-system_Skill_V1.2`。
+
+## V1.1 变更
+1. 新增「**表单与弹窗**」节(§6):玻璃模态、输入/textarea、**自定义瓦片下拉(替代原生 select,选中蓝边浅蓝底,可向上展开,状态类带色点)**、标签 chips、多指标录入网格 + **按状态锁定字段**、必填校验(红框+抖动)、入场动画。详见 `references/forms-and-modals.md`,范例 `content_asset_modal_reference.html`。
+2. 命名 `fansai-data-system_Skill_V1.1`(取代 V1.0)。
+
+## V1.0 变更(相对初版)
+1. **页面左右边距统一 36px**。
+2. **中文字体 Noto Sans SC,字重用 500**(600/700 过粗不好看);粗体只留给 Outfit 数字/英文。
+3. **header 改为面包屑式**:一级页左上角 `Materials`;二级/三级 `Materials / AI-generated / …`。
+4. 命名 `fansai-data-system_Skill_V1.0`。
+
+---
+
+## 1. 设计令牌
+
+```css
+:root{
+  --ink:#1b2430; --ink2:#0f3132; --muted:#64748b; --muted2:#94a3b8; --muted3:#727272;
+  --teal:#008aa8; --teal2:#0c7074; --blue:#49B6D8; --green:#8BD98C; --lime:#A7E885;
+  --green-deep:#34A85E; --green-ink:#1F6F4A; --line:#e8efef;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;   /* 默认 font-weight:500 */
+  --en:"Outfit","Noto Sans SC",sans-serif;                          /* 数字/英文 */
+}
+body{font-family:var(--cn); font-weight:500;}   /* 中文基准字重 = 500 */
+```
+
+### 字重规则(重要)
+- **中文一律 Noto Sans SC + `font-weight:500`**。标题、标签、正文都用 500;**不要用 600/700**——Noto 的 600+ 太重、发糊、不好看。需要强调时靠**字号 / 颜色 / 留白**,不靠加粗。
+- **数字与英文用 Outfit**,大数字 / 排名领先值 / 面包屑主级可以 600–700(Outfit 粗体好看)。
+- 含「万 / 亿 / 个」等中文字符的数值,以及文字型取值(A级 / 低 / 进行中),用中文字体(Outfit 缺这些字会丢字)。
+
+### 颜色补充
+- 平台色:小红书 `#FF2741`、抖音/视频号 `#1b2430`、微信 `#07C160`、Instagram 渐变。
+- 状态色:待排期 `#94A3B8` / 制作中 `#FF9F6E` / 分发中 `#49B6D8` / 已发布 `#3FB36A` / 优化中 `#008AA8`。
+- 评分分段:≥85 绿 `#3FB36A` / 70–84 蓝 `#49B6D8` / <70 橙 `#FF9F6E`。
+- 趋势多线:蓝 `#4D9DE8` + 深 navy `#1B2430` + 绿 `#3FB36A`。
+
+### 图标(IconPark)
+统一用 **IconPark**(ByteDance 开源,**Apache-2.0,可商用**)https://iconpark.oceanengine.com/official —— 2000+ 图标、主题可切(outline / two-tone / fill),描边风与本系统一致。
+- **必须「取 SVG 内联」**:从 IconPark 复制 SVG(或用 `@icon-park/svg`),把 `<svg><path…></svg>` 直接写进代码。**不要用 `<iconpark-icon>` Web 组件 / 图标字体** —— 因为 **SVG→Figma 导出需要真实矢量 path**,Web 组件/字体不会被导出成可编辑图层。
+- 统一 **outline 描边主题**:`stroke-width≈2`、`stroke-linecap/linejoin="round"`、`fill="none"`、`stroke="currentColor"`(颜色受控)。
+- 图标放进「**浅 tinted bg 色块 + 同色描边图标**」的锚点里(见数字布局第 5 条);尺寸 14–22px。
+- 保留 IconPark 仓库的 Apache-2.0 许可声明。
+
+### 头像(默认头像库 + 哈希分配)
+- **形状圆形**(用户/账号语义);品牌/平台 logo 才用圆角方形,别混用。
+- **尺寸**:方形交付,理想 SVG 或 ≥256/512 PNG;关键主体收在中心 ~86% 圆内(会被圆形裁切)。系统显示尺寸:chip 30 / 菜单·页头 42–46 / 表单 48–54 / hero 64–66。
+- **默认头像库**:`assets/avatars/avatar01–05.jpg`(抽象渐变、无脸,适合做默认)。系统初期少有人传自定义头像 → 给每个账号分配一个默认头像。
+- **分配规则 = 账号 ID 哈希取模 `hash(id) % N`,确定性**:同一用户每次进、换设备都固定那个,**不要每次刷新随机**;用户上传自定义头像后覆盖默认。
+```js
+const DEFAULT_AVATARS=['avatar01.jpg','avatar02.jpg','avatar03.jpg','avatar04.jpg','avatar05.jpg'];
+function hashId(id){let h=0;id=String(id);for(let i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return h;}
+function avatarFor(user){ return user.avatar || 'assets/avatars/'+DEFAULT_AVATARS[hashId(user.id)%DEFAULT_AVATARS.length]; }
+// 圆形渲染：<img class="avatar" style="width:46px;height:46px;border-radius:50%;object-fit:cover">
+// 无自定义头像也想纯色时回退：渐变底 + 首字母（见 header 的 .avatar）
+```
+
+### 玻璃与背景
+```css
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.5));
+  backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.78);
+  box-shadow:0 24px 54px -28px rgba(20,60,60,.26), inset 0 1px 0 rgba(255,255,255,.65);}
+/* 背景:#ECF4F2 上叠蓝/绿/teal radial blobs。SVG 不支持 blur → 半透明白 + 渐变近似 */
+```
+
+---
+
+## 2. 间距与圆角节奏(呼吸感)
+
+呼吸感来自**一致的节奏**,固定用这套阶梯:
+
+| 用途 | 值 |
+|---|---|
+| **页面左右边距** | **36px**(顶部 ~24–34,底部留足) |
+| 区块/卡片间 gap、section margin | 22–26px |
+| 顶层卡内边距 | 22–24px |
+| 子瓦片内边距 | 16–18px |
+| 瓦片间 gap | 14–16px |
+| 圆角 | 顶层卡 24 / stat 22 / tile 18 / 小卡 16 / chip 12–14 |
+| 卡最小高度 | KPI ~128–168 / stat ~120 |
+| 子标签与内容 | 标签下 13px |
+
+区块标题用 `.sublabel`:小标签 + 计数 chip + **向右淡出的分隔线**,比硬线更轻。
+
+---
+
+## 3. header(面包屑式)
+
+对照 `references/header_and_system_reference.html`。结构:左侧面包屑胶囊,右侧铃铛 + 头像 + 名字。`topbar` 内边距 `24px 36px 18px`(印证 36px 边距)。
+
+```html
+<div class="topbar">
+  <div class="bcrumb">
+    <span class="bdot"></span>
+    <span class="bmain">Materials</span>           <!-- 主级,粗 -->
+    <span class="bsub">/ AI-generated</span>        <!-- 二三级路径,细;可继续 / … -->
+  </div>
+  <div class="tb-right">
+    <button class="bellbtn">🔔</button>
+    <div class="me"><div class="avatar">K</div><span class="mename">Kora</span></div>
+  </div>
+</div>
+```
+```css
+.bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;
+  background:#fff;border:2px solid #f5fffe;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9ADCCB,#49B6D8)}
+.bmain{font-family:var(--en);font-weight:700;font-size:18px;letter-spacing:1.08px;color:#1b2430;line-height:24px}
+.bsub {font-family:var(--en);font-weight:300;font-size:18px;letter-spacing:1.08px;color:#1b2430;line-height:24px}
+.bellbtn{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:#1b2430;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:linear-gradient(140deg,#A7E885,#008aa8);color:#04312f;font-family:var(--en);font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center}
+.mename{font-family:var(--en);font-weight:500;font-size:18px;color:#1b2430}
+```
+
+**层级规则**:
+- **一级页面**:面包屑只显示主级,如 `Materials`(只有 `.bmain`)。
+- **二级 / 三级**:主级 + 细体路径,如 `Materials / AI-generated`、`Materials / AI-generated / 编辑`(主级 `.bmain` 粗,路径 `.bsub` 细 weight 300)。
+- 主级文案 = 模块英文名(Materials / Accounts / Data …);路径段 = 当前子页/动作。
+- 有子标签 Tab 的页(如数据管理)Tab 仍用蓝色下划线激活,与面包屑并存。
+
+**信息优先级**:context(当前平台/账号这类“我在看谁”)是主控,做成醒目 hero;时间范围是次级,用分段(深色激活)+ 日期范围导航器,别喧宾夺主。
+
+---
+
+## 4. 多个数字的布局(核心)
+
+详见 `references/numbers-and-charts.md`。铁律:
+1. 数值用 Outfit + `font-variant-numeric:tabular-nums`;含「万/亿/个」或文字型取值用中文字体。
+2. **前缀 + 数值 + 单位 基线对齐**(`align-items:baseline`)。前缀(¥/同比)、单位(万/%/亿+)比主数字**更小更淡**。
+3. 一个数字最多一个强调色;大多数保持 ink 深色,**只给有结论的数字上色**。
+4. 列表数值右对齐 + 固定 `min-width`,成列对齐。
+5. 每个指标配一个**色块图标**(很浅 tinted bg + 同色描边图标)作锚点。
+6. 指标瓦片的“上下文行”三选一:进度条+说明 / 徽标 / caption。
+
+---
+
+## 5. 图表的处理与主次(核心)
+
+详见 `references/numbers-and-charts.md`。统一“**浅轨道 + 数据 + 右值**”范式。圆环表盘/进度环、**厚环环形**(占比/构成,占地固定不下排)、平滑多线(蓝+深+绿、刻度稀疏、不堆面积、有图例、量级差异上双轴)。
+
+### 主次五律
+1. **不要同色铺满**:排名/列表别根根同绿 → **领先项品牌绿、其余中性灰**,数值标签同步分级。
+2. **不要一行多根等长条** → 单一主条(共用标尺)+ 数值副指标。
+3. **0 数据不画空条** → 收进「待发布 · N」小分区。
+4. **数据扁平时弱化面积对比** → 用厚环/构成图。
+5. **颜色 = 含义,不是装饰**。
+
+---
+
+## 6. 表单与弹窗
+
+详见 `references/forms-and-modals.md`(含完整代码)与范例 `content_asset_modal_reference.html`。要点:
+- **模态**:scrim(弥散+模糊)+ 玻璃卡(`mhead` 标题/副标/× · `mbody` 滚动 · `mfoot` 取消/主操作**右对齐**),入场轻微上浮缩放弹入;左右内边距 36px。
+- **不要用原生 `<select>`**(各系统样式不一、与玻璃风冲突)→ 用**自定义瓦片下拉**:触发器(圆角 pill + CSS 箭头,展开 teal 蓝边)+ 玻璃浮层 + 选项瓦片(**选中 = 蓝边 `#49B6D8` + 浅蓝底 `rgba(73,182,216,.1)` + 深字**);靠近滚动容器底部用**向上展开** `.up` 避免裁切;状态类下拉触发器带**状态色点**。
+- **输入 / textarea**:玻璃风,焦点 teal 蓝边 + 柔光环;聚焦时对应**标签变 teal**;数值 Outfit + tabular-nums,可配实时分段色点。
+- **标签**用 **chips**(回车/逗号增、× 删、退格删尾),别用裸输入框塞逗号串。
+- **多指标录入**:别留一排无标签输入框 → 加**列头**(曝光/点击/互动/线索/转化…);**按状态锁定**:未发布(待排期/制作中)时指标 `disabled` 置灰归 0,发布态才解锁。
+- **校验**:必填为空 → 红框 + 抖动 + 行内提示,输入即清除。
+
+---
+
+## 7. 自检与交付
+
+- **容器无浏览器**,不能截 HTML。用 `cairosvg` 栅格化 SVG 自检(中文显方块=容器缺字体,Figma/Mac 正常)。HTML 用 `node --check`;数据驱动渲染就 node 模拟 `document` 跑通 + 计数自检。
+- **SVG → Figma**:真实 `<text>` 可编辑图层;**整数坐标**;**间距与 HTML 一致**;**禁 8 位十六进制透明色 `#RRGGBBAA`**(改 `fill`+`fill-opacity`);品牌 logo 矢量还原;中文 `Noto Sans SC, PingFang SC`、字重 500;含「万」数值走中文字体。
+- 真实数据不清洗;示意数据标 sample。
+
+---
+
+## 8. 交付前自查清单
+
+- [ ] 页面左右边距 **36px**;间距走第 2 节阶梯。
+- [ ] 表单/弹窗:无原生 `<select>`(用瓦片下拉,选中蓝边浅蓝底);底部下拉向上展开;指标输入有列头、按状态锁定;必填有校验。
+- [ ] 图标:用 IconPark、**内联 SVG**(非 web 组件/字体);outline 描边 + `currentColor`,放进色块锚点。
+- [ ] 头像:圆形;无自定义时按 `hash(id) % N` 从默认库确定性分配(非每次随机);上传可覆盖。
+- [ ] 中文 Noto Sans SC **字重 500**,无 600/700 过粗;粗体只在 Outfit 数字/英文。
+- [ ] header 面包屑:一级 `Materials`;二三级 `Materials / …`(主级粗、路径细)。
+- [ ] 数字:tabular-nums;前缀/单位基线对齐且更小更淡;含「万」走中文字体;只给有结论的数字上色。
+- [ ] 图表:无同色铺满(领先高亮+其余中性);无一行多等长条;0 数据归「待发布」;占比用厚环;趋势蓝+深+绿、刻度稀疏、有图例。
+- [ ] 主次:context 主控、时间次级。
+- [ ] 自检:JS `node --check`;SVG cairosvg 看过、无 8 位透明色、整数坐标、真实 text 层。
+- [ ] 回复中文、简洁,末尾给 2–3 个下一步选项。
