@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>流程配置 · Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b2430; --ink2:#0f3132; --muted:#64748b; --muted2:#94a3b8;
+  --teal:#008aa8; --teal2:#0c7074; --blue:#49B6D8; --lime:#A7E885;
+  --line:#e8efef;
+  --ok:#1A9E4B; --warn:#C77B26; --err:#D6455B; --info:#2563EB;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","Noto Sans SC",sans-serif;
+  --glass:0 24px 54px -28px rgba(20,60,60,.26), inset 0 1px 0 rgba(255,255,255,.65);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--cn);font-weight:500;color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh;
+  background:
+   radial-gradient(1200px 720px at 92% -8%, rgba(73,182,216,.17), transparent 58%),
+   radial-gradient(1000px 700px at -2% 6%, rgba(139,217,140,.17), transparent 55%),
+   radial-gradient(900px 560px at 60% 104%, rgba(0,138,168,.10), transparent 60%),
+   #ECF4F2;
+  background-attachment:fixed}
+.tnum{font-variant-numeric:tabular-nums}
+.wrap{max-width:1680px;margin:0 auto;padding:26px 36px 60px}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.rv{opacity:0;animation:up .5s cubic-bezier(.2,.7,.2,1) forwards}
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.5));backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.78);box-shadow:var(--glass)}
+
+/* ===== header（与已验收页面完全一致的面包屑规格） ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;border:2px solid #f5fffe;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9ADCCB,#49B6D8);flex:0 0 auto}
+.bmain{font-family:var(--en);font-weight:700;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.bellbtn{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px -10px rgba(15,49,50,.18);cursor:pointer;transition:.2s}
+.bellbtn:hover{transform:translateY(-1px)}
+.me{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:linear-gradient(140deg,#A7E885,#008aa8);color:#04312f;font-family:var(--en);font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center}
+.mename{font-family:var(--en);font-weight:500;font-size:18px}
+
+/* ===== 一级 tab（字段字典 / 业务流程 / 通知设置）：与其他已验收页面同款 .subnav/.stab，追加行内图标 ===== */
+.navrow{margin-bottom:22px}
+.subnav{display:flex;align-items:center;gap:6px;padding:6px;border-radius:18px;width:fit-content;background:rgba(255,255,255,.55);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.7)}
+.stab{display:flex;align-items:center;gap:8px;border:none;background:none;padding:9px 20px;border-radius:13px;font-family:var(--cn);font-weight:500;font-size:14px;color:var(--muted);cursor:pointer;transition:.18s;white-space:nowrap}
+.stab svg{width:15px;height:15px;flex:0 0 auto}
+.stab.on{background:var(--ink);color:#fff;font-weight:600;box-shadow:0 10px 22px -10px rgba(15,49,50,.4)}
+.stab:not(.on):hover{color:var(--ink);background:rgba(255,255,255,.6)}
+
+/* ===== searchbox（与已验收页面完全一致的规格，仅按需调宽） ===== */
+.searchbox{display:flex;align-items:center;gap:9px;border-radius:14px;padding:11px 16px;background:rgba(255,255,255,.62);border:1px solid var(--line);width:260px}
+.searchbox svg{width:15px;height:15px;color:var(--muted2);flex:0 0 auto}
+.searchbox input{border:0;outline:0;background:transparent;font-family:var(--cn);font-size:13.5px;width:100%;color:var(--ink)}
+.searchbox input::placeholder{color:var(--muted2)}
+
+/* ===== 主体：左字典主题 + 右详情，两栏栅格 ===== */
+/* align-items:stretch（默认）：左右两栏等高，底边自然对齐 */
+.dictgrid{display:grid;grid-template-columns:272px 1fr;gap:22px;align-items:stretch}
+@media (max-width:1100px){ .dictgrid{grid-template-columns:1fr} }
+
+/* 左栏做成 flex 列：主题列表吃掉中间的弹性空间，脚注 margin-top:auto 顶到卡片底部 */
+.topicpanel{border-radius:22px;padding:20px 14px;display:flex;flex-direction:column;min-height:0}
+.topicpanel .plabel{font-size:11.5px;font-weight:700;letter-spacing:.4px;color:var(--muted2);padding:0 10px 12px;flex:0 0 auto}
+.topiclist{display:flex;flex-direction:column;gap:5px;flex:1 1 auto;min-height:0;overflow-y:auto}
+.topicrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:14px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink);transition:.15s}
+.topicrow:hover{background:rgba(0,138,168,.06)}
+.topicrow.on{background:var(--ink);color:#fff;box-shadow:0 12px 24px -14px rgba(15,49,50,.5)}
+.topicct{font-family:var(--en);font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;background:rgba(148,163,184,.14);color:var(--muted);flex:0 0 auto}
+.topicrow.on .topicct{background:rgba(255,255,255,.2);color:#fff}
+/* 脚注顶到卡片底部，与右栏的源数据说明在同一条底边上 */
+.topicfoot{margin-top:auto;padding:14px 12px 0;font-size:11px;line-height:1.6;color:var(--muted2);flex:0 0 auto;border-top:1px solid rgba(232,239,239,.8)}
+
+/* 右栏同样 flex 列，源数据说明用 margin-top:auto 压到底 */
+.detailpanel{border-radius:22px;padding:24px 26px;display:flex;flex-direction:column;min-height:0}
+.srcnote{margin-top:auto;padding-top:14px;font-size:11px;line-height:1.6;color:var(--muted2)}
+.dhead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.dhead h2{font-size:20px;font-weight:700}
+.dhead .dsub{font-size:12.5px;color:var(--muted2);margin-top:5px;font-weight:500}
+
+/* 新增行 */
+.addrow{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.addinput{flex:1;min-width:180px;padding:11px 16px;border-radius:14px;background:rgba(255,255,255,.62);border:1px solid var(--line);
+  font-family:var(--cn);font-size:13.5px;color:var(--ink);outline:0;transition:.16s}
+.addinput:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.16);background:#fff}
+.addinput::placeholder{color:var(--muted2)}
+.addbtn{display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:14px;font-family:var(--cn);font-size:13.5px;font-weight:700;
+  color:#fff;background:var(--ink);border:none;cursor:pointer;transition:.18s;box-shadow:0 14px 28px -14px rgba(20,30,40,.5);white-space:nowrap}
+.addbtn svg{width:14px;height:14px}
+.addbtn:hover{transform:translateY(-1px)}
+.addbtn[disabled]{background:#D7DEDE;color:#fff;box-shadow:none;cursor:not-allowed;transform:none}
+
+/* ===== table ===== */
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:11.5px;font-weight:700;color:var(--muted2);letter-spacing:.3px;padding:14px 10px 11px;border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr.datarow{transition:.15s}
+tbody tr.datarow.zebra{background:rgba(255,255,255,.5)}
+tbody tr.datarow:hover{background:rgba(0,138,168,.05)}
+tbody td{padding:16px 10px;font-size:13.5px;border-bottom:1px solid rgba(236,243,243,.8);vertical-align:middle}
+/* 操作列右对齐：表头与单元格同时靠右，整组贴齐卡片右边缘 */
+thead th.opcol,tbody td.opcol{text-align:right}
+.cn-cell{font-weight:700;color:var(--ink)}
+.en-cell{font-family:var(--en);font-weight:500;color:var(--muted);font-size:13px}
+
+/* 状态 pill：启用=绿（复用交付完成语义）／停用=灰（复用已关闭语义） */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:12px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pill .pd{width:6px;height:6px;border-radius:50%}
+
+/* 操作：上移/下移/保存 图标 ｜ 停用/启用 文字 pill ｜ 删除 危险图标 */
+.opgroup{display:inline-flex;align-items:center;gap:7px;justify-content:flex-end}
+.opicon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  background:rgba(255,255,255,.7);border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:.16s;position:relative}
+.opicon svg{width:15px;height:15px}
+.opicon:hover{color:var(--teal);border-color:rgba(0,138,168,.35);background:#fff;transform:translateY(-1px);box-shadow:0 10px 20px -12px rgba(0,138,168,.4)}
+.opicon.danger:hover{color:var(--err);border-color:rgba(214,69,91,.35);box-shadow:0 10px 20px -12px rgba(214,69,91,.4)}
+.opicon[disabled]{opacity:.35;cursor:not-allowed;pointer-events:none}
+.opicon .otip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  font-size:11px;font-weight:600;padding:5px 9px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .14s}
+.opicon:hover .otip{opacity:1}
+.opdivider{width:1px;height:20px;background:var(--line);flex:0 0 auto}
+.optoggle{padding:8px 15px;border-radius:12px;font-family:var(--cn);font-size:12px;font-weight:700;cursor:pointer;transition:.16s;border:1px solid;white-space:nowrap}
+.optoggle:hover{filter:brightness(.96);transform:translateY(-1px)}
+
+/* 空态 */
+.emptystate{padding:56px 20px;text-align:center;color:var(--muted2);font-size:13px;line-height:1.8}
+/* 面板级空态撑满剩余高度，保证左右两栏底边仍然齐平 */
+.detailpanel>.emptystate{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:14px;font-size:13px;font-weight:500;box-shadow:0 20px 40px -14px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.28s;z-index:80;max-width:560px;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar rv">
+    <div class="bcrumb"><span class="bdot"></span><span class="bmain">流程配置</span></div>
+    <div class="tb-right">
+      <button class="bellbtn" title="消息通知">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9z"/><path d="M10.3 20a2 2 0 003.4 0"/></svg>
+      </button>
+      <div class="me">
+        <div class="avatar">K</div><span class="mename">Kora</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:#64748b"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <div class="navrow rv" style="animation-delay:.02s">
+    <div class="subnav" id="subnav"></div>
+  </div>
+
+  <div class="dictgrid">
+    <aside class="topicpanel glass rv" style="animation-delay:.05s">
+      <div class="plabel">字典主题</div>
+      <div class="topiclist" id="topicList"></div>
+      <div class="topicfoot">左侧主题列表为源截图可完整读取的 <b class="tnum">15</b> 项；页面原有滚动条提示还有更多主题未在本次截图中展示，不做编造。</div>
+    </aside>
+
+    <section class="detailpanel glass rv" id="detailPanel" style="animation-delay:.08s"></section>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 数据（全部来自「流程配置 · 字段字典」页截图，未新增字段） ============ */
+const TOPICS = [
+ {key:'行业',      count:11},
+ {key:'客户来源',   count:10},
+ {key:'线索状态',   count:5},
+ {key:'ICP评级',   count:3},
+ {key:'客户状态',   count:8},
+ {key:'关系温度',   count:3},
+ {key:'决策角色',   count:5},
+ {key:'销售阶段',   count:6},
+ {key:'服务方向',   count:7},
+ {key:'Forecast', count:3},
+ {key:'风险等级',   count:3},
+ {key:'项目状态',   count:6},
+ {key:'验收状态',   count:4},
+ {key:'合同类型',   count:4},
+ {key:'质检状态',   count:3},
+];
+/* 「行业」主题下的字典项——源截图标注共 11 项，本次仅可完整读取前 10 项，第 11 项因视口截断未采集，不做编造 */
+const ITEMS = {
+ '行业': [
+  {cn:'服装/时尚',     en:'Apparel / Fashion',            status:'启用'},
+  {cn:'快消/美妆',     en:'FMCG / Beauty',                status:'启用'},
+  {cn:'3C/消费电子',   en:'3C / Consumer Electronics',    status:'启用'},
+  {cn:'食饮',         en:'Food & Beverage',              status:'启用'},
+  {cn:'互联网',        en:'Internet',                     status:'启用'},
+  {cn:'文旅',         en:'Culture & Tourism',            status:'启用'},
+  {cn:'汽车',         en:'Automotive',                   status:'启用'},
+  {cn:'游戏',         en:'Gaming',                       status:'启用'},
+  {cn:'本地生活',      en:'Local Services',               status:'启用'},
+  {cn:'出海品牌',      en:'Global Expansion Brands',      status:'启用'},
+ ],
+};
+const SOURCE_NOTE = { '行业': '源页面标注该主题共 11 项，本次截图仅可完整读取 10 项，第 11 项因视口截断未采集。' };
+
+const STATUS_STYLE = { '启用': {bg:'#EAF6EE', fg:'#1A9E4B'}, '停用': {bg:'#F1F4F4', fg:'#94A3B8'} };
+
+const TABS=[
+ {k:'field', l:'字段字典', icon:'<path d="M4 6a2 2 0 012-2h5v14H6a2 2 0 00-2 2V6z"/><path d="M20 6a2 2 0 00-2-2h-5v14h5a2 2 0 012 2V6z"/>'},
+ {k:'flow',  l:'业务流程', icon:'<path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h13"/>'},
+ {k:'notify',l:'通知设置', icon:'<path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9z"/><path d="M10.3 20a2 2 0 003.4 0"/>'},
+];
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(window.__tt); window.__tt=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ============ 一级 tab ============ */
+let activeTab='field';
+const subnav=document.getElementById('subnav');
+function renderTabs(){
+  subnav.innerHTML='';
+  TABS.forEach(t=>{
+    const b=document.createElement('button'); b.className='stab'+(t.k===activeTab?' on':'');
+    b.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${t.icon}</svg><span>${t.l}</span>`;
+    b.onclick=()=>{
+      if(t.k!=='field'){ toast(`「${t.l}」未在本次截图中展示，暂无可呈现的数据`); return; }
+      activeTab=t.k; renderTabs(); renderDetail();
+    };
+    subnav.appendChild(b);
+  });
+}
+renderTabs();
+
+/* ============ 左侧主题列表 ============ */
+let activeTopic='行业', searchQ='';
+const topicList=document.getElementById('topicList');
+function renderTopics(){
+  topicList.innerHTML='';
+  TOPICS.forEach(t=>{
+    const row=document.createElement('div'); row.className='topicrow'+(t.key===activeTopic?' on':'');
+    row.innerHTML=`<span>${t.key}</span><span class="topicct tnum">${t.count}</span>`;
+    row.onclick=()=>{ activeTopic=t.key; searchQ=''; renderTopics(); renderDetail(); };
+    topicList.appendChild(row);
+  });
+}
+renderTopics();
+
+/* ============ 右侧详情 ============ */
+const ICON_UP='<path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>';
+const ICON_DOWN='<path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/>';
+const ICON_SAVE='<path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/>';
+const ICON_DEL='<path d="M3 6h18"/><path d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/>';
+const ICON_ADD='<path d="M12 5v14M5 12h14"/>';
+const ICON_SEARCH='<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>';
+
+const detailPanel=document.getElementById('detailPanel');
+function getRows(){
+  const rows=ITEMS[activeTopic]||[];
+  if(!searchQ) return rows;
+  const q=searchQ.toLowerCase();
+  return rows.filter(r=>r.cn.toLowerCase().includes(q)||r.en.toLowerCase().includes(q));
+}
+
+function renderDetail(){
+  const all=ITEMS[activeTopic]||[];
+  const rows=getRows();
+  const note=SOURCE_NOTE[activeTopic]||'该主题下的具体字典项未在本次源截图中展示，可通过下方「新增」录入（原型演示，本地生效）。';
+  detailPanel.innerHTML=`
+    <div class="dhead">
+      <div><h2>${activeTopic}</h2><div class="dsub">共 <span class="tnum">${all.length}</span> 项</div></div>
+      <div class="searchbox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">${ICON_SEARCH}</svg>
+        <input id="dictSearch" placeholder="搜索字典项..." value="${searchQ}">
+      </div>
+    </div>
+    <div class="addrow">
+      <input class="addinput" id="addCn" placeholder="中文名称">
+      <input class="addinput" id="addEn" placeholder="英文名称">
+      <button class="addbtn" id="addBtn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${ICON_ADD}</svg>
+        新增
+      </button>
+    </div>
+    ${all.length ? `<table>
+      <thead><tr><th>中文</th><th>英文</th><th>状态</th><th class="opcol">操作</th></tr></thead>
+      <tbody id="dictBody"></tbody>
+    </table>
+    <div class="srcnote">${note}</div>`
+    : `<div class="emptystate">${note}<br>暂无已录入的字典项，可通过上方表单新增。</div>`}
+  `;
+
+  const search=document.getElementById('dictSearch');
+  search.addEventListener('input', e=>{ searchQ=e.target.value; if(all.length) renderDictBody(); });
+
+  const cnInp=document.getElementById('addCn'), enInp=document.getElementById('addEn'), addBtn=document.getElementById('addBtn');
+  function syncAddBtn(){ addBtn.disabled = !(cnInp.value.trim() && enInp.value.trim()); }
+  cnInp.addEventListener('input', syncAddBtn); enInp.addEventListener('input', syncAddBtn);
+  addBtn.onclick=()=>{
+    if(addBtn.disabled) return;
+    if(!ITEMS[activeTopic]) ITEMS[activeTopic]=[];
+    ITEMS[activeTopic].push({cn:cnInp.value.trim(), en:enInp.value.trim(), status:'启用'});
+    toast(`已新增「${cnInp.value.trim()}」—— 原型演示，本地生效，不会写入实际系统`);
+    renderDetail();
+  };
+
+  if(all.length) renderDictBody();
+}
+
+function renderDictBody(){
+  const rows=getRows();
+  const tbody=document.getElementById('dictBody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  if(!rows.length){
+    tbody.innerHTML=`<tr><td colspan="4" class="emptystate">没有符合搜索条件的字典项</td></tr>`;
+    return;
+  }
+  rows.forEach((it,idx)=>{
+    const list=ITEMS[activeTopic];
+    const realIdx=list.indexOf(it);
+    const st=STATUS_STYLE[it.status]||{bg:'#F1F4F4',fg:'#94A3B8'};
+    /* 按钮 = 「点了会变成什么」，因此取目标状态的配色 —— 与左侧状态 tag 互斥：
+       停用中的行 → 绿色「启用」按钮；启用中的行 → 灰色「停用」按钮 */
+    const nextStatus = it.status==='启用' ? '停用' : '启用';
+    const bt = STATUS_STYLE[nextStatus];
+    const tr=document.createElement('tr'); tr.className='datarow'+(idx%2===1?' zebra':'');
+    tr.innerHTML=`
+      <td class="cn-cell">${it.cn}</td>
+      <td class="en-cell">${it.en}</td>
+      <td><span class="pill" style="background:${st.bg};color:${st.fg}"><span class="pd" style="background:${st.fg}"></span>${it.status}</span></td>
+      <td class="opcol">
+        <div class="opgroup">
+          <button class="opicon" data-act="up" ${realIdx<=0?'disabled':''}><span class="otip">上移</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_UP}</svg></button>
+          <button class="opicon" data-act="down" ${realIdx>=list.length-1?'disabled':''}><span class="otip">下移</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_DOWN}</svg></button>
+          <button class="opicon" data-act="save"><span class="otip">保存</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICON_SAVE}</svg></button>
+          <span class="opdivider"></span>
+          <button class="optoggle" data-act="toggle" style="color:${bt.fg};background:${bt.bg};border-color:transparent">${nextStatus}</button>
+          <button class="opicon danger" data-act="del"><span class="otip">删除</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICON_DEL}</svg></button>
+        </div>
+      </td>`;
+    tr.querySelector('[data-act="up"]').onclick=()=>{
+      if(realIdx<=0) return;
+      [list[realIdx-1],list[realIdx]]=[list[realIdx],list[realIdx-1]];
+      toast(`「${it.cn}」已上移`); renderDetail();
+    };
+    tr.querySelector('[data-act="down"]').onclick=()=>{
+      if(realIdx>=list.length-1) return;
+      [list[realIdx+1],list[realIdx]]=[list[realIdx],list[realIdx+1]];
+      toast(`「${it.cn}」已下移`); renderDetail();
+    };
+    tr.querySelector('[data-act="save"]').onclick=()=>toast(`「${it.cn}」当前排序与状态已保存 —— 原型演示，本地生效，不会写入实际系统`);
+    tr.querySelector('[data-act="toggle"]').onclick=()=>{
+      it.status = it.status==='启用' ? '停用' : '启用';
+      toast(`「${it.cn}」已切换为「${it.status}」—— 原型演示，本地生效，不会写入实际系统`);
+      renderDetail();
+    };
+    tr.querySelector('[data-act="del"]').onclick=()=>toast(`删除「${it.cn}」需二次确认 —— 原型演示，不会真正删除数据`);
+    tbody.appendChild(tr);
+  });
+}
+
+renderDetail();
+</script>
+</body>
+</html>

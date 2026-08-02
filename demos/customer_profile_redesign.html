@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>客户资料 · Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b2430; --ink2:#0f3132; --muted:#64748b; --muted2:#94a3b8;
+  --teal:#008aa8; --teal2:#0c7074; --blue:#49B6D8; --lime:#A7E885;
+  --line:#e8efef;
+  --ok:#1A9E4B; --warn:#C77B26; --err:#D6455B; --info:#2563EB;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","Noto Sans SC",sans-serif;
+  --glass:0 24px 54px -28px rgba(20,60,60,.26), inset 0 1px 0 rgba(255,255,255,.65);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--cn);font-weight:500;color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh;
+  background:
+   radial-gradient(1200px 720px at 92% -8%, rgba(73,182,216,.17), transparent 58%),
+   radial-gradient(1000px 700px at -2% 6%, rgba(139,217,140,.17), transparent 55%),
+   radial-gradient(900px 560px at 60% 104%, rgba(0,138,168,.10), transparent 60%),
+   #ECF4F2;
+  background-attachment:fixed}
+.tnum{font-variant-numeric:tabular-nums}
+.wrap{max-width:1680px;margin:0 auto;padding:26px 36px 60px}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.rv{opacity:0;animation:up .5s cubic-bezier(.2,.7,.2,1) forwards}
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.5));backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.78);box-shadow:var(--glass)}
+
+/* ===== header ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;border:2px solid #f5fffe;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9ADCCB,#49B6D8);flex:0 0 auto}
+.bmain{font-family:var(--en);font-weight:700;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.bellbtn{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px -10px rgba(15,49,50,.18);cursor:pointer;transition:.2s}
+.bellbtn:hover{transform:translateY(-1px)}
+.me{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:linear-gradient(140deg,#A7E885,#008aa8);color:#04312f;font-family:var(--en);font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center}
+.mename{font-family:var(--en);font-weight:500;font-size:18px}
+
+/* ===== 顶部指标面板：四个 KPI + 合同构成，合并进同一张玻璃卡 ===== */
+.kpipanel{border-radius:24px;padding:24px 26px 22px;margin-bottom:22px}
+.kpirow{display:grid;grid-template-columns:repeat(4,1fr);align-items:stretch}
+.kpi{display:flex;flex-direction:column;padding:2px 26px;position:relative;min-height:0}
+.kpi:first-child{padding-left:0}
+.kpi:last-child{padding-right:0}
+.kpi+.kpi::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(203,219,219,.9) 22%,rgba(203,219,219,.9) 78%,transparent)}
+.klabel{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.klabel .cn{font-size:13px;font-weight:700;color:var(--ink)}
+.klabel .en{font-family:var(--en);font-size:9.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2)}
+.kval{display:flex;align-items:baseline;gap:7px;margin-top:16px}
+.kval .num{font-family:var(--en);font-weight:700;font-size:40px;line-height:1;letter-spacing:-.5px}
+.kval .unit{font-family:var(--cn);font-size:12px;font-weight:600;color:var(--muted2)}
+.kcap{margin-top:auto;padding-top:14px;font-size:11.5px;line-height:1.6;color:var(--muted2)}
+.kcap b{color:var(--muted);font-weight:600}
+
+/* 合同构成分段条（对已有字段的重新表达，非新增数据） */
+.mixblock{margin-top:22px;padding-top:20px;border-top:1px solid rgba(232,239,239,.9)}
+.sublabel{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-bottom:13px}
+.sublabel .en{font-family:var(--en);font-size:9.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2)}
+.sublabel .ln{flex:1;height:1px;background:linear-gradient(90deg,rgba(231,239,239,.95),transparent)}
+.segbar{display:flex;height:32px;border-radius:10px;overflow:hidden;background:#EAF1F1}
+.seg{display:flex;align-items:center;justify-content:center;font-family:var(--en);font-size:11.5px;font-weight:700;color:#fff;transition:.2s;cursor:default}
+.seg:hover{filter:brightness(1.06)}
+.seglegend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+.lgd{display:flex;align-items:center;gap:8px;font-size:12px}
+.lgd .dot{width:8px;height:8px;border-radius:3px;flex:0 0 auto}
+.lgd .nm{color:var(--muted);font-weight:600}
+.lgd .vl{font-family:var(--en);font-weight:700;color:var(--ink);margin-left:auto}
+.lgd .pc{font-family:var(--en);font-size:11px;font-weight:600;color:var(--muted2)}
+.demotag{font-size:9px;font-weight:700;color:#C77B26;background:#FDF1E3;border-radius:5px;padding:1px 5px;cursor:help;margin-left:4px}
+
+/* ===== toolbar（与已验收页面同一套 searchbox / dd / resetbtn / createbtn 规格） ===== */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.tr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.searchbox{display:flex;align-items:center;gap:9px;border-radius:14px;padding:11px 16px;background:rgba(255,255,255,.62);border:1px solid var(--line);width:300px}
+.searchbox svg{width:15px;height:15px;color:var(--muted2);flex:0 0 auto}
+.searchbox input{border:0;outline:0;background:transparent;font-family:var(--cn);font-size:13.5px;width:100%;color:var(--ink)}
+.searchbox input::placeholder{color:var(--muted2)}
+.resetbtn{display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:14px;font-family:var(--cn);font-size:13.5px;font-weight:600;
+  color:var(--muted);background:rgba(255,255,255,.62);border:1px solid var(--line);cursor:pointer;transition:.16s}
+.resetbtn svg{width:13px;height:13px}
+.resetbtn:hover{color:var(--ink);border-color:#cfe0e0;background:#fff}
+.resetbtn:active svg{transform:rotate(-180deg);transition:transform .35s}
+.resetbtn.on{color:var(--teal2);background:rgba(0,138,168,.08);border-color:rgba(0,138,168,.28)}
+.resetbtn .cv{width:6px;height:6px;border-right:1.8px solid currentColor;border-bottom:1.8px solid currentColor;transform:rotate(45deg);margin-top:-3px;transition:transform .2s}
+.resetbtn.on .cv{transform:rotate(225deg);margin-top:2px}
+.createbtn{display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:14px;font-family:var(--cn);font-size:13.5px;font-weight:700;
+  color:#fff;background:var(--ink);border:none;cursor:pointer;transition:.18s;box-shadow:0 14px 28px -14px rgba(20,30,40,.5)}
+.createbtn svg{width:14px;height:14px}
+.createbtn:hover{transform:translateY(-1px);box-shadow:0 18px 34px -14px rgba(20,30,40,.6)}
+
+/* 更多筛选：展开行 */
+.morebar{display:none;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;padding:14px 16px;border-radius:16px;
+  background:rgba(255,255,255,.5);border:1px solid var(--line)}
+.morebar.show{display:flex;animation:ddIn .18s ease}
+.morebar .mlabel{font-size:11.5px;font-weight:700;color:var(--muted2);letter-spacing:.4px;margin-right:2px}
+
+/* ===== 自定义瓦片下拉 ===== */
+.dd{position:relative}
+.dd-trig{display:flex;align-items:center;gap:9px;font-family:var(--cn);font-weight:500;font-size:13.5px;color:var(--ink);
+  background:rgba(255,255,255,.62);border:1px solid var(--line);border-radius:14px;padding:11px 16px;cursor:pointer;transition:.18s;min-width:146px}
+.dd.open .dd-trig{border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.16);background:#fff}
+.dd-trig .cv{width:7px;height:7px;border-right:1.8px solid var(--muted2);border-bottom:1.8px solid var(--muted2);transform:rotate(45deg);margin-top:-3px;margin-left:auto;transition:transform .2s}
+.dd.open .dd-trig .cv{transform:rotate(225deg);margin-top:2px}
+.dd-trig .dd-dot,.dd-opt .dd-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.dd-pop{position:absolute;top:calc(100% + 8px);left:0;min-width:190px;z-index:40;background:#fff;border:1px solid var(--line);
+  border-radius:14px;box-shadow:0 20px 48px -18px rgba(15,49,50,.34);padding:8px;display:none;animation:ddIn .16s ease}
+.dd.open .dd-pop{display:block}
+.dd-opt{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:.15s}
+.dd-opt:hover{background:rgba(0,138,168,.06)}
+.dd-opt.on{background:rgba(73,182,216,.1);color:var(--ink);font-weight:700}
+@keyframes ddIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.dd.pagesize .dd-trig{min-width:88px;padding:7px 11px;font-size:12.5px;border-radius:11px}
+.dd.pagesize .dd-pop{min-width:110px;padding:6px}
+.dd.pagesize.up .dd-pop{top:auto;bottom:calc(100% + 8px)}
+.dd.pagesize .dd-opt{font-size:12.5px;padding:7px 10px}
+
+/* ===== table ===== */
+.tablecard{border-radius:22px;padding:8px 22px 22px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:1180px}
+thead th{text-align:left;font-size:11.5px;font-weight:700;color:var(--muted2);letter-spacing:.3px;padding:18px 10px 11px;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
+thead th.sortable{cursor:pointer}
+thead th.sortable:hover{color:var(--ink)}
+thead th .sarrow{display:inline-block;margin-left:3px;opacity:.4;font-size:10px}
+thead th.sorted .sarrow{opacity:1;color:var(--teal)}
+thead th.opcol,tbody td.opcol{text-align:right}
+tbody tr.datarow{transition:.15s}
+tbody tr.datarow.zebra{background:rgba(255,255,255,.5)}
+tbody tr.datarow:hover{background:rgba(0,138,168,.05)}
+tbody td{padding:20px 10px;font-size:13.5px;border-bottom:1px solid rgba(236,243,243,.8);vertical-align:middle}
+.na{color:var(--muted2);font-weight:500}
+
+/* 客户名称 */
+.namecell{display:flex;align-items:center;gap:12px;max-width:300px}
+/* 客户首标：默认取名称前两字。统一淡薄荷底 + 淡蓝灰字，不做彩色区分 —— 它是定位锚点不是信息，不该抢名称的注意力 */
+.clogo{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  background:#E9F2F1;border:1px solid rgba(255,255,255,.7);color:#93A7B4;font-weight:600;font-size:13px;letter-spacing:.5px;line-height:1}
+.cname{font-weight:700;color:var(--ink);line-height:1.35}
+.cdesc{font-size:11.5px;color:var(--muted2);margin-top:3px;line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* 负责人：27px hash 头像 + 姓名 */
+.ownercell{display:flex;align-items:center;gap:9px}
+.ownerav{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;
+  font-family:var(--en);font-weight:700;font-size:11.5px;flex:0 0 auto;box-shadow:0 4px 10px -5px rgba(20,60,60,.4)}
+.ownername{font-weight:600;color:var(--ink);white-space:nowrap}
+.typetag{display:inline-flex;align-items:center;font-size:11.5px;font-weight:600;color:var(--muted);background:rgba(148,163,184,.12);border-radius:9px;padding:4px 10px;white-space:nowrap}
+
+/* 入库日期：完整日期数字，不做徽标化 */
+.datecell{font-family:var(--en);font-weight:600;font-size:13px;color:var(--ink);white-space:nowrap}
+
+/* ICP 评级徽标 */
+.grade{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:32px;padding:0 9px;border-radius:11px;
+  font-family:var(--en);font-weight:700;font-size:13.5px;letter-spacing:.3px}
+
+/* 状态 pill */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:12px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pill .pd{width:6px;height:6px;border-radius:50%}
+
+/* 操作：三个行级图标按钮，整组右对齐 */
+.opgroup{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
+.opicon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  background:rgba(255,255,255,.7);border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:.16s;position:relative}
+.opicon svg{width:16px;height:16px}
+.opicon:hover{color:var(--teal);border-color:rgba(0,138,168,.35);background:#fff;transform:translateY(-1px);box-shadow:0 10px 20px -12px rgba(0,138,168,.4)}
+.opicon .otip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  font-size:11px;font-weight:600;padding:5px 9px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .14s;z-index:12}
+.opicon:hover .otip{opacity:1}
+/* 修改客户状态：锚定在按钮上的状态选择浮层，沿用瓦片下拉视觉 */
+.stpop{position:absolute;top:calc(100% + 8px);right:0;min-width:168px;z-index:45;background:#fff;border:1px solid var(--line);
+  border-radius:14px;box-shadow:0 20px 48px -18px rgba(15,49,50,.34);padding:8px;display:none;text-align:left;animation:ddIn .16s ease}
+.opicon.open .stpop{display:block}
+.opicon.open{color:var(--teal);border-color:rgba(0,138,168,.45);background:#fff}
+.stpop .sthead{font-size:10.5px;font-weight:700;color:var(--muted2);letter-spacing:.4px;padding:4px 10px 7px}
+
+/* 空态 */
+.emptyrow td{padding:56px 10px;text-align:center;color:var(--muted2);font-size:13px}
+
+/* 页脚 */
+.tfoot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:10px}
+.tfoot .note{font-size:11.5px;color:var(--muted2);line-height:1.6;max-width:760px}
+.tfoot .note b{font-family:var(--en);color:var(--ink)}
+.pagerwrap{display:flex;align-items:center;gap:12px}
+.pager{display:flex;align-items:center;gap:6px}
+.pgbtn{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.6);color:var(--muted);display:flex;align-items:center;justify-content:center;font-family:var(--en);font-weight:600;font-size:12.5px;cursor:pointer;transition:.15s}
+.pgbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pgbtn[disabled]{opacity:.4;cursor:not-allowed}
+.pgbtn:not([disabled]):not(.on):hover{border-color:#cfe0e0;color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:14px;font-size:13px;font-weight:500;box-shadow:0 20px 40px -14px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.28s;z-index:80;max-width:600px;text-align:center;line-height:1.6}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:1180px){
+  .kpirow{grid-template-columns:repeat(2,1fr);row-gap:22px}
+  .kpi:nth-child(3){padding-left:0}
+  .kpi:nth-child(3)::before{display:none}
+  .seglegend{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar rv">
+    <div class="bcrumb"><span class="bdot"></span><span class="bmain">客户资料</span></div>
+    <div class="tb-right">
+      <button class="bellbtn" title="消息通知">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9z"/><path d="M10.3 20a2 2 0 003.4 0"/></svg>
+      </button>
+      <div class="me">
+        <div class="avatar">K</div><span class="mename">Kora</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:#64748b"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- 顶部指标：四个 KPI + 合同构成，合并进同一张玻璃卡 -->
+  <section class="kpipanel glass rv" style="animation-delay:.03s">
+    <div class="kpirow" id="kpiRow"></div>
+    <div class="mixblock">
+      <div class="sublabel">合同构成<span class="en">Contract Mix</span><span class="ln"></span></div>
+      <div class="segbar" id="segbar"></div>
+      <div class="seglegend" id="segLegend"></div>
+    </div>
+  </section>
+
+  <div class="toolbar rv" style="animation-delay:.06s">
+    <div class="searchbox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="searchInput" placeholder="搜索客户 / 联系人">
+    </div>
+    <div class="tr">
+      <div id="ddOwner"></div>
+      <div id="ddIndustry"></div>
+      <div id="ddStatus"></div>
+      <button class="resetbtn" id="moreBtn">更多筛选<i class="cv"></i></button>
+      <button class="resetbtn" id="resetBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg>
+        重置
+      </button>
+      <button class="createbtn" id="createBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        新建客户
+      </button>
+    </div>
+  </div>
+
+  <div class="morebar rv" id="moreBar">
+    <span class="mlabel">更多筛选</span>
+    <div id="ddSource"></div>
+    <div id="ddIcp"></div>
+    <span class="mlabel" style="margin-left:4px;font-weight:500;color:var(--muted2)">以上字段均取自表格已有列，未新增源页面不存在的筛选维度</span>
+  </div>
+
+  <div class="tablecard glass rv" style="animation-delay:.09s">
+    <table>
+      <thead><tr id="theadRow"></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="tfoot">
+      <div class="note" id="pageNote"></div>
+      <div class="pagerwrap">
+        <div id="ddPageSize"></div>
+        <div class="pager" id="pager"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 数据（全部来自「客户资料」页截图，未新增字段） ============
+   源页 KPI 标注共 14 位客户；本次截图可完整读取 7 行，第 8 行起因视口截断未采集。 */
+const CUSTOMERS = [
+ {name:'百利/猫粮',   desc:null,                                   owner:'Nico',        industry:'快消/美妆',  source:'品牌直客', date:'2026-07-31', icp:'A',  status:'方案中',   contact:'rayna'},
+ {name:'百利',        desc:'猫粮',                                 owner:'Nico',        industry:'食饮',      source:'品牌直客', date:'2026-07-31', icp:'A',  status:'方案中',   contact:null},
+ {name:'Songdio项目', desc:'songdio ai音乐创作，支持普通人创作音乐', owner:'shuyan',      industry:'文旅',      source:'历史资源', date:'2026-07-29', icp:'B',  status:'谈判中',   contact:'星星'},
+ {name:'悦慕心情',    desc:'1',                                    owner:'Rayna',       industry:'服装/时尚',  source:'代理商',   date:'2026-07-28', icp:'A',  status:'谈判中',   contact:'Rayna'},
+ {name:'test',        desc:'test',                                 owner:'Rayna',       industry:null,        source:null,      date:'2026-07-28', icp:null, status:'方案中',   contact:'1'},
+ {name:'百济神州',    desc:'创新药公司，出海公司',                   owner:'FansAI Admin',industry:'出海品牌',   source:'老板资源', date:'2026-07-28', icp:'A',  status:'需求确认', contact:'刘明天'},
+ {name:'耳机工厂',    desc:null,                                   owner:'FansAI Admin',industry:'服装/时尚',  source:'活动认识', date:'2026-07-27', icp:'A',  status:'潜在',     contact:'张三'},
+];
+const TOTAL_CUSTOMERS = 14;   // 源 KPI：总客户数 14
+
+/* KPI —— 数值与说明文案均照抄源页面，未改口径 */
+const KPIS = [
+ {cn:'总客户数',   en:'Total Customers', val:14, cap:'数据范围内客户总数',      tone:null},
+ {cn:'合同总数',   en:'Contracts',       val:7,  cap:'构成见下方「合同构成」',   tone:null},
+ {cn:'高风险客户', en:'High Risk',       val:0,  cap:'需优先跟进与复盘',        tone:null},
+ {cn:'逾期任务',   en:'Overdue Tasks',   val:22, cap:'全库待办任务已逾期 · 按<b>任务</b>计数，与上方按<b>客户</b>计数的口径不同', tone:'warn'},
+];
+
+/* 合同构成：源 KPI 副文案「年度合约 1 · 季度合约 1 · 项目制 2 · 未分…」，第四类标签被截断。
+   1+1+2=4，合同总数 7，故第四类为 3 —— 由已有数字相减推算，非编造，图例中标注。 */
+const CONTRACT_MIX = [
+ {nm:'年度合约', val:1, color:'#008aa8'},
+ {nm:'季度合约', val:1, color:'#4D9DE8'},
+ {nm:'项目制',   val:2, color:'#3FB36A'},
+ {nm:'未分…',    val:3, color:'#CBD7DE', fg:'#4A5568', derived:true},   // 未归类项走最浅的中性灰；条上文字改深墨以过 AA 对比度（5.13:1）
+];
+
+/* 客户状态：按销售管线推进顺序，逐字复用已验收页面的语义色注册表 */
+const STATUS_STYLE = {
+ '潜在':     {bg:'#F1F4F4', fg:'#94A3B8'},   // 未启动 → 灰（同「已关闭」组）
+ '需求确认': {bg:'#FDF1E3', fg:'#C77B26'},   // 待办/确认中 → 橙（同「立项审核中」组）
+ '方案中':   {bg:'#E4EEFB', fg:'#2563EB'},   // 已推进 → 蓝（同「合同审核通过」组）
+ '谈判中':   {bg:'#E0F4F8', fg:'#008AA8'},   // 进行中 → teal（同「执行中」组）
+};
+const STATUS_ORDER = ['潜在','需求确认','方案中','谈判中'];
+/* ICP 评级：A 绿 / B 蓝 —— 与「供应商列表」等级徽标同一套配色 */
+const ICP_STYLE = { 'A':{bg:'#EAF6EE', fg:'#1A9E4B'}, 'B':{bg:'#E4EEFB', fg:'#2563EB'} };
+
+/* 负责人头像仍按姓名 hash 确定性取色（同一人固定同色）；客户首标不再彩色区分，见 .clogo */
+const AVATAR_PALETTE=['linear-gradient(140deg,#A7E885,#008aa8)','linear-gradient(140deg,#5CC0DE,#2563EB)',
+ 'linear-gradient(140deg,#F5C36B,#E8854A)','linear-gradient(140deg,#B7C9FF,#5B7CE8)','linear-gradient(140deg,#8BD98C,#1A9E4B)'];
+function hashStr(s){ let h=0; s=String(s); for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return h; }
+function avatarGrad(n){ return AVATAR_PALETTE[hashStr(n)%AVATAR_PALETTE.length]; }
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.innerHTML=msg; t.classList.add('show');
+  clearTimeout(window.__tt); window.__tt=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ============ 顶部 KPI ============ */
+const TONE={warn:'#C77B26'};
+document.getElementById('kpiRow').innerHTML = KPIS.map(k=>`
+  <div class="kpi">
+    <div class="klabel"><span class="cn">${k.cn}</span><span class="en">${k.en}</span></div>
+    <div class="kval"><span class="num tnum" style="color:${k.tone?TONE[k.tone]:'var(--ink)'}">${k.val}</span><span class="unit">${k.cn==='逾期任务'?'个':'家'}</span></div>
+    <div class="kcap">${k.cap}</div>
+  </div>`).join('');
+
+/* 合同构成分段条 */
+const mixTotal = CONTRACT_MIX.reduce((s,m)=>s+m.val,0);
+document.getElementById('segbar').innerHTML = CONTRACT_MIX.map(m=>{
+  const pc = m.val/mixTotal*100;
+  return `<div class="seg" style="width:${pc}%;background:${m.color};color:${m.fg||'#fff'}" title="${m.nm} ${m.val} 份 · ${pc.toFixed(1)}%">${pc>=10?pc.toFixed(0)+'%':''}</div>`;
+}).join('');
+document.getElementById('segLegend').innerHTML = CONTRACT_MIX.map(m=>{
+  const pc=(m.val/mixTotal*100).toFixed(1);
+  const tag = m.derived ? `<span class="demotag" title="源页面该标签被截断显示为「未分…」，数量 3 由合同总数 7 减去前三类推算得出">推算</span>` : '';
+  return `<div class="lgd"><span class="dot" style="background:${m.color}"></span>
+    <span class="nm">${m.nm}${tag}</span><span class="vl tnum">${m.val}</span><span class="pc">${pc}%</span></div>`;
+}).join('');
+
+/* ============ 筛选下拉 ============ */
+let fOwner='全部负责人', fIndustry='全部行业', fStatus='全部客户状态', fSource='全部来源', fIcp='全部评级';
+let searchQ='', sortKey=null, sortDir=1, currentPage=1, PAGE_SIZE=10;
+const uniq=(k)=>Array.from(new Set(CUSTOMERS.map(c=>c[k]).filter(Boolean)));
+const OWNER_OPTS=['全部负责人', ...uniq('owner')];
+const INDUSTRY_OPTS=['全部行业', ...uniq('industry')];
+const STATUS_OPTS=['全部客户状态', ...STATUS_ORDER.filter(s=>CUSTOMERS.some(c=>c.status===s))];
+const SOURCE_OPTS=['全部来源', ...uniq('source')];
+const ICP_OPTS=['全部评级', ...uniq('icp')];
+const PAGE_SIZE_OPTS=[10,20,50];
+
+function buildDD(mountId, opts, getVal, setVal, dotFor, extraCls, labelFor){
+  const wrap=document.createElement('div'); wrap.className='dd'+(extraCls?' '+extraCls:'');
+  const trig=document.createElement('button'); trig.type='button'; trig.className='dd-trig';
+  const pop=document.createElement('div'); pop.className='dd-pop';
+  const label=v=>labelFor?labelFor(v):v;
+  function dotHtml(v){ const c=dotFor?dotFor(v):null; return c?`<span class="dd-dot" style="background:${c}"></span>`:''; }
+  function paint(){ trig.innerHTML = dotHtml(getVal()) + `<span>${label(getVal())}</span><i class="cv"></i>`; }
+  opts.forEach(o=>{
+    const el=document.createElement('div'); el.className='dd-opt'+(o===getVal()?' on':''); el.dataset.v=o;
+    el.innerHTML = dotHtml(o) + `<span>${label(o)}</span>`;
+    el.onclick=(e)=>{ e.stopPropagation(); setVal(o);
+      pop.querySelectorAll('.dd-opt').forEach(x=>x.classList.toggle('on', x.dataset.v==o));
+      paint(); wrap.classList.remove('open'); };
+    pop.appendChild(el);
+  });
+  trig.onclick=(e)=>{ e.stopPropagation(); const open=wrap.classList.contains('open');
+    closeAllPops(); if(!open) wrap.classList.add('open'); };
+  paint(); wrap.append(trig,pop);
+  document.getElementById(mountId).appendChild(wrap);
+  wrap.repaint=()=>{ paint(); pop.querySelectorAll('.dd-opt').forEach(x=>x.classList.toggle('on', x.dataset.v==getVal())); };
+  return wrap;
+}
+function closeAllPops(){
+  document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('.opicon.open').forEach(d=>d.classList.remove('open'));
+}
+const ddOwner   = buildDD('ddOwner',   OWNER_OPTS,   ()=>fOwner,   v=>{fOwner=v;currentPage=1;renderTable();}, null);
+const ddIndustry= buildDD('ddIndustry',INDUSTRY_OPTS,()=>fIndustry,v=>{fIndustry=v;currentPage=1;renderTable();}, null);
+const ddStatus  = buildDD('ddStatus',  STATUS_OPTS,  ()=>fStatus,  v=>{fStatus=v;currentPage=1;renderTable();}, v=>STATUS_STYLE[v]?STATUS_STYLE[v].fg:null);
+const ddSource  = buildDD('ddSource',  SOURCE_OPTS,  ()=>fSource,  v=>{fSource=v;currentPage=1;renderTable();}, null);
+const ddIcp     = buildDD('ddIcp',     ICP_OPTS,     ()=>fIcp,     v=>{fIcp=v;currentPage=1;renderTable();}, v=>ICP_STYLE[v]?ICP_STYLE[v].fg:null);
+const ddPageSize= buildDD('ddPageSize',PAGE_SIZE_OPTS,()=>PAGE_SIZE,v=>{PAGE_SIZE=v;currentPage=1;renderTable();}, null,'pagesize up', v=>`${v} 条/页`);
+document.addEventListener('click', closeAllPops);
+
+const moreBar=document.getElementById('moreBar'), moreBtn=document.getElementById('moreBtn');
+moreBtn.onclick=(e)=>{ e.stopPropagation(); const on=moreBar.classList.toggle('show'); moreBtn.classList.toggle('on',on); };
+
+document.getElementById('searchInput').addEventListener('input', e=>{ searchQ=e.target.value.trim().toLowerCase(); currentPage=1; renderTable(); });
+document.getElementById('resetBtn').onclick=()=>{
+  fOwner='全部负责人'; fIndustry='全部行业'; fStatus='全部客户状态'; fSource='全部来源'; fIcp='全部评级';
+  searchQ=''; sortKey=null; sortDir=1; currentPage=1; PAGE_SIZE=10;
+  document.getElementById('searchInput').value='';
+  moreBar.classList.remove('show'); moreBtn.classList.remove('on');
+  [ddOwner,ddIndustry,ddStatus,ddSource,ddIcp,ddPageSize].forEach(d=>d.repaint());
+  renderThead(); renderTable(); toast('已重置筛选、搜索与排序');
+};
+document.getElementById('createBtn').onclick=()=>toast('「新建客户」为原型演示按钮，暂未接入真实创建流程');
+
+/* ============ 表头 ============ */
+const COLS=[
+ {k:'name',    l:'客户名称'},
+ {k:'owner',   l:'负责人'},
+ {k:'industry',l:'所属行业'},
+ {k:'source',  l:'客户来源'},
+ {k:'date',    l:'入库日期', sortable:true},
+ {k:'icp',     l:'ICP 评级', sortable:true},
+ {k:'status',  l:'客户状态', sortable:true},
+ {k:'contact', l:'主要联系人'},
+ {k:'op',      l:'操作', opcol:true},
+];
+const ICP_RANK={'A':2,'B':1};
+const theadRow=document.getElementById('theadRow');
+function renderThead(){
+  theadRow.innerHTML = COLS.map(c=>{
+    const sorted=sortKey===c.k, arrow=sorted?(sortDir===1?'▲':'▼'):(c.sortable?'↕':'');
+    return `<th class="${c.sortable?'sortable':''}${sorted?' sorted':''}${c.opcol?' opcol':''}" data-k="${c.k}">${c.l}${c.sortable?`<span class="sarrow">${arrow}</span>`:''}</th>`;
+  }).join('');
+  theadRow.querySelectorAll('th.sortable').forEach(th=>{
+    th.onclick=()=>{ const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else {sortKey=k;sortDir=1;} renderThead(); renderTable(); };
+  });
+}
+renderThead();
+
+function getFiltered(){
+  let rows=CUSTOMERS.filter(c=>{
+    if(fOwner!=='全部负责人' && c.owner!==fOwner) return false;
+    if(fIndustry!=='全部行业' && c.industry!==fIndustry) return false;
+    if(fStatus!=='全部客户状态' && c.status!==fStatus) return false;
+    if(fSource!=='全部来源' && c.source!==fSource) return false;
+    if(fIcp!=='全部评级' && c.icp!==fIcp) return false;
+    if(searchQ){
+      const hay=[c.name,c.desc,c.owner,c.contact,c.industry,c.source].filter(Boolean).join(' ').toLowerCase();
+      if(!hay.includes(searchQ)) return false;
+    }
+    return true;
+  });
+  if(sortKey){
+    const rank=r=>{
+      if(sortKey==='date')   return r.date ? Date.parse(r.date) : null;
+      if(sortKey==='icp')    return r.icp ? ICP_RANK[r.icp] : null;
+      if(sortKey==='status') return STATUS_ORDER.indexOf(r.status);
+      return null;
+    };
+    /* 空值一律排末尾，不参与升降序 */
+    rows=rows.slice().sort((a,b)=>{
+      const x=rank(a), y=rank(b);
+      if(x===null&&y===null) return 0;
+      if(x===null) return 1;
+      if(y===null) return -1;
+      return (x-y)*sortDir;
+    });
+  }
+  return rows;
+}
+
+/* 图标：跟进纪要=带条目的笔记本／修改客户状态=阶段旗标（替换源页面语义不符的「刷新」图标）／编辑=铅笔 */
+const ICON_NOTE='<path d="M8 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2h-2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M8 11h8M8 15h5"/>';
+const ICON_STAGE='<path d="M5 21V4"/><path d="M5 5h11l-2.2 3.2L16 11.5H5"/><circle cx="5" cy="3" r="1.3"/>';
+const ICON_EDIT='<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>';
+
+const naSpan='<span class="na">—</span>';
+function dateCell(d){ return d ? `<span class="datecell tnum">${d}</span>` : naSpan; }
+
+const tbody=document.getElementById('tbody');
+function renderTable(){
+  const rows=getFiltered();
+  const totalPages=Math.max(1, Math.ceil(rows.length/PAGE_SIZE));
+  if(currentPage>totalPages) currentPage=totalPages;
+  const pageRows=rows.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  tbody.innerHTML='';
+  if(!pageRows.length){
+    tbody.innerHTML=`<tr class="emptyrow"><td colspan="${COLS.length}">没有符合当前筛选条件的客户</td></tr>`;
+    renderPager(totalPages, rows.length); return;
+  }
+  pageRows.forEach((c,idx)=>{
+    const st=STATUS_STYLE[c.status]||{bg:'#F1F4F4',fg:'#94A3B8'};
+    const ic=c.icp?ICP_STYLE[c.icp]:null;
+    const tr=document.createElement('tr'); tr.className='datarow'+(idx%2===1?' zebra':'');
+    tr.innerHTML=`
+      <td>
+        <div class="namecell">
+          <span class="clogo">${c.name.slice(0,2)}</span>
+          <span style="min-width:0"><div class="cname">${c.name}</div>${c.desc?`<div class="cdesc" title="${c.desc.replace(/"/g,'&quot;')}">${c.desc}</div>`:''}</span>
+        </div>
+      </td>
+      <td><div class="ownercell"><span class="ownerav" style="background:${avatarGrad(c.owner)}">${c.owner.charAt(0).toUpperCase()}</span><span class="ownername">${c.owner}</span></div></td>
+      <td>${c.industry?`<span class="typetag">${c.industry}</span>`:naSpan}</td>
+      <td>${c.source?`<span class="typetag">${c.source}</span>`:naSpan}</td>
+      <td>${dateCell(c.date)}</td>
+      <td>${ic?`<span class="grade" style="background:${ic.bg};color:${ic.fg}">${c.icp}</span>`:naSpan}</td>
+      <td><span class="pill" style="background:${st.bg};color:${st.fg}"><span class="pd" style="background:${st.fg}"></span>${c.status}</span></td>
+      <td>${c.contact?c.contact:naSpan}</td>
+      <td class="opcol">
+        <div class="opgroup">
+          <span class="opicon" data-act="note"><span class="otip">跟进纪要</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICON_NOTE}</svg></span>
+          <span class="opicon" data-act="stage"><span class="otip">修改客户状态</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICON_STAGE}</svg>
+            <span class="stpop"><span class="sthead">修改客户状态</span>${STATUS_ORDER.map(s=>{
+              const ss=STATUS_STYLE[s];
+              return `<span class="dd-opt${s===c.status?' on':''}" data-st="${s}"><span class="dd-dot" style="background:${ss.fg}"></span><span>${s}</span></span>`;
+            }).join('')}</span>
+          </span>
+          <span class="opicon" data-act="edit"><span class="otip">编辑</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICON_EDIT}</svg></span>
+        </div>
+      </td>`;
+
+    tr.querySelector('[data-act="note"]').onclick=(e)=>{
+      e.stopPropagation(); closeAllPops();
+      toast(`「${c.name}」跟进纪要 —— 当前状态 <b>${c.status}</b>，负责人 ${c.owner}，入库 ${c.date}。源页面未提供纪要正文字段，不做编造展示。`);
+    };
+    const stageBtn=tr.querySelector('[data-act="stage"]');
+    stageBtn.onclick=(e)=>{
+      e.stopPropagation();
+      const open=stageBtn.classList.contains('open'); closeAllPops();
+      if(!open) stageBtn.classList.add('open');
+    };
+    stageBtn.querySelectorAll('[data-st]').forEach(opt=>{
+      opt.onclick=(e)=>{
+        e.stopPropagation();
+        const ns=opt.dataset.st;
+        if(ns===c.status){ closeAllPops(); toast(`「${c.name}」已处于「${ns}」，状态未变化`); return; }
+        const old=c.status; c.status=ns; closeAllPops(); renderTable();
+        toast(`「${c.name}」客户状态：${old} → <b>${ns}</b>。原型演示，仅本地生效，不会写入实际系统。`);
+      };
+    });
+    tr.querySelector('[data-act="edit"]').onclick=(e)=>{
+      e.stopPropagation(); closeAllPops();
+      toast(`编辑「${c.name}」· ${c.industry||'行业未填'} · ${c.source||'来源未填'} · 主要联系人 ${c.contact||'—'}（原型演示，未接入编辑流程）`);
+    };
+    tbody.appendChild(tr);
+  });
+  renderPager(totalPages, rows.length);
+}
+
+function renderPager(totalPages, cnt){
+  const pager=document.getElementById('pager'); pager.innerHTML='';
+  if(totalPages>1){
+    const prev=document.createElement('button'); prev.className='pgbtn'; prev.textContent='‹';
+    prev.disabled=currentPage<=1; prev.onclick=()=>{currentPage--;renderTable();}; pager.appendChild(prev);
+    for(let i=1;i<=totalPages;i++){
+      const b=document.createElement('button'); b.className='pgbtn'+(i===currentPage?' on':''); b.textContent=i;
+      b.onclick=()=>{currentPage=i;renderTable();}; pager.appendChild(b);
+    }
+    const next=document.createElement('button'); next.className='pgbtn'; next.textContent='›';
+    next.disabled=currentPage>=totalPages; next.onclick=()=>{currentPage++;renderTable();}; pager.appendChild(next);
+  }
+  const note=document.getElementById('pageNote');
+  const filtering = fOwner!=='全部负责人'||fIndustry!=='全部行业'||fStatus!=='全部客户状态'||fSource!=='全部来源'||fIcp!=='全部评级'||searchQ;
+  note.innerHTML = filtering
+    ? `当前筛选结果 <b>${cnt}</b> 条 / 可读取 <b>${CUSTOMERS.length}</b> 条`
+    : `源页面 KPI 标注共 <b>${TOTAL_CUSTOMERS}</b> 位客户，此处呈现截图中可完整读取的 <b>${CUSTOMERS.length}</b> 条，其余因视口截断未采集。`;
+}
+renderTable();
+</script>
+</body>
+</html>

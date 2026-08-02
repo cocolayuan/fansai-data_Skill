@@ -1,0 +1,4 @@
+interface:
+  display_name: "FansAI 数据中台 V2"
+  short_description: "用 V2 规范设计与重构 FansAI 数据中台页面"
+  default_prompt: "使用 $fansai-data-system-v2 按 V2 规范重构这个 FansAI 数据中台页面。"

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>供应商列表 · Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b2430; --ink2:#0f3132; --muted:#64748b; --muted2:#94a3b8;
+  --teal:#008aa8; --teal2:#0c7074; --blue:#49B6D8; --lime:#A7E885;
+  --line:#e8efef;
+  --ok:#1A9E4B; --warn:#C77B26; --err:#D6455B; --info:#2563EB;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","Noto Sans SC",sans-serif;
+  --glass:0 24px 54px -28px rgba(20,60,60,.26), inset 0 1px 0 rgba(255,255,255,.65);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--cn);font-weight:500;color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh;
+  background:
+   radial-gradient(1200px 720px at 92% -8%, rgba(73,182,216,.17), transparent 58%),
+   radial-gradient(1000px 700px at -2% 6%, rgba(139,217,140,.17), transparent 55%),
+   radial-gradient(900px 560px at 60% 104%, rgba(0,138,168,.10), transparent 60%),
+   #ECF4F2;
+  background-attachment:fixed}
+.tnum{font-variant-numeric:tabular-nums}
+.wrap{max-width:1680px;margin:0 auto;padding:26px 36px 60px}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.rv{opacity:0;animation:up .5s cubic-bezier(.2,.7,.2,1) forwards}
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.5));backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.78);box-shadow:var(--glass)}
+
+/* ===== header ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;border:2px solid #f5fffe;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9ADCCB,#49B6D8);flex:0 0 auto}
+.bmain{font-family:var(--en);font-weight:700;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.bellbtn{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px -10px rgba(15,49,50,.18);cursor:pointer;transition:.2s}
+.bellbtn:hover{transform:translateY(-1px)}
+.me{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:linear-gradient(140deg,#A7E885,#008aa8);color:#04312f;font-family:var(--en);font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center}
+.mename{font-family:var(--en);font-weight:500;font-size:18px}
+
+/* ===== tabs ===== */
+.navrow{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.subnav{display:flex;align-items:center;gap:6px;padding:6px;border-radius:18px;width:fit-content;background:rgba(255,255,255,.55);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.7)}
+.stab{border:none;background:none;padding:9px 20px;border-radius:13px;font-family:var(--cn);font-weight:500;font-size:14px;color:var(--muted);cursor:pointer;transition:.18s;white-space:nowrap}
+.stab.on{background:var(--ink);color:#fff;font-weight:600;box-shadow:0 10px 22px -10px rgba(15,49,50,.4)}
+.stab:not(.on):hover{color:var(--ink);background:rgba(255,255,255,.6)}
+
+/* ===== toolbar ===== */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.tr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.searchbox{display:flex;align-items:center;gap:9px;border-radius:14px;padding:11px 16px;background:rgba(255,255,255,.62);border:1px solid var(--line);width:300px}
+.searchbox svg{width:15px;height:15px;color:var(--muted2);flex:0 0 auto}
+.searchbox input{border:0;outline:0;background:transparent;font-family:var(--cn);font-size:13.5px;width:100%;color:var(--ink)}
+.searchbox input::placeholder{color:var(--muted2)}
+.resetbtn{display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:14px;font-family:var(--cn);font-size:13.5px;font-weight:600;
+  color:var(--muted);background:rgba(255,255,255,.62);border:1px solid var(--line);cursor:pointer;transition:.16s}
+.resetbtn svg{width:13px;height:13px}
+.resetbtn:hover{color:var(--ink);border-color:#cfe0e0;background:#fff}
+.resetbtn:active svg{transform:rotate(-180deg);transition:transform .35s}
+.createbtn{display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:14px;font-family:var(--cn);font-size:13.5px;font-weight:700;
+  color:#fff;background:var(--ink);border:none;cursor:pointer;transition:.18s;box-shadow:0 14px 28px -14px rgba(20,30,40,.5)}
+.createbtn svg{width:14px;height:14px}
+.createbtn:hover{transform:translateY(-1px);box-shadow:0 18px 34px -14px rgba(20,30,40,.6)}
+
+/* ===== 自定义瓦片下拉（替代原生 select） ===== */
+.dd{position:relative}
+.dd-trig{display:flex;align-items:center;gap:9px;font-family:var(--cn);font-weight:500;font-size:13.5px;color:var(--ink);
+  background:rgba(255,255,255,.62);border:1px solid var(--line);border-radius:14px;padding:11px 16px;cursor:pointer;transition:.18s;min-width:140px}
+.dd.open .dd-trig{border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.16);background:#fff}
+.dd-trig .cv{width:7px;height:7px;border-right:1.8px solid var(--muted2);border-bottom:1.8px solid var(--muted2);transform:rotate(45deg);margin-top:-3px;margin-left:auto;transition:transform .2s}
+.dd.open .dd-trig .cv{transform:rotate(225deg);margin-top:2px}
+.dd-trig .dd-dot,.dd-opt .dd-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.dd-pop{position:absolute;top:calc(100% + 8px);left:0;min-width:190px;z-index:30;background:#fff;border:1px solid var(--line);
+  border-radius:14px;box-shadow:0 20px 48px -18px rgba(15,49,50,.34);padding:8px;display:none;animation:ddIn .16s ease}
+.dd.open .dd-pop{display:block}
+.dd-opt{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:.15s}
+.dd-opt:hover{background:rgba(0,138,168,.06)}
+.dd-opt.on{background:rgba(73,182,216,.1);color:var(--ink);font-weight:700}
+@keyframes ddIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+/* 页脚「N 条/页」下拉：体量更小，向上展开 */
+.dd.pagesize .dd-trig{min-width:88px;padding:7px 11px;font-size:12.5px;border-radius:11px}
+.dd.pagesize .dd-pop{min-width:110px;padding:6px}
+.dd.pagesize.up .dd-pop{top:auto;bottom:calc(100% + 8px)}
+.dd.pagesize .dd-opt{font-size:12.5px;padding:7px 10px}
+
+/* ===== table ===== */
+.tablecard{border-radius:22px;padding:8px 22px 22px}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:11.5px;font-weight:700;color:var(--muted2);letter-spacing:.3px;padding:18px 10px 11px;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
+thead th.sortable{cursor:pointer}
+thead th.sortable:hover{color:var(--ink)}
+thead th .sarrow{display:inline-block;margin-left:3px;opacity:.4;font-size:10px}
+thead th.sorted .sarrow{opacity:1;color:var(--teal)}
+.thinfo{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:3px;color:var(--muted2);cursor:help;vertical-align:-2px;position:relative}
+.thinfo svg{width:14px;height:14px}
+.thinfo .ttip{position:absolute;top:calc(100% + 9px);left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  font-size:11px;font-weight:500;letter-spacing:0;padding:7px 11px;border-radius:9px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .14s;z-index:20}
+.thinfo:hover .ttip{opacity:1}
+tbody tr.datarow{transition:.15s}
+tbody tr.datarow.zebra{background:rgba(255,255,255,.5)}
+tbody tr.datarow:hover{background:rgba(0,138,168,.05)}
+tbody td{padding:22px 10px;font-size:13.5px;border-bottom:1px solid rgba(236,243,243,.8);vertical-align:middle}
+
+/* 供应商名称单元 */
+.namecell{display:flex;align-items:center;gap:12px}
+.slogo{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  color:#fff;font-weight:700;font-size:15px;box-shadow:0 6px 14px -7px rgba(20,60,60,.5)}
+.sname{font-weight:700;color:var(--ink);line-height:1.4}
+/* 类型标签：与「项目管理」页 .typetag 同规格，跨页面复用同一视觉语言 */
+.typetag{display:inline-flex;align-items:center;margin-top:4px;font-size:11.5px;font-weight:600;color:var(--muted);
+  background:rgba(148,163,184,.12);border-radius:9px;padding:3px 9px}
+
+/* 等级徽标 */
+.grade{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 10px;border-radius:11px;
+  font-family:var(--en);font-weight:700;font-size:14px;letter-spacing:.3px}
+.grade.sm{font-size:11.5px;font-family:var(--cn);font-weight:600}
+
+/* 状态 / 风险 pill */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:12px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pill .pd{width:6px;height:6px;border-radius:50%}
+
+/* 联系人 */
+.contact .cname{font-weight:700;color:var(--ink)}
+.contact .cphone{font-family:var(--en);font-weight:500;font-size:12.5px;color:var(--muted2);margin-top:3px;letter-spacing:.2px}
+
+/* 评分：空环占位，表达「未录入」而非 0 分 */
+.scorecell{display:flex;align-items:center;gap:10px}
+.scorering{position:relative;width:42px;height:42px;flex:0 0 auto}
+.scoretxt{font-size:12px;color:var(--muted2);font-weight:600}
+
+/* 操作 */
+.opgroup{display:inline-flex;align-items:center;gap:8px;justify-content:flex-start}
+.opicon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  background:rgba(255,255,255,.7);border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:.16s;position:relative}
+.opicon svg{width:17px;height:17px}
+.opicon:hover{color:var(--teal);border-color:rgba(0,138,168,.35);background:#fff;transform:translateY(-1px);box-shadow:0 10px 20px -12px rgba(0,138,168,.4)}
+.opicon.danger:hover{color:var(--err);border-color:rgba(214,69,91,.35);box-shadow:0 10px 20px -12px rgba(214,69,91,.4)}
+.opicon .otip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  font-size:11px;font-weight:600;padding:5px 9px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .14s}
+.opicon:hover .otip{opacity:1}
+
+/* 空态 */
+.emptyrow td{padding:56px 10px;text-align:center;color:var(--muted2);font-size:13px}
+
+/* 页脚 */
+.tfoot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:10px}
+.tfoot .note{font-size:11.5px;color:var(--muted2)}
+.tfoot .note b{font-family:var(--en);color:var(--ink)}
+.pagerwrap{display:flex;align-items:center;gap:12px}
+.pager{display:flex;align-items:center;gap:6px}
+.pgbtn{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.6);color:var(--muted);display:flex;align-items:center;justify-content:center;font-family:var(--en);font-weight:600;font-size:12.5px;cursor:pointer;transition:.15s}
+.pgbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pgbtn[disabled]{opacity:.4;cursor:not-allowed}
+.pgbtn:not([disabled]):not(.on):hover{border-color:#cfe0e0;color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:14px;font-size:13px;font-weight:500;box-shadow:0 20px 40px -14px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.28s;z-index:80;max-width:560px;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar rv">
+    <div class="bcrumb"><span class="bdot"></span><span class="bmain">供应商列表</span></div>
+    <div class="tb-right">
+      <button class="bellbtn" title="消息通知">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9z"/><path d="M10.3 20a2 2 0 003.4 0"/></svg>
+      </button>
+      <div class="me">
+        <div class="avatar">K</div><span class="mename">Kora</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:#64748b"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <div class="navrow rv" style="animation-delay:.02s">
+    <div class="subnav" id="subnav"></div>
+  </div>
+
+  <div class="toolbar rv" style="animation-delay:.06s">
+    <div class="searchbox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="searchInput" placeholder="搜索名称 / 简称 / 联系人">
+    </div>
+    <div class="tr">
+      <div id="ddType"></div>
+      <div id="ddGrade"></div>
+      <div id="ddCoop"></div>
+      <button class="resetbtn" id="resetBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg>
+        重置
+      </button>
+      <button class="createbtn" id="createBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        新建供应商
+      </button>
+    </div>
+  </div>
+
+  <div class="tablecard glass rv" style="animation-delay:.08s">
+    <table>
+      <thead><tr id="theadRow"></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="tfoot">
+      <div class="note" id="pageNote"></div>
+      <div class="pagerwrap">
+        <div id="ddPageSize"></div>
+        <div class="pager" id="pager"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 数据（全部来自「供应商列表」页截图，未新增字段） ============ */
+const SUPPLIERS = [
+ {name:'读图科技（南昌）有限公司', type:'其他类型', grade:'A',      risk:'无', contact:'胡文水',          phone:'+86 191763549581', score:null, coop:'合作中'},
+ {name:'上海泽猎人力资源',         type:'其他类型', grade:'B',      risk:'无', contact:'胡先生',          phone:'+86 17601243451',  score:null, coop:'合作中'},
+ {name:'木木设计师',               type:'sole_proprietor', grade:'normal', risk:'无', contact:'@AiWithMehreen', phone:'+86 55555555',   score:null, coop:'待合作'},
+ {name:'AS设计师傅',               type:'个人',     grade:'normal', risk:'无', contact:'mumu',            phone:'+86 15867143227',  score:null, coop:'待合作'},
+];
+const TOTAL_SUPPLIERS = 4; // 源页脚：共 4 条，1 页
+
+const TABS=['创作者列表','供应商列表'];
+
+/* 等级配色：A 绿 / B 蓝 / normal 中性 —— 领先高亮、其余中性 */
+const GRADE_STYLE = {
+ 'A':      {bg:'#EAF6EE', fg:'#1A9E4B'},
+ 'B':      {bg:'#E4EEFB', fg:'#2563EB'},
+ 'normal': {bg:'#F1F4F4', fg:'#94A3B8'},
+};
+/* 合作状态：沿用已验收页面的状态色语言（合作中≈执行中 teal，待合作≈立项审核中 橙） */
+const COOP_STYLE = {
+ '合作中': {bg:'#E0F4F8', fg:'#008AA8'},
+ '待合作': {bg:'#FDF1E3', fg:'#C77B26'},
+};
+const RISK_STYLE = {
+ '无': {bg:'#EAF6EE', fg:'#1A9E4B'},
+};
+/* 供应商 logo 底色：按名称 hash 确定性取色，同一家永远同色 */
+const LOGO_PALETTE = [
+ 'linear-gradient(140deg,#A7E885,#008aa8)',
+ 'linear-gradient(140deg,#5CC0DE,#2563EB)',
+ 'linear-gradient(140deg,#F5C36B,#E8854A)',
+ 'linear-gradient(140deg,#8BD98C,#1A9E4B)',
+ 'linear-gradient(140deg,#9DB4F5,#5C5CD6)',
+];
+function hashStr(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return h; }
+function logoGrad(n){ return LOGO_PALETTE[hashStr(n)%LOGO_PALETTE.length]; }
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(window.__tt); window.__tt=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ============ tabs ============ */
+const subnav=document.getElementById('subnav');
+TABS.forEach((t,i)=>{
+  const b=document.createElement('button'); b.className='stab'+(i===1?' on':''); b.textContent=t;
+  b.onclick=()=>{
+    document.querySelectorAll('.stab').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    if(i===0) toast('「创作者列表」为独立页面，请打开 创作者列表_redesign.html 查看');
+  };
+  subnav.appendChild(b);
+});
+
+/* ============ 筛选下拉 ============ */
+let fType='全部类型', fGrade='全部等级', fCoop='全部合作状态', searchQ='', sortKey=null, sortDir=1, currentPage=1;
+let PAGE_SIZE=10;
+const TYPE_OPTS=['全部类型', ...Array.from(new Set(SUPPLIERS.map(s=>s.type)))];
+const GRADE_OPTS=['全部等级', ...Array.from(new Set(SUPPLIERS.map(s=>s.grade)))];
+const COOP_OPTS=['全部合作状态', ...Array.from(new Set(SUPPLIERS.map(s=>s.coop)))];
+const PAGE_SIZE_OPTS=[10,20,50];
+
+function buildDD(mountId, opts, getVal, setVal, dotFor, extraCls, labelFor, onPick){
+  const wrap=document.createElement('div'); wrap.className='dd'+(extraCls?' '+extraCls:'');
+  const trig=document.createElement('button'); trig.type='button'; trig.className='dd-trig';
+  const pop=document.createElement('div'); pop.className='dd-pop';
+  const label=v=>labelFor?labelFor(v):v;
+  function dotHtml(v){ const c=dotFor?dotFor(v):null; return c?`<span class="dd-dot" style="background:${c}"></span>`:''; }
+  function paint(){ trig.innerHTML = dotHtml(getVal()) + `<span>${label(getVal())}</span><i class="cv"></i>`; }
+  opts.forEach(o=>{
+    const el=document.createElement('div'); el.className='dd-opt'+(o===getVal()?' on':''); el.dataset.v=o;
+    el.innerHTML = dotHtml(o) + `<span>${label(o)}</span>`;
+    el.onclick=(e)=>{ e.stopPropagation(); setVal(o);
+      pop.querySelectorAll('.dd-opt').forEach(x=>x.classList.toggle('on', x.dataset.v==o));
+      paint(); wrap.classList.remove('open'); if(onPick) onPick(); };
+    pop.appendChild(el);
+  });
+  trig.onclick=(e)=>{ e.stopPropagation(); const open=wrap.classList.contains('open');
+    document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open')); if(!open) wrap.classList.add('open'); };
+  paint(); wrap.append(trig,pop);
+  document.getElementById(mountId).appendChild(wrap);
+  wrap.repaint=()=>{ paint(); pop.querySelectorAll('.dd-opt').forEach(x=>x.classList.toggle('on', x.dataset.v==getVal())); };
+  return wrap;
+}
+const ddType = buildDD('ddType', TYPE_OPTS, ()=>fType, v=>{fType=v;currentPage=1;renderTable();}, null);
+const ddGrade= buildDD('ddGrade',GRADE_OPTS, ()=>fGrade, v=>{fGrade=v;currentPage=1;renderTable();}, v=>GRADE_STYLE[v]?GRADE_STYLE[v].fg:null);
+const ddCoop = buildDD('ddCoop', COOP_OPTS, ()=>fCoop, v=>{fCoop=v;currentPage=1;renderTable();}, v=>COOP_STYLE[v]?COOP_STYLE[v].fg:null);
+/* 每页条数：源页面右下角「10 条/页」控件，此处补齐为真正可用的自定义下拉，向上展开 */
+const ddPageSize = buildDD('ddPageSize', PAGE_SIZE_OPTS, ()=>PAGE_SIZE, v=>{PAGE_SIZE=v;currentPage=1;renderTable();}, null, 'pagesize up', v=>`${v} 条/页`);
+document.addEventListener('click', ()=>document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open')));
+
+document.getElementById('searchInput').addEventListener('input', e=>{ searchQ=e.target.value.trim().toLowerCase(); currentPage=1; renderTable(); });
+document.getElementById('resetBtn').onclick=()=>{
+  fType='全部类型'; fGrade='全部等级'; fCoop='全部合作状态'; searchQ=''; sortKey=null; sortDir=1; currentPage=1; PAGE_SIZE=10;
+  document.getElementById('searchInput').value='';
+  ddType.repaint(); ddGrade.repaint(); ddCoop.repaint(); ddPageSize.repaint();
+  renderThead(); renderTable(); toast('已重置筛选、搜索与排序');
+};
+document.getElementById('createBtn').onclick=()=>toast('「新建供应商」为原型演示按钮，暂未接入真实创建流程');
+
+/* ============ 表头 ============ */
+const COLS=[
+ {k:'name', l:'供应商名称'},
+ {k:'grade', l:'供应商等级', sortable:true},
+ {k:'risk', l:'风险点'},
+ {k:'contact', l:'主联系人'},
+ {k:'score', l:'综合评分', info:'源页面暂未展开评分构成，此处如实显示「暂无评分」而非编造分数'},
+ {k:'coop', l:'合作状态'},
+ {k:'op', l:'操作'},
+];
+const GRADE_RANK={'A':3,'B':2,'normal':1};
+const ICON_INFO='<circle cx="12" cy="12" r="9"/><path d="M12 11.5v4.5"/><circle cx="12" cy="8.2" r="1" fill="currentColor" stroke="none"/>';
+const theadRow=document.getElementById('theadRow');
+function renderThead(){
+  theadRow.innerHTML = COLS.map(c=>{
+    const sorted=sortKey===c.k, arrow=sorted?(sortDir===1?'▲':'▼'):(c.sortable?'↕':'');
+    const info = c.info ? `<span class="thinfo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_INFO}</svg><span class="ttip">${c.info}</span></span>` : '';
+    return `<th class="${c.sortable?'sortable':''}${sorted?' sorted':''}" data-k="${c.k}">${c.l}${info}${c.sortable?`<span class="sarrow">${arrow}</span>`:''}</th>`;
+  }).join('');
+  theadRow.querySelectorAll('th.sortable').forEach(th=>{
+    th.onclick=()=>{ const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else {sortKey=k;sortDir=1;} renderThead(); renderTable(); };
+  });
+}
+renderThead();
+
+function getFiltered(){
+  let rows=SUPPLIERS.filter(s=>{
+    if(fType!=='全部类型' && s.type!==fType) return false;
+    if(fGrade!=='全部等级' && s.grade!==fGrade) return false;
+    if(fCoop!=='全部合作状态' && s.coop!==fCoop) return false;
+    if(searchQ){
+      const hay=(s.name+' '+s.type+' '+s.contact+' '+s.phone).toLowerCase();
+      if(!hay.includes(searchQ)) return false;
+    }
+    return true;
+  });
+  if(sortKey==='grade'){
+    rows=rows.slice().sort((a,b)=>(GRADE_RANK[a.grade]-GRADE_RANK[b.grade])*sortDir);
+  }
+  return rows;
+}
+
+/* 空评分环：虚线轨道，明确表达"尚未录入"而非 0 分 */
+function emptyRing(){
+  const size=42, sw=4.5, r=(size-sw)/2;
+  return `<span class="scorering"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#DDE7E7" stroke-width="${sw}" stroke-dasharray="3 5" stroke-linecap="round"/>
+  </svg></span>`;
+}
+
+const ICON_EDIT='<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>';
+const ICON_DEL='<path d="M3 6h18"/><path d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/>';
+
+const tbody=document.getElementById('tbody');
+function renderTable(){
+  const rows=getFiltered();
+  const totalPages=Math.max(1, Math.ceil(rows.length/PAGE_SIZE));
+  if(currentPage>totalPages) currentPage=totalPages;
+  const pageRows=rows.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  tbody.innerHTML='';
+  if(!pageRows.length){
+    tbody.innerHTML=`<tr class="emptyrow"><td colspan="${COLS.length}">没有符合当前筛选条件的供应商</td></tr>`;
+    renderPager(totalPages, rows.length); return;
+  }
+  pageRows.forEach((s,idx)=>{
+    const g=GRADE_STYLE[s.grade], c=COOP_STYLE[s.coop], rk=RISK_STYLE[s.risk]||{bg:'#F1F4F4',fg:'#94A3B8'};
+    const gradeCls = (s.grade==='A'||s.grade==='B') ? 'grade' : 'grade sm';
+    const tr=document.createElement('tr'); tr.className='datarow'+(idx%2===1?' zebra':'');
+    tr.innerHTML=`
+      <td>
+        <div class="namecell">
+          <span class="slogo" style="background:${logoGrad(s.name)}">${s.name.charAt(0)}</span>
+          <span><div class="sname">${s.name}</div><span class="typetag">${s.type}</span></span>
+        </div>
+      </td>
+      <td><span class="${gradeCls}" style="background:${g.bg};color:${g.fg}">${s.grade}</span></td>
+      <td><span class="pill" style="background:${rk.bg};color:${rk.fg}"><span class="pd" style="background:${rk.fg}"></span>${s.risk}</span></td>
+      <td>
+        <div class="contact"><div class="cname">${s.contact}</div><div class="cphone tnum">${s.phone}</div></div>
+      </td>
+      <td><div class="scorecell">${emptyRing()}<span class="scoretxt">暂无评分</span></div></td>
+      <td><span class="pill" style="background:${c.bg};color:${c.fg}"><span class="pd" style="background:${c.fg}"></span>${s.coop}</span></td>
+      <td>
+        <div class="opgroup">
+          <span class="opicon" data-act="edit"><span class="otip">编辑</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICON_EDIT}</svg></span>
+          <span class="opicon danger" data-act="del"><span class="otip">删除</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICON_DEL}</svg></span>
+        </div>
+      </td>`;
+    tr.querySelector('[data-act="edit"]').onclick=()=>toast(`编辑「${s.name}」· ${s.type} · 等级 ${s.grade} · 主联系人 ${s.contact}（原型演示，未接入编辑流程）`);
+    tr.querySelector('[data-act="del"]').onclick=()=>toast(`删除「${s.name}」需二次确认 —— 原型演示，不会真正删除数据`);
+    tbody.appendChild(tr);
+  });
+  renderPager(totalPages, rows.length);
+}
+
+function renderPager(totalPages, cnt){
+  const pager=document.getElementById('pager'); pager.innerHTML='';
+  if(totalPages>1){
+    const prev=document.createElement('button'); prev.className='pgbtn'; prev.textContent='‹';
+    prev.disabled=currentPage<=1; prev.onclick=()=>{currentPage--;renderTable();}; pager.appendChild(prev);
+    for(let i=1;i<=totalPages;i++){
+      const b=document.createElement('button'); b.className='pgbtn'+(i===currentPage?' on':''); b.textContent=i;
+      b.onclick=()=>{currentPage=i;renderTable();}; pager.appendChild(b);
+    }
+    const next=document.createElement('button'); next.className='pgbtn'; next.textContent='›';
+    next.disabled=currentPage>=totalPages; next.onclick=()=>{currentPage++;renderTable();}; pager.appendChild(next);
+  }
+
+  const note=document.getElementById('pageNote');
+  const filtering = fType!=='全部类型'||fGrade!=='全部等级'||fCoop!=='全部合作状态'||searchQ;
+  note.innerHTML = filtering
+    ? `当前筛选结果 <b>${cnt}</b> 条 / 共 <b>${TOTAL_SUPPLIERS}</b> 条`
+    : `共 <b>${TOTAL_SUPPLIERS}</b> 条，${totalPages} 页`;
+}
+renderTable();
+</script>
+</body>
+</html>

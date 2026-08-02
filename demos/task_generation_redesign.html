@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>生成任务 · Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b2430; --ink2:#0f3132; --muted:#64748b; --muted2:#94a3b8;
+  --teal:#008aa8; --teal2:#0c7074; --blue:#49B6D8; --lime:#A7E885;
+  --line:#e8efef;
+  --ok:#1A9E4B; --warn:#C77B26; --err:#D6455B; --info:#2563EB;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","Noto Sans SC",sans-serif;
+  --glass:0 24px 54px -28px rgba(20,60,60,.26), inset 0 1px 0 rgba(255,255,255,.65);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--cn);font-weight:500;color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh;
+  background:
+   radial-gradient(1200px 720px at 92% -8%, rgba(73,182,216,.17), transparent 58%),
+   radial-gradient(1000px 700px at -2% 6%, rgba(139,217,140,.17), transparent 55%),
+   radial-gradient(900px 560px at 60% 104%, rgba(0,138,168,.10), transparent 60%),
+   #ECF4F2;
+  background-attachment:fixed}
+.tnum{font-variant-numeric:tabular-nums}
+.wrap{max-width:1680px;margin:0 auto;padding:26px 36px 60px}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.rv{opacity:0;animation:up .5s cubic-bezier(.2,.7,.2,1) forwards}
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.5));backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.78);box-shadow:var(--glass)}
+
+/* ===== header ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;border:2px solid #f5fffe;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9ADCCB,#49B6D8);flex:0 0 auto}
+.bmain{font-family:var(--en);font-weight:700;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.bellbtn{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px -10px rgba(15,49,50,.18);cursor:pointer;transition:.2s}
+.bellbtn:hover{transform:translateY(-1px)}
+.me{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:linear-gradient(140deg,#A7E885,#008aa8);color:#04312f;font-family:var(--en);font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center}
+.mename{font-family:var(--en);font-weight:500;font-size:18px}
+
+/* ===== toolbar ===== */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.tl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.iconbtn{display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:14px;font-family:var(--cn);font-size:13.5px;font-weight:600;
+  color:var(--muted);background:rgba(255,255,255,.62);border:1px solid var(--line);cursor:pointer;transition:.16s}
+.iconbtn svg{width:14px;height:14px}
+.iconbtn:hover{color:var(--ink);border-color:#cfe0e0;background:#fff}
+.iconbtn.spin:active svg{transform:rotate(180deg);transition:transform .35s}
+.querybtn{display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:14px;font-family:var(--cn);font-size:13.5px;font-weight:700;
+  color:#fff;background:var(--ink);border:none;cursor:pointer;transition:.18s;box-shadow:0 14px 28px -14px rgba(20,30,40,.5)}
+.querybtn svg{width:14px;height:14px}
+.querybtn:hover{transform:translateY(-1px);box-shadow:0 18px 34px -14px rgba(20,30,40,.6)}
+
+/* ===== 自定义瓦片下拉 ===== */
+.dd{position:relative}
+.dd-trig{display:flex;align-items:center;gap:9px;font-family:var(--cn);font-weight:500;font-size:13.5px;color:var(--ink);
+  background:rgba(255,255,255,.62);border:1px solid var(--line);border-radius:14px;padding:11px 16px;cursor:pointer;transition:.18s;min-width:132px}
+.dd.open .dd-trig{border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.16);background:#fff}
+.dd-trig .cv{width:7px;height:7px;border-right:1.8px solid var(--muted2);border-bottom:1.8px solid var(--muted2);transform:rotate(45deg);margin-top:-3px;margin-left:auto;transition:transform .2s}
+.dd.open .dd-trig .cv{transform:rotate(225deg);margin-top:2px}
+.dd-trig .dd-dot,.dd-opt .dd-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.dd-pop{position:absolute;top:calc(100% + 8px);left:0;min-width:180px;z-index:30;background:#fff;border:1px solid var(--line);
+  border-radius:14px;box-shadow:0 20px 48px -18px rgba(15,49,50,.34);padding:8px;display:none;animation:ddIn .16s ease}
+.dd.open .dd-pop{display:block}
+.dd-opt{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:.15s}
+.dd-opt:hover{background:rgba(0,138,168,.06)}
+.dd-opt.on{background:rgba(73,182,216,.1);color:var(--ink);font-weight:700}
+@keyframes ddIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.dd.pagesize .dd-trig{min-width:88px;padding:7px 11px;font-size:12.5px;border-radius:11px}
+.dd.pagesize .dd-pop{min-width:110px;padding:6px}
+.dd.pagesize.up .dd-pop{top:auto;bottom:calc(100% + 8px)}
+.dd.pagesize .dd-opt{font-size:12.5px;padding:7px 10px}
+
+/* ===== table ===== */
+.tablecard{border-radius:22px;padding:8px 22px 22px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:1080px}
+thead th{text-align:left;font-size:11.5px;font-weight:700;color:var(--muted2);letter-spacing:.3px;padding:18px 10px 11px;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
+tbody tr.datarow{transition:.15s}
+tbody tr.datarow.zebra{background:rgba(255,255,255,.5)}
+tbody tr.datarow:hover{background:rgba(0,138,168,.05)}
+tbody td{padding:20px 10px;font-size:13.5px;border-bottom:1px solid rgba(236,243,243,.8);vertical-align:middle}
+
+/* 输出 / 输入 缩略图占位（未核实真实视频文件，用色块 + 类型徽标代替真实画面） */
+.mthumb{width:56px;height:42px;border-radius:11px;position:relative;flex:0 0 auto;box-shadow:0 8px 16px -8px rgba(20,60,60,.5);overflow:hidden}
+.mbadge{position:absolute;left:4px;bottom:4px;width:16px;height:16px;border-radius:5px;background:rgba(10,20,24,.62);
+  display:flex;align-items:center;justify-content:center}
+.mbadge svg{width:10px;height:10px;color:#fff}
+.cellna{color:var(--muted2);font-weight:500}
+
+/* 状态 / 模型 pill */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:12px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pill .pd{width:6px;height:6px;border-radius:50%}
+.modelpill{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:11px;font-size:12px;font-weight:700;color:var(--ink);
+  background:#fff;border:1px solid var(--line)}
+.modelpill svg{width:13px;height:13px;color:var(--teal)}
+
+/* 提示词单元：两行截断 + 操作链接 */
+.promptcell{max-width:420px}
+.ptext{font-size:13px;line-height:1.55;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.plinks{display:flex;align-items:center;gap:14px;margin-top:7px}
+.plink{font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.plink:hover{color:var(--teal2);text-decoration:underline}
+.plink svg{width:11px;height:11px}
+
+/* 时间列 */
+.timecell .tdate{font-family:var(--en);font-weight:600;font-size:13px;color:var(--ink)}
+.timecell .tdur{font-family:var(--cn);font-weight:500;font-size:11.5px;color:var(--muted2);margin-top:3px}
+
+/* 操作 */
+.opgroup{display:inline-flex;align-items:center;gap:8px;justify-content:flex-start}
+.opicon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  background:rgba(255,255,255,.7);border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:.16s;position:relative}
+.opicon svg{width:16px;height:16px}
+.opicon:hover{color:var(--teal);border-color:rgba(0,138,168,.35);background:#fff;transform:translateY(-1px);box-shadow:0 10px 20px -12px rgba(0,138,168,.4)}
+.opicon .otip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  font-size:11px;font-weight:600;padding:5px 9px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .14s}
+.opicon:hover .otip{opacity:1}
+
+/* 空态 */
+.emptyrow td{padding:56px 10px;text-align:center;color:var(--muted2);font-size:13px}
+
+/* 页脚 */
+.tfoot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:10px}
+.tfoot .note{font-size:11.5px;color:var(--muted2);max-width:640px;line-height:1.6}
+.tfoot .note b{font-family:var(--en);color:var(--ink)}
+.pagerwrap{display:flex;align-items:center;gap:12px}
+.pager{display:flex;align-items:center;gap:6px}
+.pgbtn{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.6);color:var(--muted);display:flex;align-items:center;justify-content:center;font-family:var(--en);font-weight:600;font-size:12.5px;cursor:pointer;transition:.15s}
+.pgbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pgbtn[disabled]{opacity:.4;cursor:not-allowed}
+.pgbtn:not([disabled]):not(.on):hover{border-color:#cfe0e0;color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:14px;font-size:13px;font-weight:500;box-shadow:0 20px 40px -14px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.28s;z-index:80;max-width:560px;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar rv">
+    <div class="bcrumb"><span class="bdot"></span><span class="bmain">生成任务</span></div>
+    <div class="tb-right">
+      <button class="bellbtn" title="消息通知">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9z"/><path d="M10.3 20a2 2 0 003.4 0"/></svg>
+      </button>
+      <div class="me">
+        <div class="avatar">K</div><span class="mename">Kora</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:#64748b"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar rv" style="animation-delay:.04s">
+    <div class="tl" id="ddRow"></div>
+    <div class="tr">
+      <button class="iconbtn spin" id="resetBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg>
+        重置
+      </button>
+      <button class="iconbtn" id="refreshBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h5"/><path d="M20 20v-5h-5"/><path d="M4.5 15a8 8 0 0014.9 2.5M19.5 9A8 8 0 004.6 6.5"/></svg>
+        刷新
+      </button>
+      <button class="querybtn" id="queryBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        查询
+      </button>
+    </div>
+  </div>
+
+  <div class="tablecard glass rv" style="animation-delay:.08s">
+    <table>
+      <thead>
+        <tr>
+          <th>输出</th><th>输入</th><th>状态</th><th>模型</th><th>提示词</th><th>时间</th><th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="tfoot">
+      <div class="note" id="pageNote"></div>
+      <div class="pagerwrap">
+        <div id="ddPageSize"></div>
+        <div class="pager" id="pager"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 数据（全部来自「生成任务」页截图，未新增字段） ============
+   源截图 待redesign/生成任务列表.jpg 本次仅可完整读取前 7 条记录（视口截断，
+   第 8 条起因滚动而不完整，未采集）；总条数 / 总页数源图未展示，不做编造。 */
+const TASKS = [
+ {id:1, status:'成功', model:'Seedance 2.0', prompt:'Create a 10-second vertical 9:16 warm elegant art-studio UGC hook advertisement for Songdio. Generate the character from text only; no…', time:'2026/07/31 15:42', dur:'耗时 2分8秒'},
+ {id:2, status:'成功', model:'Seedance 2.0', prompt:'Create a 10-second vertical 9:16 premium modern-night cinematic UGC hook advertisement for Songdio. Generate the character from text only; no…', time:'2026/07/31 15:40', dur:'耗时 2分44秒'},
+ {id:3, status:'成功', model:'Seedance 2.0', prompt:'Create a 10-second vertical 9:16 premium modern-night cinematic UGC hook advertisement for Songdio. Generate the character from text only; no…', time:'2026/07/31 15:39', dur:'耗时 2分8秒'},
+ {id:4, status:'成功', model:'Seedance 2.0', prompt:'Create a 10-second vertical 9:16 high-energy dance-rehearsal UGC hook advertisement for Songdio. Generate the character from text only; no…', time:'2026/07/31 14:44', dur:'耗时 4分55秒'},
+ {id:5, status:'成功', model:'Seedance 2.0', prompt:'0-1.5 seconds: begin with a smooth sideways camera move. He repeats the same unfinished chord on an acoustic guitar, stops with a frustrated laugh,…', time:'2026/07/31 14:35', dur:'耗时 3分12秒'},
+ {id:6, status:'成功', model:'Seedance 2.0', prompt:'Create a 10-second vertical 9:16 bright playful lifestyle UGC hook advertisement for Songdio. Generate the character from text only; no…', time:'2026/07/31 14:28', dur:'耗时 2分30秒'},
+ {id:7, status:'成功', model:'Seedance 2.0', prompt:'Create a 10-second vertical 9:16 fashion-forward cinematic UGC hook advertisement for Songdio. Generate the character from text only; no…', time:'2026/07/31 14:00', dur:'耗时 4分43秒'},
+];
+
+/* 语义色：成功 复用已验收页面「交付完成/A级」同一组绿色 */
+const STATUS_STYLE = { '成功': {bg:'#EAF6EE', fg:'#1A9E4B'} };
+
+/* 缩略图占位色板：按任务 id 确定性取色，同一任务永远同色（无真实视频文件可核实，不冒充真实画面） */
+const THUMB_PALETTE = [
+ 'linear-gradient(150deg,#2b3a45,#0f3132)',
+ 'linear-gradient(150deg,#3a4a5a,#1b2430)',
+ 'linear-gradient(150deg,#2e4a4e,#0c7074)',
+ 'linear-gradient(150deg,#4a3a52,#1b2430)',
+ 'linear-gradient(150deg,#33454a,#122a2c)',
+];
+function hashStr(s){ let h=0; s=String(s); for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return h; }
+function thumbGrad(id){ return THUMB_PALETTE[hashStr(id)%THUMB_PALETTE.length]; }
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(window.__tt); window.__tt=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ============ 筛选下拉（选项均从真实数据推导，不臆造未出现过的取值） ============ */
+let fModel='全部模型', fType='全部类型', fStatus='全部状态', currentPage=1, PAGE_SIZE=30;
+const MODEL_OPTS=['全部模型', ...Array.from(new Set(TASKS.map(t=>t.model)))];
+const TYPE_OPTS=['全部类型']; // 源截图表格未提供可区分的「类型」字段，暂无更多取值可选
+const STATUS_OPTS=['全部状态', ...Array.from(new Set(TASKS.map(t=>t.status)))];
+const PAGE_SIZE_OPTS=[10,30,50];
+
+function buildDD(mountId, opts, getVal, setVal, dotFor, extraCls, labelFor){
+  const wrap=document.createElement('div'); wrap.className='dd'+(extraCls?' '+extraCls:'');
+  const trig=document.createElement('button'); trig.type='button'; trig.className='dd-trig';
+  const pop=document.createElement('div'); pop.className='dd-pop';
+  const label=v=>labelFor?labelFor(v):v;
+  function dotHtml(v){ const c=dotFor?dotFor(v):null; return c?`<span class="dd-dot" style="background:${c}"></span>`:''; }
+  function paint(){ trig.innerHTML = dotHtml(getVal()) + `<span>${label(getVal())}</span><i class="cv"></i>`; }
+  opts.forEach(o=>{
+    const el=document.createElement('div'); el.className='dd-opt'+(o===getVal()?' on':''); el.dataset.v=o;
+    el.innerHTML = dotHtml(o) + `<span>${label(o)}</span>`;
+    el.onclick=(e)=>{ e.stopPropagation(); setVal(o);
+      pop.querySelectorAll('.dd-opt').forEach(x=>x.classList.toggle('on', x.dataset.v==o));
+      paint(); wrap.classList.remove('open'); };
+    pop.appendChild(el);
+  });
+  trig.onclick=(e)=>{ e.stopPropagation(); const open=wrap.classList.contains('open');
+    document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open')); if(!open) wrap.classList.add('open'); };
+  paint(); wrap.append(trig,pop);
+  document.getElementById(mountId).appendChild(wrap);
+  wrap.repaint=()=>{ paint(); pop.querySelectorAll('.dd-opt').forEach(x=>x.classList.toggle('on', x.dataset.v==getVal())); };
+  return wrap;
+}
+const ddModel = buildDD('ddRow', MODEL_OPTS, ()=>fModel, v=>{fModel=v;currentPage=1;renderTable();}, null);
+const ddType  = buildDD('ddRow', TYPE_OPTS,  ()=>fType,  v=>{fType=v;currentPage=1;renderTable();}, null);
+const ddStatus= buildDD('ddRow', STATUS_OPTS,()=>fStatus,v=>{fStatus=v;currentPage=1;renderTable();}, v=>STATUS_STYLE[v]?STATUS_STYLE[v].fg:null);
+const ddPageSize = buildDD('ddPageSize', PAGE_SIZE_OPTS, ()=>PAGE_SIZE, v=>{PAGE_SIZE=v;currentPage=1;renderTable();}, null, 'pagesize up', v=>`${v} 条/页`);
+document.addEventListener('click', ()=>document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open')));
+
+document.getElementById('resetBtn').onclick=()=>{
+  fModel='全部模型'; fType='全部类型'; fStatus='全部状态'; currentPage=1; PAGE_SIZE=30;
+  ddModel.repaint(); ddType.repaint(); ddStatus.repaint(); ddPageSize.repaint();
+  renderTable(); toast('已重置筛选条件');
+};
+document.getElementById('refreshBtn').onclick=()=>{ renderTable(); toast('已刷新列表 · 原型演示，未重新拉取后端数据'); };
+document.getElementById('queryBtn').onclick=()=>{ currentPage=1; renderTable(); toast(`已应用筛选：${fModel} · ${fType} · ${fStatus}`); };
+
+/* ============ 渲染 ============ */
+function getFiltered(){
+  return TASKS.filter(t=>{
+    if(fModel!=='全部模型' && t.model!==fModel) return false;
+    if(fStatus!=='全部状态' && t.status!==fStatus) return false;
+    return true;
+  });
+}
+
+const ICON_VIDEO='<path d="M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/><path d="M21 8.5l-4 2.2v2.6l4 2.2V8.5z"/>';
+const ICON_MODEL='<path d="M4 16v-4"/><path d="M9 16V8"/><path d="M14 16v-6"/><path d="M19 16v-2.5"/>';
+const ICON_EXPAND='<path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>';
+const ICON_COPY='<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>';
+const ICON_LINK='<path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6"/>';
+const ICON_EDIT='<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>';
+
+function thumb(t, isOutput){
+  if(!isOutput) return `<span class="cellna">—</span>`;
+  return `<div class="mthumb" style="background:${thumbGrad(t.id)}">
+    <span class="mbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_VIDEO}</svg></span>
+  </div>`;
+}
+
+const tbody=document.getElementById('tbody');
+function renderTable(){
+  const rows=getFiltered();
+  const totalPages=Math.max(1, Math.ceil(rows.length/PAGE_SIZE));
+  if(currentPage>totalPages) currentPage=totalPages;
+  const pageRows=rows.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  tbody.innerHTML='';
+  if(!pageRows.length){
+    tbody.innerHTML=`<tr class="emptyrow"><td colspan="7">没有符合当前筛选条件的生成任务</td></tr>`;
+    renderPager(totalPages, rows.length); return;
+  }
+  pageRows.forEach((t,idx)=>{
+    const st=STATUS_STYLE[t.status]||{bg:'#F1F4F4',fg:'#94A3B8'};
+    const tr=document.createElement('tr'); tr.className='datarow'+(idx%2===1?' zebra':'');
+    tr.innerHTML=`
+      <td>${thumb(t,true)}</td>
+      <td>${thumb(t,false)}</td>
+      <td><span class="pill" style="background:${st.bg};color:${st.fg}"><span class="pd" style="background:${st.fg}"></span>${t.status}</span></td>
+      <td><span class="modelpill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_MODEL}</svg>${t.model}</span></td>
+      <td>
+        <div class="promptcell">
+          <div class="ptext" title="${t.prompt.replace(/"/g,'&quot;')}">${t.prompt}</div>
+          <div class="plinks">
+            <span class="plink" data-act="full"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_EXPAND}</svg>查看全屏</span>
+            <span class="plink" data-act="copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_COPY}</svg>复制</span>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="timecell"><div class="tdate tnum">${t.time}</div><div class="tdur">${t.dur}</div></div>
+      </td>
+      <td>
+        <div class="opgroup">
+          <span class="opicon" data-act="link"><span class="otip">打开详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICON_LINK}</svg></span>
+          <span class="opicon" data-act="edit"><span class="otip">编辑</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICON_EDIT}</svg></span>
+        </div>
+      </td>`;
+    tr.querySelector('[data-act="full"]').onclick=()=>toast('查看全屏：源数据未提供可播放的视频文件，原型演示无法真正全屏预览');
+    tr.querySelector('[data-act="copy"]').onclick=()=>{
+      navigator.clipboard && navigator.clipboard.writeText(t.prompt).catch(()=>{});
+      toast('提示词已复制到剪贴板');
+    };
+    tr.querySelector('[data-act="link"]').onclick=()=>toast(`任务 #${t.id} · ${t.model} · ${t.status} —— 原型演示，未接入详情跳转`);
+    tr.querySelector('[data-act="edit"]').onclick=()=>toast(`编辑任务 #${t.id} 的提示词 —— 原型演示，未接入实际编辑流程`);
+    tbody.appendChild(tr);
+  });
+  renderPager(totalPages, rows.length);
+}
+
+function renderPager(totalPages, cnt){
+  const pager=document.getElementById('pager'); pager.innerHTML='';
+  if(totalPages>1){
+    const prev=document.createElement('button'); prev.className='pgbtn'; prev.textContent='‹';
+    prev.disabled=currentPage<=1; prev.onclick=()=>{currentPage--;renderTable();}; pager.appendChild(prev);
+    for(let i=1;i<=totalPages;i++){
+      const b=document.createElement('button'); b.className='pgbtn'+(i===currentPage?' on':''); b.textContent=i;
+      b.onclick=()=>{currentPage=i;renderTable();}; pager.appendChild(b);
+    }
+    const next=document.createElement('button'); next.className='pgbtn'; next.textContent='›';
+    next.disabled=currentPage>=totalPages; next.onclick=()=>{currentPage++;renderTable();}; pager.appendChild(next);
+  }
+  const note=document.getElementById('pageNote');
+  const filtering = fModel!=='全部模型'||fType!=='全部类型'||fStatus!=='全部状态';
+  note.innerHTML = filtering
+    ? `当前筛选结果 <b>${cnt}</b> 条`
+    : `本页原型呈现源截图可完整读取的 <b>${TASKS.length}</b> 条记录（视口截断，实际总条数与总页数源图未展示，不做编造）`;
+}
+renderTable();
+</script>
+</body>
+</html>
