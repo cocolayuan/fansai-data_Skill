@@ -13,7 +13,6 @@ FansAI 数据中台页面系统 Skill —— 薄荷液态玻璃 clean-SaaS 风�
 | 数据看板 · 管理层看板 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/management_dashboard_redesign.html) | 全公司经营目标、团队推进、线索转化、客户与现金流洞察 |
 | 数据看板 · 业务层看板 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/business_dashboard_redesign.html) | 个人目标、线索客户、项目推进、开票回款与日程联动 |
 | 数据看板 · 执行层看板 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/execution_dashboard_redesign.html) | 团队排期、负载预警、交付节点与外部团队验收状态 |
-| 数据看板 · 总数据看板 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/dashboard_overview_redesign.html) | 周期分析、KPI 与本周解读合并；分段条、流程图及项目表联动 |
 | 项目管理 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/project_management_redesign.html) | 状态筛选、表头排序、撕页日期与三段式操作列 |
 | 创作者列表 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/creator_list_redesign.html) | 三栏卡片列表、作品视觉优先、长文本截断与真实图片槽位 |
 | 供应商列表 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/vendor_list_redesign.html) | 自定义瓦片筛选、列表排序、组织首标与负责人头像 |
