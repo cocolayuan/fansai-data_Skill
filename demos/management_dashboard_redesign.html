@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数据大盘 · 管理层看板 · Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ===== V2 设计令牌 ===== */
+:root{
+  --ink:#1b2430; --ink2:#0f3132; --muted:#64748b; --muted2:#94a3b8;
+  --teal:#008aa8; --teal2:#0c7074; --blue:#49B6D8; --green:#8BD98C; --lime:#A7E885;
+  --green-deep:#34A85E; --green-ink:#1F6F4A; --line:#e8efef;
+  --ok:#1A9E4B; --warn:#C77B26; --err:#D6455B; --info:#2563EB;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","Noto Sans SC",sans-serif;
+  --glassshadow:inset 0 1px 0 rgba(255,255,255,.65);   /* V2 玻璃卡：不投影，只保留顶边内高光 */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+/* V2 §2：背景只铺一层，禁止再套一层带圆角投影的外框 */
+body{font-family:var(--cn);font-weight:500;color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh;
+  background:
+   radial-gradient(900px 520px at 12% -6%, rgba(154,220,203,.42), transparent 62%),
+   radial-gradient(760px 480px at 88% 4%, rgba(73,182,216,.30), transparent 60%),
+   radial-gradient(820px 520px at 62% 104%, rgba(0,138,168,.10), transparent 62%),
+   #ECF4F2;
+  background-attachment:fixed}
+.wrap{max-width:1680px;margin:0 auto;padding:26px 36px 52px}
+.tnum{font-variant-numeric:tabular-nums}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.rv{opacity:0;animation:up .5s cubic-bezier(.2,.7,.2,1) forwards}
+/* V2 §1 液态玻璃配方（原样取值）：半透明白渐变 + blur(24) saturate(160%) + 1px 内描白边，不投影 */
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.5));
+  backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+  border:1px solid rgba(255,255,255,.78);box-shadow:var(--glassshadow)}
+/* 「今日」是唯一带卡面的模块，内边距放宽让卡更高一些 */
+.panel.today{padding:30px 26px 32px}
+.panel.today .slist{gap:14px}
+.panel.today .sitem{padding:17px 18px}
+.glass-lite{background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(150%);
+  -webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid rgba(255,255,255,.7)}
+
+/* ===== header 面包屑 ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:16px}
+.bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;
+  border:2px solid #f5fffe;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9ADCCB,#49B6D8);flex:0 0 auto}
+.bmain{font-family:var(--en);font-weight:700;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.bsub{font-family:var(--en);font-weight:300;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.bellbtn{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px -10px rgba(15,49,50,.18);cursor:pointer;transition:.2s}
+.bellbtn:hover{transform:translateY(-1px)}
+.me{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;color:#04312f;font-family:var(--en);
+  font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center}
+.mename{font-family:var(--en);font-weight:500;font-size:18px}
+
+/* ===== tab + 控件同一行（V2 §3：控件不占独立行） ===== */
+.navrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.tabs{display:flex;align-items:center;gap:6px;padding:6px;border-radius:18px;width:fit-content}
+.tab{border:none;background:none;padding:9px 18px;border-radius:13px;font-family:var(--cn);font-weight:500;
+  font-size:14px;color:var(--muted);cursor:pointer;transition:.18s;white-space:nowrap;display:flex;align-items:baseline;gap:7px}
+.tab .ten{font-family:var(--en);font-size:9.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2)}
+.tab.on{background:var(--ink);color:#fff;font-weight:600;box-shadow:0 10px 22px -10px rgba(15,49,50,.4)}
+.tab.on .ten{color:rgba(255,255,255,.62)}
+.tab:not(.on):hover{color:var(--ink);background:rgba(255,255,255,.6)}
+.ctrlrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.datepill{display:flex;align-items:baseline;gap:7px;padding:9px 15px;border-radius:14px;background:rgba(255,255,255,.6);
+  border:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.datepill b{font-family:var(--en);font-weight:600;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+.ghostbtn{display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:14px;font-family:var(--cn);
+  font-size:12.5px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.6);border:1px solid var(--line);cursor:pointer;transition:.16s}
+.ghostbtn svg{width:14px;height:14px}
+.ghostbtn:hover{color:var(--ink);border-color:#cfe0e0;background:#fff}
+.refreshbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.6);
+  color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.25s}
+.refreshbtn:hover{color:var(--ink);border-color:#cfe0e0}
+.refreshbtn.spin svg{animation:spin .7s linear}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== 视角切换 ===== */
+.viewbar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.viewbar h1{font-size:21px;font-weight:700;display:flex;align-items:baseline;gap:9px}
+.viewbar h1 .ven{font-family:var(--en);font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted2)}
+.viewbar .vd{font-size:12.5px;color:var(--muted2);margin-top:5px}
+.bdswitch{display:flex;align-items:center;gap:4px;padding:4px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid var(--line)}
+.bdswitch button{border:none;background:none;padding:8px 14px;border-radius:10px;font-family:var(--cn);font-weight:500;
+  font-size:13px;color:var(--muted);cursor:pointer;transition:.18s;display:flex;align-items:center;gap:7px}
+.bdswitch button .bav{width:20px;height:20px;border-radius:50%;font-family:var(--en);font-size:9.5px;font-weight:700;
+  color:#04312f;display:flex;align-items:center;justify-content:center}
+.bdswitch button.on{background:var(--ink);color:#fff;font-weight:600}
+
+/* ===== section ===== */
+section{margin-bottom:26px}
+.panel{border-radius:24px;padding:24px}
+.sechead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.sechead h2{font-size:18px;font-weight:700;display:flex;align-items:baseline;gap:9px}
+.sechead h2 .sen{font-family:var(--en);font-size:10px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted2)}
+.sechead .sd{font-size:12.5px;color:var(--muted2);margin-top:5px;max-width:820px;line-height:1.6}
+/* 口径说明与主标题同行（不再单独占一行） */
+.sechead h2 .sdi{font-size:12px;font-weight:500;color:var(--muted2);letter-spacing:0;
+  padding-left:14px;margin-left:2px;border-left:1px solid var(--line);line-height:1.5}
+.sublabel{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-bottom:13px}
+.sublabel .ct{font-family:var(--en);font-size:11px;color:var(--muted2);background:rgba(255,255,255,.7);
+  border:1px solid var(--line);border-radius:12px;padding:1px 9px}
+.sublabel .ln{flex:1;height:1px;background:linear-gradient(90deg,rgba(231,239,239,.95),transparent)}
+.segctrl{display:flex;align-items:center;gap:4px;padding:4px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid var(--line)}
+.segctrl button{border:none;background:none;padding:8px 15px;border-radius:10px;font-family:var(--cn);font-weight:500;
+  font-size:13px;color:var(--muted);cursor:pointer;transition:.18s}
+.segctrl button.on{background:var(--ink);color:#fff;font-weight:600}
+/* 周期选择：年度 / 季度 / 月度 三个瓦片下拉（V2 §6：不用原生 select） */
+.pdd{position:relative}
+.pdd .pt{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;border:none;background:none;
+  font-family:var(--cn);font-weight:500;font-size:13px;color:var(--muted);cursor:pointer;transition:.18s;white-space:nowrap}
+.pdd .pt .pv{font-family:var(--en);font-weight:600;font-variant-numeric:tabular-nums}
+.pdd .pt::after{content:'';width:5.5px;height:5.5px;border-right:1.7px solid currentColor;border-bottom:1.7px solid currentColor;
+  transform:rotate(45deg) translateY(-2px);opacity:.5;flex:0 0 auto;transition:.18s}
+.pdd:not(.on) .pt:hover{color:var(--ink);background:rgba(255,255,255,.7)}
+.pdd.on .pt{background:var(--ink);color:#fff;font-weight:600}
+.pdd.open .pt::after{transform:rotate(225deg) translateY(-2px);opacity:.85}
+.pdd .ppop{display:none;position:absolute;right:0;top:calc(100% + 9px);z-index:40;min-width:152px;max-height:236px;
+  overflow-y:auto;border-radius:14px;padding:6px;background:rgba(255,255,255,.96);
+  backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
+  border:1px solid rgba(255,255,255,.9);box-shadow:0 18px 40px -18px rgba(15,50,40,.4)}
+.pdd.open .ppop{display:block}
+.popt{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:10px;font-size:12.5px;font-weight:500;
+  color:var(--ink);border:1px solid transparent;cursor:pointer;transition:.14s;white-space:nowrap}
+.popt:hover{background:rgba(0,138,168,.06)}
+.popt.sel{border-color:var(--blue);background:rgba(73,182,216,.1);font-weight:600}
+.popt .nd{margin-left:auto;font-size:9.5px;font-weight:600;color:var(--muted2);background:#F1F4F4;border-radius:5px;padding:1px 6px}
+/* 该周期源数据缺失时的诚实空态 */
+.kpibody{display:flex;flex-direction:column;min-height:0}
+.kpiempty{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:10px;padding:64px 24px;min-height:290px}
+.kpiempty .eic{width:52px;height:52px;border-radius:16px;background:#EEF4F3;color:var(--muted2);
+  display:flex;align-items:center;justify-content:center}
+.kpiempty .et2{font-size:14px;font-weight:600}
+.kpiempty .ed{font-size:12px;color:var(--muted2);line-height:1.75;max-width:470px}
+.srcnote{margin-top:auto;padding-top:14px;border-top:1px solid rgba(232,239,239,.8);font-size:11.5px;color:var(--muted2);line-height:1.65}
+.demotag{font-size:9px;font-weight:700;color:#C77B26;background:#FDF1E3;border-radius:5px;padding:1px 5px;margin-left:5px;cursor:help}
+
+/* ===== ① 今日：寄语 + AI 策略（合并同一玻璃容器，两栏 stretch 等高） ===== */
+.todaygrid{display:grid;grid-template-columns:352px 1fr;gap:22px;align-items:stretch}
+.museside,.aiside{display:flex;flex-direction:column;min-height:0}
+/* 寄语卡：背景图（每 24h 轮换）+ 遮罩层；渐变作为图片加载失败时的兜底底色 */
+.muse{position:relative;flex:1 1 auto;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;
+  justify-content:space-between;padding:22px 24px 20px;isolation:isolate;
+  background:linear-gradient(150deg,#0B3B3D 0%,#0d5c53 46%,#12796a 100%)}
+.muse .mbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transform:scale(1.02);
+  transition:opacity .32s ease}
+.muse .mbg.fading{opacity:0}
+.muse .mscrim{position:absolute;inset:0;z-index:1;
+  background:linear-gradient(155deg, rgba(6,34,30,.84) 0%, rgba(8,52,45,.68) 46%, rgba(10,74,58,.44) 100%)}
+.muse>.mk,.muse>div:not(.mscrim),.muse>.mfoot{position:relative;z-index:2}
+.muse .mk{display:flex;align-items:center;gap:9px;font-size:11px;font-weight:700;letter-spacing:1.6px;
+  text-transform:uppercase;color:#D6F5E4;margin-bottom:14px}
+.muse .mk .idot{width:7px;height:7px;border-radius:50%;background:#D6F5E4;box-shadow:0 0 0 4px rgba(214,245,228,.2)}
+.muse blockquote{font-size:17.5px;line-height:1.95;color:#fff;font-weight:500;letter-spacing:.4px;
+  text-shadow:0 1px 12px rgba(0,0,0,.28)}
+.muse .mfoot{display:flex;align-items:center;justify-content:space-between;margin-top:18px;gap:12px}
+.muse .mdate{font-family:var(--en);font-size:12px;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:.4px}
+.muse .mbtn{border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.12);color:#fff;border-radius:20px;
+  padding:6px 15px;font-family:var(--cn);font-size:12px;font-weight:500;cursor:pointer;transition:.18s}
+.muse .mbtn:hover{background:rgba(255,255,255,.24)}
+
+.slist{display:flex;flex-direction:column;gap:10px}
+.sitem{display:flex;gap:13px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.55);
+  border:1px solid var(--line);transition:.18s}
+.sitem:hover{background:rgba(255,255,255,.82)}
+.stag{flex:0 0 auto;height:23px;border-radius:11px;padding:0 10px;font-size:11px;font-weight:600;
+  display:inline-flex;align-items:center;gap:5px}
+.stag .sd2{width:5px;height:5px;border-radius:50%}
+.sbody{font-size:13px;line-height:1.75;color:var(--ink)}
+.sbody b{font-weight:600}
+.sbody .amt{font-family:var(--en);font-weight:700;font-variant-numeric:tabular-nums}
+.sbody .why{color:var(--muted2);font-size:12px;line-height:1.7;margin-top:5px}
+
+/* ===== ② KPI：表现分环 + 结构堆叠条 ===== */
+.kpigrid{display:grid;grid-template-columns:246px 1fr;gap:22px;align-items:stretch}
+.ringcard,.barcard{display:flex;flex-direction:column;min-height:0;border-radius:20px;padding:20px;
+  background:rgba(255,255,255,.55);border:1px solid var(--line)}
+.ringcard{align-items:center;justify-content:center;text-align:center;gap:2px}
+.ringwrap{position:relative;width:190px;height:190px;margin-bottom:16px}
+.ringwrap .rv2{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ringwrap .rv2 b{font-family:var(--en);font-weight:700;font-size:42px;line-height:1;font-variant-numeric:tabular-nums}
+.ringwrap .rv2 span{font-size:10.5px;color:var(--muted2);margin-top:9px;line-height:1.55;max-width:124px}
+.ringcard .rlbl{font-size:13px;font-weight:600;color:var(--ink)}
+.knums{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.knum{border-radius:16px;padding:15px 16px 14px;background:#fff;border:1px solid var(--line);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.knum::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc)}
+.knum .kl{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);font-weight:600}
+.knum .kl .kd{width:7px;height:7px;border-radius:2px;background:var(--acc);flex:0 0 auto}
+.knum .kv{display:flex;align-items:baseline;gap:4px;font-family:var(--en);font-weight:700;font-size:27px;
+  line-height:1;margin-top:16px;font-variant-numeric:tabular-nums}
+.knum .kv .un{font-family:var(--cn);font-size:14px;font-weight:700;color:var(--muted)}
+.knum .kc{font-size:11px;color:var(--muted2);margin-top:auto;padding-top:12px}
+.stackwrap{position:relative;margin-top:10px}
+.stack{display:flex;height:34px;border-radius:17px;overflow:hidden;background:#EAF1F1}
+.stack>i{height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--en);
+  font-weight:700;font-size:11.5px;color:#fff;transition:width .7s cubic-bezier(.2,.7,.2,1);min-width:0;overflow:hidden}
+.stack .sgap{background:transparent}
+.tmark{position:absolute;top:-7px;bottom:-7px;width:2px;background:var(--ink);border-radius:2px;transition:left .7s cubic-bezier(.2,.7,.2,1)}
+.tmark span{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-family:var(--en);font-size:10px;
+  font-weight:700;color:var(--ink);white-space:nowrap;background:rgba(255,255,255,.85);border-radius:6px;padding:1px 6px}
+.stackleg{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:22px;font-size:12px;color:var(--muted)}
+.stackleg span{display:flex;align-items:center;gap:7px}
+.stackleg i{width:10px;height:10px;border-radius:3px}
+.knote{margin-top:14px;font-size:12.5px;color:var(--muted);line-height:1.8}
+.knote b{font-family:var(--en);font-weight:700;color:var(--ink)}
+.knote b.bad{color:var(--err)}
+
+/* ===== ③ 线索流程图 ===== */
+.flowbox{border-radius:20px;padding:24px 22px 20px;background:rgba(255,255,255,.55);border:1px solid var(--line)}
+.flow{display:flex;align-items:flex-start}
+.fnode{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:118px;text-align:center}
+.fcircle{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-family:var(--en);font-weight:700;font-size:22px;box-shadow:0 12px 24px -12px rgba(20,60,60,.5)}
+.fcn{font-size:13px;font-weight:600;color:var(--ink)}
+.fen{font-family:var(--en);font-size:9.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2)}
+.famt{font-family:var(--en);font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.famt .cnu{font-family:var(--cn);font-size:11.5px;font-weight:700}
+.farrow{flex:1 1 auto;min-width:24px;height:64px;display:flex;align-items:center;justify-content:center;color:#CBDAD8}
+.farrow svg{width:100%;max-width:54px;height:12px}
+.fdiv{flex:0 0 1px;align-self:stretch;margin:4px 24px 0;
+  background:repeating-linear-gradient(to bottom, var(--line) 0 5px, transparent 5px 10px)}
+.fnode.exception .fcircle{background:none;border:1.5px dashed var(--err);color:var(--err);box-shadow:none}
+.fnode.exception .fcn{color:var(--err)}
+.calnote{display:flex;align-items:flex-start;gap:9px;margin-top:18px;padding:11px 14px;border-radius:14px;
+  background:rgba(0,138,168,.06);border:1px solid rgba(0,138,168,.16);font-size:11.5px;color:var(--teal2);line-height:1.65}
+.calnote svg{width:14px;height:14px;flex:0 0 auto;margin-top:2px}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch;margin-top:20px}
+.minicard{border-radius:20px;padding:19px 20px;background:rgba(255,255,255,.55);border:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0}
+.minicard h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:9px;margin-bottom:4px}
+.minicard h3 .cnt{font-family:var(--en);font-size:11px;font-weight:700;border-radius:11px;padding:2px 9px}
+.minicard .msub{font-size:11.5px;color:var(--muted2);margin-bottom:12px}
+.mrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;
+  border-bottom:1px dashed rgba(232,239,239,.95);font-size:13px}
+.mrow:last-of-type{border-bottom:none}
+.mrow b{font-weight:600}
+.mrow .msec{color:var(--muted2);font-size:11.5px}
+.mrow .rt{flex:0 0 auto;display:flex;align-items:center;gap:9px}
+.mbar{width:74px;height:8px;border-radius:5px;background:#EAF1F1;overflow:hidden}
+.mbar>i{display:block;height:100%;border-radius:5px;background:var(--err)}
+.mdays{font-family:var(--en);font-weight:700;font-size:13px;color:var(--err);min-width:56px;text-align:right;font-variant-numeric:tabular-nums}
+.mwhen{font-family:var(--en);font-weight:700;font-size:12.5px;min-width:74px;text-align:right}
+.mwhen.today{color:var(--warn)}
+.mwhen.later{color:var(--muted2)}
+
+/* ===== ④ 周日历 ===== */
+.callegend{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.callegend span{display:flex;align-items:center;gap:6px}
+.callegend i{width:9px;height:9px;border-radius:3px}
+.cal{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.62)}
+.calhead,.calbody{display:grid;grid-template-columns:58px repeat(7,1fr)}
+.calhead .dh{padding:11px 6px;text-align:center;border-bottom:1px solid var(--line);border-left:1px solid var(--line)}
+.calhead .dh:first-child{border-left:none}
+.calhead .dw{font-size:11px;color:var(--muted2);font-weight:600}
+.calhead .dn{font-family:var(--en);font-size:15px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.calhead .dh.today{background:rgba(0,138,168,.08)}
+.calhead .dh.today .dn{color:var(--teal)}
+.calhead .dh.today .dw{color:var(--teal2)}
+.calbody{position:relative}
+.gutter .gh{height:54px;font-family:var(--en);font-size:10.5px;font-weight:500;color:var(--muted2);
+  text-align:right;padding-right:9px;transform:translateY(-7px)}
+.ccol{position:relative;border-left:1px solid var(--line);cursor:copy}
+.ccol.today{background:rgba(0,138,168,.05)}
+.hline{position:absolute;left:0;right:0;height:1px;background:rgba(232,239,239,.9);pointer-events:none}
+.ev{position:absolute;left:4px;right:4px;border-radius:10px;padding:6px 9px;font-size:11.5px;line-height:1.4;
+  overflow:hidden;cursor:pointer;border-left:3px solid;box-shadow:0 6px 14px -10px rgba(20,60,60,.5)}
+.ev .et{font-family:var(--en);font-weight:700;font-size:10.5px;opacity:.8}
+.ev .en2{font-weight:600;margin-top:1px}
+.ev .ep{opacity:.72;font-size:11px;margin-top:2px}
+
+/* ===== ⑤ 项目推进 ===== */
+.owner{border-radius:20px;padding:19px 20px;background:rgba(255,255,255,.55);border:1px solid var(--line);margin-bottom:16px}
+.owner:last-child{margin-bottom:0}
+.ohead{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+.oav{width:34px;height:34px;border-radius:50%;color:#04312f;font-family:var(--en);font-weight:700;font-size:13px;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ohead b{font-size:14px;font-weight:600}
+.ohead .ometa{font-size:11.5px;color:var(--muted2)}
+.ohead .ometa em{font-style:normal;color:var(--err);font-weight:600}
+.proj{padding:26px 0 12px;border-top:1px solid rgba(232,239,239,.9)}
+.ptop{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
+.ptop .pn{font-size:13.5px;font-weight:600}
+.pbadge{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;height:24px;border-radius:12px;padding:0 11px;
+  font-size:11.5px;font-weight:600}
+.pbadge .pd{width:6px;height:6px;border-radius:50%}
+.rail{display:flex;align-items:center}
+.rstep{display:flex;align-items:center;flex:1}
+.rstep:last-child{flex:0 0 auto}
+.rstep .rp{width:11px;height:11px;border-radius:50%;background:#DCE6E3;flex:0 0 auto}
+.rstep .rl{height:2px;background:#DCE6E3;flex:1}
+.rstep.done .rp{background:var(--teal)}
+.rstep.done .rl{background:var(--teal)}
+.rstep.now .rp{width:14px;height:14px;background:#fff;border:3.5px solid var(--warn);box-shadow:0 0 0 4px rgba(199,123,38,.14)}
+.rstep.late .rp{width:14px;height:14px;background:#fff;border:3.5px solid var(--err);box-shadow:0 0 0 4px rgba(214,69,91,.14)}
+.rlabels{display:flex;justify-content:space-between;gap:6px;margin-top:8px}
+.rlabels span{font-size:10.5px;color:var(--muted2);white-space:nowrap}
+.rlabels span.cur{color:var(--warn);font-weight:600}
+.rlabels span.curLate{color:var(--err);font-weight:600}
+.rlabels span.fin{color:var(--ok);font-weight:600}
+
+/* ===== ⑥ 应收：账龄分段条 + 表格 ===== */
+.agewrap{border-radius:20px;padding:20px;background:rgba(255,255,255,.55);border:1px solid var(--line);
+  display:flex;flex-direction:column;margin-bottom:20px}
+.agetop{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.agetotal{display:flex;align-items:baseline;gap:6px}
+.agetotal .pre{font-family:var(--cn);font-size:13px;font-weight:600;color:var(--muted)}
+.agetotal b{font-family:var(--en);font-weight:700;font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+.agetotal .un{font-size:11.5px;color:var(--muted2);font-weight:600}
+/* 分段条：每段独立圆角 + 间隙（参照系统内「行业分布 / 合同构成」范式） */
+.segbar{display:flex;gap:5px;height:32px}
+.segbar>i{height:100%;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;
+  font-family:var(--en);font-weight:700;font-size:12px;transition:width .7s cubic-bezier(.2,.7,.2,1);overflow:hidden}
+/* 图例：名称 / 百分比 / 金额 紧挨成一组，不被整行拉散 */
+.seglegend{display:flex;flex-wrap:wrap;gap:10px 38px;margin-top:16px}
+.segitem{display:flex;align-items:baseline;gap:8px;font-size:12.5px;color:var(--ink);font-weight:500}
+.segitem .sdot{width:9px;height:9px;border-radius:3px;flex:0 0 auto;align-self:center}
+.segitem .sp{font-family:var(--en);font-weight:700;font-variant-numeric:tabular-nums}
+.segitem .sv{font-family:var(--en);font-weight:500;font-size:12px;color:var(--muted2);font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:11.5px;font-weight:700;color:var(--muted2);letter-spacing:.3px;
+  padding:0 12px 12px;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
+thead th.sortable{cursor:pointer}
+thead th.sortable:hover{color:var(--ink)}
+thead th .sa{display:inline-block;margin-left:4px;opacity:.4;font-size:10px}
+thead th.sorted .sa{opacity:1;color:var(--teal)}
+th.num,td.num{text-align:right}
+tbody tr.datarow{cursor:pointer;transition:.15s}
+tbody tr.datarow.zebra{background:rgba(255,255,255,.5)}
+tbody tr.datarow:hover{background:rgba(0,138,168,.06)}
+tbody tr.datarow.open{background:rgba(0,138,168,.08)}
+tbody td{padding:22px 12px;font-size:13px;border-bottom:1px solid rgba(236,243,243,.85);vertical-align:middle}
+.pname{font-weight:600}
+.pcust{font-size:11.5px;color:var(--muted2);margin-top:3px}
+.amtcell{font-family:var(--en);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.amtcell.pending{color:var(--warn)}
+.amtcell.zero{color:var(--muted2);font-weight:500}
+/* 账龄单元格：色点与上方分段条一一对应，文字用同色的可读版本 */
+.agecell{display:inline-flex;align-items:center;gap:7px;font-family:var(--en);font-weight:700;font-size:13px;
+  font-variant-numeric:tabular-nums}
+.agecell .adot{width:8px;height:8px;border-radius:3px;flex:0 0 auto}
+.agecell .cnu{font-family:var(--cn);font-size:12.5px}
+.stpill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:12px;font-size:11.5px;
+  font-weight:600;white-space:nowrap}
+.stpill .pd{width:6px;height:6px;border-radius:50%}
+.prog{font-size:12.5px;line-height:1.6}
+.prog .psub{display:block;font-size:11px;color:var(--muted2);margin-top:3px}
+.prog .ok{color:var(--ok);font-weight:600}
+.caret{width:26px;text-align:center;color:var(--muted2)}
+.caret svg{transition:transform .2s}
+tr.open .caret{color:var(--teal)}
+tr.open .caret svg{transform:rotate(180deg)}
+tr.detailrow td{padding:0;border-bottom:1px solid rgba(236,243,243,.85)}
+.dwrap{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(.2,.7,.2,1)}
+tr.detailrow.show .dwrap{max-height:200px}
+.dinner{padding:18px 14px 20px 42px;display:flex;gap:26px;align-items:center}
+.dstackwrap{flex:1;min-width:0}
+.dstacklbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted2);margin-bottom:7px;font-weight:600}
+.dstack{height:16px;border-radius:9px;background:#EAF1F1;overflow:hidden;display:flex}
+.dstack>span{height:100%}
+.dstackleg{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.dstackleg span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:600}
+.dstackleg i{width:9px;height:9px;border-radius:3px}
+.dnote{flex:0 0 250px;font-size:11.5px;color:var(--muted2);line-height:1.7;padding-left:22px;border-left:1px solid var(--line)}
+.tfoot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:16px}
+.tfoot .tsum{font-size:12.5px;color:var(--muted)}
+.tfoot .tsum b{font-family:var(--en);font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ===== 空态 ===== */
+.emptystate{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:56px 24px;gap:9px}
+.emptystate .eic{width:52px;height:52px;border-radius:16px;background:#EEF4F3;color:var(--muted2);
+  display:flex;align-items:center;justify-content:center}
+.emptystate .et2{font-size:14px;font-weight:600;color:var(--ink)}
+.emptystate .ed{font-size:12px;color:var(--muted2);line-height:1.7;max-width:460px}
+
+/* ===== 弹层（新建 / 详情），瓦片下拉替代原生 select ===== */
+.pop{position:absolute;z-index:60;width:296px;border-radius:20px;padding:18px;
+  background:linear-gradient(160deg,rgba(255,255,255,.94),rgba(255,255,255,.86));
+  backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%);
+  border:1px solid rgba(255,255,255,.9);box-shadow:0 30px 60px -24px rgba(15,50,40,.36)}
+.pop h5{font-size:13.5px;font-weight:600;margin-bottom:3px}
+.pop .phint{font-size:11px;color:var(--muted2);margin-bottom:12px}
+.pop label{display:block;font-size:11px;color:var(--muted);font-weight:600;margin:11px 0 5px}
+.pop input{width:100%;border:1px solid var(--line);border-radius:12px;padding:9px 11px;font-size:12.5px;
+  font-family:var(--cn);background:#fff;color:var(--ink);outline:none;transition:.16s}
+.pop input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(73,182,216,.16)}
+.pop input.err{border-color:var(--err);animation:shake .32s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.tsel{position:relative}
+.tsel .tt{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);
+  border-radius:12px;padding:9px 11px;background:#fff;font-family:var(--cn);font-size:12.5px;font-weight:500;
+  color:var(--ink);cursor:pointer;transition:.16s}
+.tsel .tt .lft{display:flex;align-items:center;gap:7px}
+.tsel .tt .sd3{width:7px;height:7px;border-radius:50%}
+.tsel .tt::after{content:'';width:6px;height:6px;border-right:1.8px solid var(--muted2);border-bottom:1.8px solid var(--muted2);
+  transform:rotate(45deg) translateY(-2px);flex:0 0 auto}
+.tsel.open .tt{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,138,168,.12)}
+.tpop{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:5;max-height:172px;overflow-y:auto;
+  border-radius:14px;padding:6px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 18px 40px -18px rgba(15,50,40,.4)}
+.tsel.open .tpop{display:block}
+.tsel.up .tpop{top:auto;bottom:calc(100% + 6px)}
+.topt{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;font-size:12.5px;
+  border:1px solid transparent;cursor:pointer;transition:.14s}
+.topt:hover{background:rgba(0,138,168,.06)}
+.topt.sel{border-color:var(--blue);background:rgba(73,182,216,.1);color:var(--ink);font-weight:600}
+.topt .sd3{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.pdline{font-size:12.5px;line-height:1.7;color:var(--ink)}
+.pdline b{font-weight:600}
+.pdprep{margin-top:9px;border-radius:12px;padding:10px 12px;background:rgba(0,138,168,.07);
+  border:1px solid rgba(0,138,168,.16);font-size:12px;color:var(--teal2);line-height:1.7}
+.pdprep::before{content:"要准备：";font-weight:600;color:var(--teal)}
+.popbtns{display:flex;gap:9px;justify-content:flex-end;margin-top:16px}
+.popbtns button{border-radius:11px;padding:8px 15px;font-family:var(--cn);font-size:12.5px;font-weight:600;
+  cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--muted);transition:.16s}
+.popbtns button:hover{color:var(--ink);border-color:#cfe0e0}
+.popbtns button.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.popbtns button.danger{color:var(--err);border-color:#F3CDD4}
+
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(22px);background:var(--ink);
+  color:#fff;padding:12px 20px;border-radius:15px;font-size:12.5px;font-weight:500;line-height:1.6;max-width:520px;
+  box-shadow:0 20px 40px -14px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.28s;z-index:80}
+.toast .tdis{display:block;font-size:11px;color:rgba(255,255,255,.62);margin-top:3px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:1360px){
+  .todaygrid{grid-template-columns:1fr}
+  .kpigrid{grid-template-columns:1fr}
+  .knums{grid-template-columns:repeat(2,1fr)}
+  .seglegend{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:900px){
+  .wrap{padding:22px 18px 44px}
+  .twocol{grid-template-columns:1fr}
+  .flow{flex-wrap:wrap;gap:18px}
+  .fdiv{display:none}
+}
+
+
+/* =========================================================================
+   管理层增量组件 —— 令牌 / 圆角阶梯 / 配色全部沿用上方业务层规范，不另起一套
+   ========================================================================= */
+
+/* 通用 pill（业务层的 .stpill 用于表格状态，这里补一组说明性 pill） */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:11px;padding:2px 9px;font-size:11px;font-weight:600;white-space:nowrap}
+.p-gray{background:#F1F4F4;color:#8A9A95}
+.p-amber{background:#FDF1E3;color:#C77B26}
+.p-ok{background:#EAF6EE;color:#1A9E4B}
+.p-err{background:#FDE9EC;color:#D6455B}
+.p-teal{background:#E0F4F8;color:#0c7074}
+.help{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;
+  background:#EEF4F3;color:var(--muted2);font-size:10px;font-weight:700;cursor:pointer;border:none;
+  font-family:var(--en);transition:.15s;flex:0 0 auto}
+.help:hover,.help.on{background:var(--teal);color:#fff}
+.infopop{position:absolute;z-index:90;width:250px;border-radius:16px;padding:14px 16px;
+  background:rgba(255,255,255,.97);backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid rgba(255,255,255,.9);box-shadow:0 22px 46px -20px rgba(15,50,40,.42);
+  font-size:12px;line-height:1.8;color:var(--muted)}
+.infopop b{display:block;font-size:12.5px;color:var(--ink);font-weight:600;margin-bottom:5px}
+.infopop .fml{display:inline-block;margin-top:8px;font-family:var(--en);font-weight:600;font-size:12px;
+  color:var(--teal2);background:#E0F4F8;border-radius:9px;padding:4px 10px}
+.filtrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ghostbtn.solid{background:var(--ink);border-color:var(--ink);color:#fff}
+.ghostbtn.solid:hover{background:#0f3132;color:#fff;border-color:#0f3132}
+.hide{display:none !important}
+
+/* ===== ① 经营简报：左寄语位换成结论卡，右字段行沿用 .slist / .sitem ===== */
+.bnav{display:flex;align-items:center;gap:8px}
+.bnav button{width:32px;height:32px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.6);
+  color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.16s}
+.bnav button:hover:not(:disabled){color:var(--ink);border-color:#cfe0e0;background:#fff}
+.bnav button:disabled{opacity:.32;cursor:not-allowed}
+.bnav .blbl{font-family:var(--en);font-size:13px;font-weight:600;min-width:126px;text-align:center;
+  font-variant-numeric:tabular-nums;color:var(--ink)}
+.bnav .blbl s{text-decoration:none;font-family:var(--cn);font-size:12px;font-weight:500;color:var(--muted2);margin-left:5px}
+.muse .btagline{display:flex;align-items:center;gap:9px;font-size:11px;font-weight:700;letter-spacing:1.6px;
+  text-transform:uppercase;color:#D6F5E4;margin-bottom:15px}
+.muse .btagline .idot{width:7px;height:7px;border-radius:50%;background:#7DF0D2;box-shadow:0 0 0 4px rgba(125,240,210,.2)}
+.muse .bhero{font-size:17.5px;line-height:1.85;color:#fff;font-weight:600;letter-spacing:.3px;
+  text-shadow:0 1px 12px rgba(0,0,0,.28)}
+.muse .bhero .hn{font-family:var(--en);font-weight:700;color:#9FF0CE;font-variant-numeric:tabular-nums}
+.muse .bjudge{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.18)}
+.muse .bjudge .jt{display:inline-block;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:2px 9px;
+  font-size:11px;font-weight:600;color:#D6F5E4;margin-bottom:9px}
+.muse .bjudge .jv{font-size:12.5px;line-height:1.85;color:rgba(255,255,255,.82)}
+.muse .bjudge .jv .n{font-family:var(--en);font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.panel.today .stag{min-width:88px;justify-content:center}
+.sbody .n{font-family:var(--en);font-weight:700;font-variant-numeric:tabular-nums}
+.sbody .dim{color:var(--muted2)}
+.sbody .warnn{color:var(--warn);font-weight:700}
+.sbody .errn{color:var(--err);font-weight:700}
+.sbody .sep{color:#CBDAD8;margin:0 8px}
+.sbody .ph{display:inline-block;border:1px dashed #CBDAD8;border-radius:12px;padding:4px 12px;font-size:12px;color:var(--muted2)}
+.sbody .go{color:var(--teal);font-weight:600;cursor:pointer;border-bottom:1px dashed rgba(0,138,168,.4)}
+
+/* ===== ② 目标达成：沿用 .kpigrid / .ringcard / .knums / .stack ===== */
+.knum .kv .un2{font-family:var(--cn);font-size:12px;font-weight:600;color:var(--muted2);margin-left:3px}
+.knum .kt{font-family:var(--en);font-size:11.5px;font-weight:600;color:var(--muted2);margin-top:7px;font-variant-numeric:tabular-nums}
+.knum .kt b{font-weight:700}
+.kbar{height:6px;border-radius:4px;background:#EAF1F1;margin-top:10px;overflow:hidden}
+.kbar>i{display:block;height:100%;border-radius:4px;width:0;transition:width .8s cubic-bezier(.2,.7,.2,1)}
+.ringcard .rsub{font-size:11.5px;color:var(--muted2);line-height:1.7;margin-top:7px;max-width:190px}
+
+/* ===== ③ 经营财务：同比/环比 chip + 平滑多线时间序列 ===== */
+.dcs{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+.dc{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;border-radius:9px;padding:2px 7px;
+  background:#F1F4F4;color:#8A9A95;cursor:help}
+.dc b{font-family:var(--en);font-weight:700;font-variant-numeric:tabular-nums}
+.dc.up{background:#EAF6EE;color:#1A9E4B}
+.dc.down{background:#FDE9EC;color:#D6455B}
+.fingrid{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:stretch}
+/* 迷你柱图：每根柱＝一个周期，柱顶写值，选中期加深 */
+.barwrap{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;margin-top:10px}
+/* 柱子的 height:% 必须有一个高度确定的父级：
+   .bars 用 stretch 撑满 → .bar 有确定高度 → .bt 用 flex:1 拿到确定高度 → i 的 % 才解析得出来。
+   （之前 .bars 用 align-items:flex-end，.bar 塌成内容高度，柱子全渲染成 0，只剩数字标签。） */
+.bars{display:flex;align-items:stretch;gap:6px;flex:1 1 auto;min-height:112px;max-height:150px}
+.bar{flex:1 1 0;min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;gap:7px}
+.bar .bv{flex:0 0 auto;font-family:var(--en);font-size:10.5px;font-weight:700;color:var(--muted2);white-space:nowrap;
+  font-variant-numeric:tabular-nums;line-height:1}
+.bar .bt{flex:1 1 auto;min-height:0;width:100%;max-width:42px;display:flex;align-items:flex-end}
+.bar .bt>i{width:100%;border-radius:7px 7px 3px 3px;height:0;
+  transition:height .8s cubic-bezier(.2,.7,.2,1)}
+.bar.sel .bv{color:var(--ink);font-size:11.5px}
+.barx{display:flex;gap:7px;margin-top:10px;padding-top:9px;border-top:1px solid rgba(232,239,239,.9)}
+.barx span{flex:1 1 0;min-width:0;text-align:center;font-size:10.5px;color:var(--muted2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.barx span.sel{color:var(--ink);font-weight:700}
+.bignum{display:flex;align-items:baseline;gap:7px;margin-top:4px;flex-wrap:wrap}
+/* 只作用于直接子元素：之前写成 .bignum b，把 .dc 里的同比/环比数字也一起放大了 */
+.bignum>b{font-family:var(--en);font-weight:700;font-size:23px;line-height:1;font-variant-numeric:tabular-nums}
+.bignum .bu{font-size:11.5px;color:var(--muted2);font-weight:600}
+.bignum .dc{font-size:10px;padding:2px 6px;border-radius:8px;align-self:center}
+.bignum .dc b{font-size:10px}
+.lineleg{display:flex;align-items:center;gap:15px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.lineleg span{display:flex;align-items:center;gap:6px}
+.lineleg i{width:15px;height:3px;border-radius:2px}
+/* 走势图：点多的时候（月度 12 个点）不挤，超出就在卡内左右滑 */
+.chartbox{position:relative;flex:1 1 auto;min-height:262px;margin-top:6px;overflow-x:auto;overflow-y:hidden}
+.chartbox svg{width:100%;height:100%;display:block;overflow:visible}
+.chartbox::-webkit-scrollbar{height:7px}
+.chartbox::-webkit-scrollbar-thumb{background:#D6E3E1;border-radius:4px}
+.chartbox::-webkit-scrollbar-track{background:transparent}
+.scrollhint{font-size:10.5px;color:var(--muted2);margin-top:6px;display:flex;align-items:center;gap:6px}
+.scrollhint svg{width:12px;height:12px;flex:0 0 auto}
+.ringwrap.sm{width:154px;height:154px;margin-bottom:12px}
+.ringwrap.sm .rv2 b{font-size:32px}
+.ringwrap.sm .rv2 span{font-size:10px;margin-top:6px}
+
+/* ===== ④⑤⑦ 表格增强（表体样式沿用业务层 thead/tbody 规范） ===== */
+.tbl{border-radius:20px;padding:6px 20px 18px;background:rgba(255,255,255,.55);border:1px solid var(--line)}
+tbody tr.datarow.tot{background:rgba(0,138,168,.05)}
+tbody tr.datarow.tot td{font-weight:600;border-bottom:none}
+tbody tr.datarow.lead .pname{color:var(--ink2)}
+.owncell{display:flex;align-items:center;gap:10px}
+.owncell .rk{font-family:var(--en);font-size:11.5px;font-weight:700;color:var(--muted2);width:14px;flex:0 0 auto}
+.owncell .oav{width:32px;height:32px;border-radius:50%;color:#04312f;font-family:var(--en);font-weight:700;font-size:12px;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+/* 完成进度：与「关系温度」同一套实心分段语言 —— 绿=已回款 蓝=已签待回 灰=在谈未锁定。
+   0 值的段不画（V2：0 数据不画空条），所以线索为空时不会留一截空壳。 */
+.rail2{position:relative;height:26px;min-width:160px}
+.rail2 .rtrack{position:absolute;inset:0;border-radius:13px;background:#EEF3F2}
+.rail2 .rsegs{position:absolute;left:0;top:0;bottom:0;right:0;display:flex;gap:4px}
+.rail2 .rsegs>i{height:100%;border-radius:13px;width:0;transition:width .8s cubic-bezier(.2,.7,.2,1);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--en);font-weight:700;
+  font-size:10.5px;overflow:hidden}
+.rail2 .rtick{position:absolute;top:-5px;bottom:-5px;width:3px;border-radius:2px;background:var(--ink);z-index:2}
+.rail2.empty .rtrack{background:repeating-linear-gradient(115deg,#F1F5F4 0 7px,#E9EFEE 7px 14px)}
+.railempty{position:absolute;inset:0;display:flex;align-items:center;padding-left:14px;font-size:11px;color:var(--muted2)}
+.ratecell{display:flex;align-items:baseline;gap:5px;justify-content:flex-end;font-family:var(--en);font-weight:700;
+  font-size:15px;font-variant-numeric:tabular-nums}
+.tickleg{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:16px;font-size:11.5px;color:var(--muted)}
+.tickleg span{display:flex;align-items:center;gap:7px}
+.tickleg i{width:11px;height:11px;border-radius:3px}
+.tickleg i.tk{width:3px;height:13px;border-radius:2px;background:var(--ink)}
+.tickleg .note{color:var(--muted2)}
+.sharecell{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.sharebar{width:96px;height:8px;border-radius:5px;background:#EAF1F1;overflow:hidden;flex:0 0 auto}
+.sharebar>i{display:block;height:100%;border-radius:5px;width:0;transition:width .8s cubic-bezier(.2,.7,.2,1)}
+.cumcell{font-family:var(--en);font-weight:600;font-size:12.5px;color:var(--muted2);font-variant-numeric:tabular-nums}
+
+/* ===== ⑤ 客户集中度：点阵 + 指标卡 ===== */
+/* 整个模块加一层卡面，内层降一档，构成 24 / 20 / 16 的圆角与透明度阶梯 */
+.panel.carded{background:rgba(255,255,255,.42);backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);border:1px solid rgba(255,255,255,.72);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55)}
+.concbox{border-radius:20px;padding:22px;background:rgba(255,255,255,.6);border:1px solid var(--line)}
+.concgrid{display:grid;grid-template-columns:262px 1fr;gap:26px;align-items:stretch}
+.wfside,.wtside{display:flex;flex-direction:column;min-width:0}
+.waffle{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;width:242px}
+.waffle i{aspect-ratio:1;border-radius:4px;opacity:0;transform:scale(.5);
+  transition:opacity .35s ease,transform .35s cubic-bezier(.2,.7,.2,1)}
+.waffle.lit i{opacity:1;transform:none}
+.cmrow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.cm{border-radius:16px;padding:15px 16px;background:#fff;border:1px solid var(--line)}
+.cm .l{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);font-weight:600;flex-wrap:wrap}
+.cm .v{font-family:var(--en);font-weight:700;font-size:25px;margin-top:10px;font-variant-numeric:tabular-nums}
+.cm .h{font-size:11px;color:var(--muted2);margin-top:7px;line-height:1.65}
+
+/* ===== ⑥ 漏斗：节点圆 + 箭头上的转化率（.flow / .fnode 复用业务层） ===== */
+.fcircle .fu{font-family:var(--cn);font-size:10px;font-weight:600;opacity:.85;margin-top:1px}
+.fnode .fnote{font-size:10.5px;color:var(--muted2);line-height:1.5;max-width:118px}
+.flow .fcircle{flex-direction:column;font-size:18px;line-height:1.05}
+.farrow{flex-direction:column;gap:6px;padding-top:26px;height:auto}
+.farrow .fr{font-family:var(--en);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.farrow .frn{font-size:10px;color:var(--muted2);white-space:nowrap}
+.convgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px}
+.conv{border-radius:18px;padding:17px 18px 15px;background:rgba(255,255,255,.55);border:1px solid var(--line);
+  display:flex;flex-direction:column}
+.conv .ch{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;flex-wrap:wrap}
+.conv .ch s{width:8px;height:8px;border-radius:3px;text-decoration:none;flex:0 0 auto}
+.conv .cv{font-family:var(--en);font-weight:700;font-size:27px;margin-top:12px;font-variant-numeric:tabular-nums}
+.conv .cd{font-size:11px;color:var(--muted2);margin-top:6px;font-family:var(--en);font-variant-numeric:tabular-nums}
+.spark{position:relative;height:44px;margin-top:12px}
+.spark svg{width:100%;height:100%;overflow:visible;display:block}
+/* 末点单独用 HTML 画：SVG 用 preserveAspectRatio=none 拉伸后圆会变成椭圆 */
+.spark .sdot{position:absolute;width:10px;height:10px;border-radius:50%;background:#fff;
+  border:2.4px solid currentColor;transform:translate(-50%,-50%);box-sizing:border-box}
+.conv .cf{margin-top:auto;padding-top:11px;font-size:10.5px;color:var(--muted2);line-height:1.6}
+
+/* ===== ⑦ 近期动态 ===== */
+/* 一屏高度内左右等高：行高固定，两张卡都 min-height:0，各自的列表区 flex:1 内部滚动。
+   （之前用「右卡高度」反推左侧上限，而右卡又被左侧内容撑高 —— 循环依赖，永远不收敛。） */
+.actgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.02fr);gap:22px;
+  align-items:stretch;height:clamp(560px,72vh,820px)}
+.actgrid>div{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.actgrid>div>h3,.actgrid>div>.msub{flex:0 0 auto}
+.feedwrap{flex:1 1 auto;min-height:0;overflow-y:auto;margin:0 -4px;padding:0 4px}
+/* 日期分组：把 40 条流水按天收拢，先看哪天有事，再看那天有什么 */
+.fday{display:flex;align-items:baseline;gap:10px;padding:16px 2px 9px;position:sticky;top:0;z-index:2;
+  background:linear-gradient(180deg,rgba(247,251,250,.97) 70%,rgba(247,251,250,0));backdrop-filter:blur(6px)}
+.fday:first-child{padding-top:4px}
+.fday .fd1{font-family:var(--en);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.fday .fd2{font-size:11.5px;color:var(--muted2)}
+.fday .fdl{flex:1;height:1px;background:linear-gradient(90deg,rgba(231,239,239,.95),transparent)}
+.fev{display:grid;grid-template-columns:8px 1fr auto;gap:12px;align-items:flex-start;padding:11px 4px 11px 2px;
+  border-radius:12px;transition:.15s}
+.fev:hover{background:rgba(0,138,168,.05)}
+.fev .fdot{width:8px;height:8px;border-radius:50%;margin-top:6px}
+.fev .fmain{font-size:13.5px;font-weight:600;line-height:1.5}
+.fev .fmeta{font-size:11.5px;color:var(--muted2);margin-top:4px;line-height:1.6}
+.fev .fmeta .fk{font-weight:600}
+.fev .fam{font-family:var(--en);font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums;
+  white-space:nowrap;padding-top:1px}
+.fev .fam.zero{color:var(--muted2);font-weight:500}
+.feedmore{margin-top:12px;padding:10px;border-radius:13px;border:1px dashed var(--line);text-align:center;
+  font-size:12px;font-weight:600;color:var(--teal);cursor:pointer;transition:.15s}
+.feedmore:hover{background:rgba(0,138,168,.06);border-color:#bcd9d9}
+/* 阶段总览：一条分段条先给全局比例，再点图例看具体项目 */
+/* 卡片定高后，flex 子元素默认会被压缩 —— 分段条必须 flex:0 0 auto 才不会被挤成一条线 */
+.tempbar{display:flex;gap:5px;height:52px;margin-top:4px;flex:0 0 auto}
+.tempbar{align-items:flex-end;padding-top:8px}
+.tempbar>i{height:100%;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;
+  font-family:var(--en);font-weight:700;font-size:14px;width:0;cursor:pointer;
+  transition:width .8s cubic-bezier(.2,.7,.2,1);position:relative}
+/* 选中：只把那一段向上弹一下并保持满色，宽度不动 —— 换段时不会整条重排 */
+.tempbar>i .seghl{position:absolute;inset:0;border-radius:13px;background:inherit;
+  transition:transform .22s cubic-bezier(.2,.7,.2,1),box-shadow .22s,opacity .18s;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--en);font-weight:700;font-size:14px}
+.tempbar>i:hover .seghl{transform:translateY(-3px)}
+.tempbar.picking>i .seghl{opacity:.34}
+.tempbar.picking>i.on .seghl{opacity:1;transform:translateY(-8px);box-shadow:0 12px 22px -10px rgba(15,49,50,.5)}
+.templeg{display:flex;flex-direction:column;gap:2px;margin-top:16px;flex:0 0 auto}
+.tli{display:grid;grid-template-columns:12px 1fr auto auto;gap:12px;align-items:center;padding:11px 10px;
+  border-radius:13px;cursor:pointer;transition:.15s;border:1px solid transparent}
+.tli:hover{background:rgba(0,138,168,.05)}
+.tli.on{background:#fff;border-color:var(--line);box-shadow:0 6px 18px -14px rgba(15,49,50,.4)}
+.tli .tdot{width:12px;height:12px;border-radius:4px}
+.tli .tn{font-size:13px;font-weight:600}
+.tli .tp{font-family:var(--en);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.tli .tv{font-family:var(--en);font-weight:600;font-size:12px;color:var(--muted2);min-width:78px;text-align:right;
+  font-variant-numeric:tabular-nums}
+.stagescroll{flex:1 1 auto;min-height:0;overflow-y:auto;margin:16px -4px 0;padding:0 4px;
+  border-top:1px solid rgba(232,239,239,.9)}
+.stagecards{padding-top:14px}
+.scard{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 0;
+  border-bottom:1px dashed rgba(232,239,239,.95)}
+.scard:last-child{border-bottom:none}
+.scard .sn{font-size:13px;font-weight:600;line-height:1.5}
+.scard .sm{font-size:11.5px;color:var(--muted2);margin-top:3px}
+.scard .sa{font-family:var(--en);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;opacity:1}
+.feedwrap thead th{position:sticky;top:0;z-index:2;background:rgba(247,251,250,.96);backdrop-filter:blur(6px)}
+.evtag{display:inline-flex;align-items:center;justify-content:center;height:24px;border-radius:12px;padding:0 11px;
+  font-size:11.5px;font-weight:600}
+.daycell{font-family:var(--en);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.daycell s{display:block;text-decoration:none;font-family:var(--cn);font-size:10.5px;color:var(--muted2);font-weight:500;margin-top:3px}
+.stg{margin-bottom:20px}
+.stg:last-child{margin-bottom:0}
+.sh{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600}
+.sh s{width:8px;height:8px;border-radius:3px;text-decoration:none;flex:0 0 auto}
+.sh u{margin-left:auto;text-decoration:none;font-size:11px;color:var(--muted2);font-family:var(--en);font-weight:600;
+  font-variant-numeric:tabular-nums}
+.sbar{height:9px;border-radius:5px;background:#EDF3F2;margin-top:9px;overflow:hidden}
+.sbar>i{display:block;height:100%;border-radius:5px;width:0;transition:width .8s cubic-bezier(.2,.7,.2,1)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:12px;padding:5px 11px;font-size:11.5px;
+  background:rgba(255,255,255,.72);border:1px solid var(--line);color:var(--ink)}
+.chip s{text-decoration:none;font-size:10px;color:var(--muted2)}
+
+/* ===== 弹层：设定目标 / 原表填写提示 ===== */
+.maskbg{position:fixed;inset:0;background:rgba(11,40,38,.42);backdrop-filter:blur(3px);z-index:70;
+  display:flex;align-items:center;justify-content:center;padding:24px}
+.modal{width:min(700px,100%);max-height:86vh;display:flex;flex-direction:column;border-radius:24px;overflow:hidden;
+  background:linear-gradient(160deg,rgba(255,255,255,.96),rgba(255,255,255,.9));
+  backdrop-filter:blur(26px) saturate(160%);border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 30px 70px -26px rgba(15,50,40,.5)}
+.mhd2{display:flex;align-items:center;gap:11px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}
+.mhd2 h3{font-size:15px;font-weight:700}
+.mhd2 .x{margin-left:auto;width:30px;height:30px;border-radius:10px;border:1px solid var(--line);background:#fff;
+  color:var(--muted);font-size:17px;cursor:pointer;line-height:1}
+.mbd{padding:20px 22px;overflow-y:auto}
+.mft{display:flex;align-items:center;gap:10px;padding:15px 22px;border-top:1px solid var(--line)}
+.dqrow{display:grid;grid-template-columns:24px 1fr;gap:10px;padding:11px 0;border-bottom:1px solid rgba(236,243,243,.9);
+  font-size:12px;line-height:1.8}
+.dqrow s{text-decoration:none;font-family:var(--en);color:var(--muted2);font-weight:700}
+.frow{margin-bottom:16px}
+.frow>label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.frow>label i{font-style:normal;color:var(--muted2);font-weight:500;margin-left:6px}
+.frow input{width:100%;border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:13px;
+  font-family:var(--en);font-weight:600;background:#fff;color:var(--ink);outline:none;transition:.16s;
+  font-variant-numeric:tabular-nums}
+.frow input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(73,182,216,.16)}
+.qw{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.qw label{display:block;font-size:11px;color:var(--muted2);margin-bottom:4px;font-weight:600}
+.assign{display:grid;grid-template-columns:1fr 150px 62px;gap:12px;align-items:center;padding:10px 0;
+  border-bottom:1px solid rgba(236,243,243,.9)}
+.an{display:flex;align-items:center;gap:9px;font-size:12.5px}
+.an .oav{width:26px;height:26px;border-radius:50%;color:#04312f;font-family:var(--en);font-weight:700;font-size:11px;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ap{font-family:var(--en);font-size:12px;font-weight:700;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.hintbox{margin-top:14px;border-radius:14px;padding:11px 14px;background:rgba(0,138,168,.06);
+  border:1px solid rgba(0,138,168,.16);font-size:11.5px;color:var(--teal2);line-height:1.75}
+.hintbox.warnbox{background:#FDF1E3;border-color:#F0D6AE;color:#A8691C}
+.splitt{width:100%;border-collapse:collapse;margin-top:6px;font-size:11.5px}
+.splitt th{text-align:left;font-weight:700;color:var(--muted2);padding:0 8px 9px;border-bottom:1px solid var(--line)}
+.splitt td{padding:11px 8px;border-bottom:1px solid rgba(236,243,243,.9);font-family:var(--en);font-weight:600;
+  font-variant-numeric:tabular-nums}
+.splitt td:first-child{font-family:var(--cn);font-weight:500;color:var(--muted)}
+.soonlist{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px;width:100%;max-width:900px}
+.sl{border-radius:16px;padding:15px;background:rgba(255,255,255,.6);border:1px solid var(--line);text-align:left}
+.sl b{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
+.sl span{font-size:11.5px;color:var(--muted2);line-height:1.7}
+
+@media (max-width:1420px){
+  .actgrid{grid-template-columns:1fr}
+  .convgrid{grid-template-columns:repeat(2,1fr)}
+  .concgrid{grid-template-columns:1fr}
+}
+@media (max-width:1100px){
+  .cmrow{grid-template-columns:1fr}
+}
+
+.feedwrap::-webkit-scrollbar,.stagescroll::-webkit-scrollbar{width:7px}
+.feedwrap::-webkit-scrollbar-thumb,.stagescroll::-webkit-scrollbar-thumb{background:#D6E3E1;border-radius:4px}
+.feedwrap::-webkit-scrollbar-track,.stagescroll::-webkit-scrollbar-track{background:transparent}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== header：与业务层 Redesign 逐字同规范 ===== -->
+  <header class="topbar rv">
+    <div class="bcrumb">
+      <span class="bdot"></span>
+      <span class="bmain">Data_Board</span>
+      <span class="bsub">/ 管理层看板</span>
+    </div>
+    <div class="tb-right">
+      <button class="bellbtn" title="消息通知">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9z"/><path d="M10.3 20a2 2 0 003.4 0"/></svg>
+      </button>
+      <div class="me">
+        <div class="avatar" id="meAvatar">曾</div>
+        <span class="mename">Nico</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== tab + 控件同一行（V2 §3：控件不占独立行） ===== -->
+  <nav class="navrow rv" style="animation-delay:.02s">
+    <div class="tabs glass-lite">
+      <button class="tab on" data-lv="mgmt" onclick="switchLevel('mgmt')">管理层<span class="ten">Overview</span></button>
+      <button class="tab" data-lv="biz" onclick="switchLevel('biz')">业务层<span class="ten">Lead to Cash</span></button>
+      <button class="tab" data-lv="exec" onclick="switchLevel('exec')">执行层<span class="ten">Schedule</span></button>
+    </div>
+    <div class="ctrlrow">
+      <div class="datepill">数据截至 <b id="cutoff"></b></div>
+      <div class="datepill" style="background:#FDF1E3;border-color:#F3E0C4;color:#C77B26;cursor:help"
+           title="源表实际只从 2025-12 起。为了让原型的趋势图完整，2025 年补了 12 条演示记录，均带 demo 标记，2026 的真实数字未改。点「填报提示」看逐条明细。">
+        2025 为演示数据</div>
+      <button class="ghostbtn" id="exportBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+        导出
+      </button>
+      <button class="refreshbtn" id="refreshBtn" title="刷新数据">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== 视角切换 ===== -->
+  <div class="viewbar rv" style="animation-delay:.04s">
+    <div>
+      <h1>管理层看板<span class="ven">Management Layer</span></h1>
+      <div class="vd">目标走到哪、钱卡在哪一段、靠谁在扛、客户结构有多集中</div>
+    </div>
+    <button class="ghostbtn" id="goalBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>
+      设定目标
+    </button>
+  </div>
+
+  <div id="lv-mgmt">
+
+  <!-- ===== ① 经营简报：页面唯一玻璃卡 ===== -->
+  <section class="rv" style="animation-delay:.06s">
+    <div class="panel glass today">
+      <div class="sechead">
+        <div>
+          <h2>经营简报<span class="sen">Brief</span></h2>
+        </div>
+        <div class="ctrlrow">
+          <div class="segctrl" id="briefSeg"></div>
+          <div class="bnav" id="briefNav"></div>
+        </div>
+      </div>
+      <div class="todaygrid">
+        <div class="museside">
+          <div class="muse">
+            <img class="mbg" id="museBg" alt="" onerror="this.style.display='none'">
+            <div class="mscrim"></div>
+            <div>
+              <div class="btagline"><span class="idot"></span><span id="briefKicker">经营简报</span></div>
+              <div class="bhero" id="briefHero"></div>
+              <div class="bjudge"><span class="jt">判断</span><div class="jv" id="briefJudge"></div></div>
+            </div>
+            <div class="mfoot">
+              <span class="mdate" id="briefDate"></span>
+              <button class="mbtn" id="dqBtn">填报提示</button>
+            </div>
+          </div>
+        </div>
+        <div class="aiside">
+          <div class="sublabel">本期字段<span class="ct" id="briefCt"></span><span class="ln"></span></div>
+          <div class="slist" id="briefRows"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ② 经营目标达成情况 ===== -->
+  <section class="rv" style="animation-delay:.08s">
+    <div class="panel">
+      <div class="sechead">
+        <div>
+          <h2>经营目标达成情况<span class="sdi">口径：合同额按签订日、收款按到账日、毛利润＝合同额−外采预算、新客户按首次签约归属</span></h2>
+        </div>
+        <div class="filtrow" id="f-goal"></div>
+      </div>
+      <div class="kpigrid">
+        <div class="ringcard">
+          <div class="ringwrap" id="goalRing"></div>
+          <div class="rlbl">合同额达成率</div>
+          <div class="rsub" id="goalRsub"></div>
+        </div>
+        <div class="barcard">
+          <div class="knums" id="goalNums"></div>
+          <div class="sublabel">合同额目标结构拆解<span class="ln"></span></div>
+          <div class="stackwrap">
+            <div class="stack" id="goalStack"></div>
+            <div class="tmark" id="goalMark"><span id="goalMarkTxt"></span></div>
+          </div>
+          <div class="stackleg">
+            <span><i style="background:#1A9E4B"></i>已回款</span>
+            <span><i style="background:#008AA8"></i>已签待回</span>
+            <span><i style="background:repeating-linear-gradient(45deg,#EBA33F 0 5px,#F7D9A8 5px 10px)"></i>在谈线索（未落定）</span>
+            <span><i style="background:#EAF1F1"></i>缺口</span>
+          </div>
+          <div class="knote" id="goalNote"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ③ 经营财务 ===== -->
+  <section class="rv" style="animation-delay:.10s">
+    <div class="panel">
+      <div class="sechead">
+        <div>
+          <h2>经营财务<span class="sdi">合同按签订日、开票按开票日、回款按到账日、外采按付款日各自归属，四条口径互不换算</span></h2>
+          <div class="sd" id="finsub"></div>
+        </div>
+        <div class="filtrow" id="f-fin"></div>
+      </div>
+      <div class="knums" id="finNums"></div>
+      <div class="fingrid">
+        <div class="minicard">
+          <h3>钱走到哪一段了<span class="cnt" style="background:#E0F4F8;color:#0c7074" id="trendCt"></span></h3>
+          <div class="msub" id="trendsub"></div>
+          <div class="lineleg" id="lineleg"></div>
+          <div class="chartbox" id="trendbox"></div>
+          <div class="scrollhint" id="trendhint"></div>
+        </div>
+        <div class="minicard">
+          <h3>毛利润<span class="cnt" style="background:#DDF1F1;color:#0c7074">合同额 − 外采预算</span></h3>
+          <div class="msub" id="profitsub"></div>
+          <div class="bignum" id="profitNum"></div>
+          <div class="barwrap"><div class="bars" id="profitBars"></div><div class="barx" id="profitX"></div></div>
+          <div class="sublabel" style="margin:16px 0 10px">合同额结构<span class="ln"></span></div>
+          <div class="segbar" id="gprSeg"></div>
+          <div class="seglegend" id="gprLeg" style="gap:8px 22px"></div>
+        </div>
+        <div class="minicard">
+          <h3>毛利率<span class="cnt" style="background:#EAF6EE;color:#1A9E4B">毛利润 ÷ 合同额</span></h3>
+          <div class="msub" id="gprsub"></div>
+          <div class="bignum" id="gprNum"></div>
+          <div class="barwrap"><div class="bars" id="gprBars"></div><div class="barx" id="gprX"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ④ 团队经营 ===== -->
+  <section class="rv" style="animation-delay:.12s">
+    <div class="panel">
+      <div class="sechead">
+        <div>
+          <h2>团队经营<span class="sen">By BD</span></h2>
+          <div class="sd" id="teamsub"></div>
+        </div>
+        <div class="filtrow">
+          <button class="ghostbtn" id="teamReset">恢复源表顺序</button>
+          <span id="f-team" class="filtrow"></span>
+        </div>
+      </div>
+      <div class="tbl">
+        <table id="teamTable">
+          <thead><tr>
+            <th style="width:210px">BD</th>
+            <th>完成进度<span class="sa" style="opacity:.5">同一刻度</span></th>
+            <th class="num sortable" data-sort="tgt">目标<span class="sa">↕</span></th>
+            <th class="num sortable" data-sort="amt">已签约<span class="sa">↕</span></th>
+            <th class="num sortable" data-sort="rec">已回款<span class="sa">↕</span></th>
+            <th class="num sortable" data-sort="leadA">在谈线索<span class="sa">↕</span></th>
+            <th class="num sortable" data-sort="rate">完成率<span class="sa">↕</span></th>
+            <th class="caret"></th>
+          </tr></thead>
+          <tbody id="teamBody"></tbody>
+        </table>
+      </div>
+      <div class="tickleg" id="teamLeg"></div>
+    </div>
+  </section>
+
+  <!-- ===== ⑤ 客户集中度 ===== -->
+  <section class="rv" style="animation-delay:.14s">
+    <div class="panel carded">
+      <div class="sechead">
+        <div>
+          <h2>客户集中度<span class="sen">Concentration</span></h2>
+          <div class="sd" id="concsub"></div>
+        </div>
+        <div class="filtrow">
+          <div class="segctrl" id="concbasis"></div>
+          <span id="f-conc" class="filtrow"></span>
+        </div>
+      </div>
+      <div class="concbox"><div class="concgrid">
+        <div class="wfside">
+          <div class="sublabel">一颗 = 1%<span class="ln"></span></div>
+          <div class="waffle" id="waffle"></div>
+        </div>
+        <div class="wtside">
+          <div class="sublabel">客户明细<span class="ct" id="concCt"></span><span class="ln"></span></div>
+          <table id="concTable">
+            <thead><tr>
+              <th>客户</th>
+              <th>类型</th>
+              <th class="num sortable" data-sort="a">金额<span class="sa">↕</span></th>
+              <th class="num">占比</th>
+              <th class="num">累计</th>
+            </tr></thead>
+            <tbody id="concBody"></tbody>
+          </table>
+        </div>
+      </div></div>
+      <div class="cmrow" id="concmet"></div>
+      <div class="knote" id="wfoot" style="margin-top:18px"></div>
+    </div>
+  </section>
+
+  <!-- ===== ⑥ 转化漏斗 ===== -->
+  <section class="rv" style="animation-delay:.16s">
+    <div class="panel">
+      <div class="sechead">
+        <div>
+          <h2>转化漏斗<span class="sen">Funnel</span></h2>
+          <div class="sd" id="funsub"></div>
+        </div>
+        <div class="filtrow">
+          <div class="tsel" id="funbd"></div>
+          <span id="f-fun" class="filtrow"></span>
+        </div>
+      </div>
+      <div class="flowbox">
+        <div class="flow" id="fflow"></div>
+        <div class="calnote">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+          <span id="funnote"></span>
+        </div>
+      </div>
+      <div class="convgrid" id="convgrid"></div>
+    </div>
+  </section>
+
+  <!-- ===== ⑦ 近期动态 ===== -->
+  <section class="rv" style="animation-delay:.18s">
+    <div class="panel">
+      <div class="sechead">
+        <div>
+          <h2>近期动态<span class="sen">Activity</span></h2>
+          <div class="sd" id="feedsub"></div>
+        </div>
+        <div class="segctrl" id="feedfilter"></div>
+      </div>
+      <div class="actgrid">
+        <div class="minicard" id="feedCard">
+          <h3>发生了什么<span class="cnt" style="background:#E0F4F8;color:#0c7074" id="feedCt"></span></h3>
+          <div class="msub">按天收拢的状态变更，先看哪天有事，再看那天发生了什么</div>
+          <div class="feedwrap" id="feedwrap"></div>
+        </div>
+        <div class="minicard" id="stageCard">
+          <h3>项目走到哪一步</h3>
+          <div class="msub" id="wipnote"></div>
+          <div class="tempbar" id="stageBar"></div>
+          <div class="templeg" id="stageLeg"></div>
+          <div class="stagescroll"><div class="stagecards" id="stageCards"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </div>
+  <div id="lv-exec" class="hide"></div>
+</div>
+<div id="mask"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+
+const RAW = {"rows": [{"id": "L001", "name": "波司登品牌管理中心 社媒内容制作", "client": "杨小书", "bd": "", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-07-17", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L002", "name": "LG Whoo新品assets制作", "client": "Jocelyn", "bd": "Tori", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-07-17", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 100000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L003", "name": "FatPho大發越南粉 社交媒体代运营", "client": "Leon", "bd": "Tori", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-07-17", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 180000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L004", "name": "曹宝记2026年9月impact大会视频", "client": "曹宝记", "bd": "ZZ", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-05-22", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 80000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L005", "name": "蔚来汽车入库", "client": "蔚来", "bd": "ZZ", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-05-19", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L006", "name": "中海地产（珠海）", "client": "中海地产", "bd": "Nico", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "朋友推荐", "note": "", "lead": "2026-05-15", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 30000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L007", "name": "维他柠檬茶入库", "client": "维他柠檬茶", "bd": "Nico", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "朋友推荐", "note": "待招标", "lead": "2026-05-12", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L008", "name": "特美刻全案营销", "client": "特美刻", "bd": "Harrison", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "内部方案讨论中，待客户补充素材", "lead": "2026-05-28", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L009", "name": "嘉士伯啤酒（联合竞标入库）", "client": "嘉士伯", "bd": "Nico", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "朋友推荐", "note": "待招标", "lead": "2026-05-28", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L010", "name": "宝矿力水特", "client": "宝矿力", "bd": "Nico", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "朋友推荐", "note": "待招标", "lead": "2026-05-28", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L011", "name": "喜茶", "client": "喜茶", "bd": "Nico", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "等待组织workshop", "lead": "2026-05-25", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L012", "name": "绫致集团（丹麦）", "client": "绫致集团", "bd": "Nico", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "待招标", "lead": "2026-05-25", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L013", "name": "MG汽车", "client": "MG汽车", "bd": "ZZ", "ae": "", "type": "第三方", "ctype": "新开发客户", "source": "自己开发", "note": "跟核心代理接洽沟通需求中", "lead": "2026-06-02", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L014", "name": "奇正藏药 短剧&TVC制作（竞标）", "client": "奇正藏药", "bd": "Nico", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "朋友推荐", "note": "准备竞标文档，预计本月开标", "lead": "2026-06-22", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 550000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L015", "name": "广汽传奇社媒短视频（中东市场）", "client": "Boopin Dubai", "bd": "Nico", "ae": "", "type": "第三方", "ctype": "新开发客户", "source": "自己开发", "note": "待项目启动", "lead": "2026-06-01", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L016", "name": "致美斋-短剧项目", "client": "致美斋", "bd": "Nico", "ae": "", "type": "第三方", "ctype": "新开发客户", "source": "朋友推荐", "note": "本周董事长会面，预计本月可以启动", "lead": "2026-07-12", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 200000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L017", "name": "汇美集团- IP孵化项目", "client": "汇美集团", "bd": "Nico", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "朋友推荐", "note": "月底提案", "lead": "2026-07-12", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 450000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L018", "name": "智能手表TVC项目", "client": "Boopin Dubai", "bd": "Nico", "ae": "", "type": "第三方", "ctype": "新开发客户", "source": "朋友推荐", "note": "待品牌确认需求后，启动制作（已经匹配对应外包团队）", "lead": "2026-07-12", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 100000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L019", "name": "香港马会Demo片", "client": "友友传媒", "bd": "Nico", "ae": "", "type": "第三方", "ctype": "老客户续约", "source": "自己开发", "note": "待代理确认脚本后，进入执行制作", "lead": "2026-07-12", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 5000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L020", "name": "宠物智能项圈Assets制作", "client": "广和通", "bd": "Tori", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "待确认报价", "lead": "2026-07-13", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 150000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L021", "name": "新秀丽小红书品牌素材", "client": "新秀丽", "bd": "Rebecca", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "AI新品样片素材brief已收到，与品牌沟通报价中", "lead": "2026-07-09", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 250000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L022", "name": "优色林", "client": "优色林", "bd": "Rebecca", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "已电话介绍，等待品牌转介服务商", "lead": "2026-07-08", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L023", "name": "万博宣伟-万事达pr宣传图文素材", "client": "万博宣伟", "bd": "Rebecca", "ae": "", "type": "第三方", "ctype": "新开发客户", "source": "自己开发", "note": "等待客户需求反馈", "lead": "2026-07-09", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L024", "name": "因赛集团 （制作供应商入库）", "client": "因赛", "bd": "Tori", "ae": "", "type": "第三方", "ctype": "新开发客户", "source": "自己开发", "note": "7.10入库", "lead": "2026-07-13", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L025", "name": "元隆雅图（制作供应商入库）", "client": "谦玛广告", "bd": "Tori", "ae": "", "type": "第三方", "ctype": "新开发客户", "source": "自己开发", "note": "7.20完成入库谈判", "lead": "2026-07-20", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 0, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L026", "name": "Chou & Friends（周同学）", "client": "广州智真", "bd": "Nico", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "先提案，根据策略确定内容制作框架", "lead": "2026-07-15", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 400000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "L027", "name": "WOLFSKIN狼爪", "client": "狼爪", "bd": "Rebecca", "ae": "", "type": "直客", "ctype": "新开发客户", "source": "朋友推荐", "note": "拍摄项目，等待品牌更新新品清单、拍摄场景", "lead": "2026-07-22", "appr": "", "sign": "", "lost": "", "why": "", "status": "在谈线索", "due": "", "done": "", "amt": 100000, "extPlan": 0, "gpr": null, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "P028", "name": "名创优品x Hello Kitty 传统动画制作", "client": "名创优品", "bd": "Nico", "ae": "陈采姿", "type": "直客", "ctype": "", "source": "", "note": "", "lead": "2026-07-17", "appr": "2026-07-17", "sign": "", "lost": "", "why": "", "status": "项目制作中", "amt": 22000, "due": "", "done": "2026-09-04", "extPlan": 0, "gpr": 100.0, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "P029", "name": "名创优品 YOYO生日会制作项目", "client": "名创优品", "bd": "Nico", "ae": "陈采姿", "type": "直客", "ctype": "老客户续约", "source": "自己开发", "note": "", "lead": "2026-07-08", "appr": "2026-07-08", "sign": "2026-07-13", "lost": "", "why": "", "status": "项目制作中", "amt": 75000, "due": "", "done": "2026-07-24", "extPlan": 14000, "gpr": 81.3, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "P030", "name": "思菲其30s TVC项目", "client": "东莞众羽", "bd": "Nico", "ae": "陈采姿", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-07-01", "appr": "2026-07-01", "sign": "2026-07-01", "lost": "", "why": "", "status": "项目制作中", "amt": 165000, "due": "", "done": "2026-07-31", "extPlan": 100000, "gpr": 39.4, "invs": [{"d": "2026-06-30", "a": 99000.0}], "recs": [{"d": "2026-07-16", "a": 99000.0}], "exts": [], "nodes": []}, {"id": "P031", "name": "麦当劳 暑期动画制作", "client": "才殿传媒", "bd": "Yico", "ae": "", "type": "第三方", "ctype": "老客户续约", "source": "内部推荐", "note": "", "lead": "2026-06-22", "appr": "", "sign": "", "lost": "", "why": "", "status": "立项中", "amt": 20000, "due": "", "done": "2026-07-31", "extPlan": 0, "gpr": 100.0, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "P032", "name": "周同学动态海报制作", "client": "未填客户", "bd": "Nico", "ae": "曾磊 Nico", "type": "直客", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-06-18", "appr": "2026-06-18", "sign": "2026-06-26", "lost": "", "why": "", "status": "项目制作中", "amt": 1500, "due": "", "done": "2026-06-26", "extPlan": 0, "gpr": 100.0, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "P033", "name": "TPC2026 impact week", "client": "苏州音昱", "bd": "ZZ", "ae": "陈采姿", "type": "直客", "ctype": "老客户续约", "source": "其他", "note": "", "lead": "2026-06-11", "appr": "2026-06-11", "sign": "", "lost": "", "why": "", "status": "项目制作中", "amt": 90000, "due": "", "done": "2026-09-04", "extPlan": 0, "gpr": 100.0, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "P034", "name": "科沃斯TVC转绘项目", "client": "广州梵也", "bd": "Nico", "ae": "陈采姿", "type": "第三方", "ctype": "老客户续约", "source": "自己开发", "note": "", "lead": "2026-06-01", "appr": "2026-06-01", "sign": "2026-06-05", "lost": "", "why": "", "status": "项目制作中", "amt": 36040, "due": "2026-07-15", "done": "2026-06-18", "extPlan": 2400, "gpr": 93.3, "invs": [{"d": "2026-06-25", "a": 36040.0}], "recs": [], "exts": [], "nodes": []}, {"id": "P035", "name": "MINISOx世界杯 TVC制作", "client": "广州梵也", "bd": "Nico", "ae": "陈采姿", "type": "第三方", "ctype": "老客户续约", "source": "自己开发", "note": "", "lead": "2026-05-25", "appr": "2026-05-25", "sign": "2026-06-01", "lost": "", "why": "", "status": "项目已完成，待付款", "amt": 50000, "due": "2026-07-15", "done": "2026-06-09", "extPlan": 0, "gpr": 100.0, "invs": [{"d": "2026-06-15", "a": 50000.0}], "recs": [], "exts": [], "nodes": []}, {"id": "P036", "name": "百利猫粮-AI 动画风格制作需求", "client": "广州汇萨", "bd": "Nico", "ae": "胡蓉 Yico", "type": "第三方", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-05-23", "appr": "2026-05-23", "sign": "2026-05-23", "lost": "", "why": "", "status": "项目制作中", "amt": 95500, "due": "", "done": "", "extPlan": 0, "gpr": 100.0, "invs": [{"d": "2026-06-26", "a": 95500.0}], "recs": [{"d": "2026-07-02", "a": 38200.0}], "exts": [], "nodes": []}, {"id": "P037", "name": "MINISO  x YOYO", "client": "广州梵也", "bd": "Nico", "ae": "张泽 ZZ,王雨涵 Norah", "type": "第三方", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-05-09", "appr": "2026-05-09", "sign": "2026-05-09", "lost": "", "why": "", "status": "项目制作中", "amt": 110000, "due": "", "done": "", "extPlan": 1378, "gpr": 98.7, "invs": [{"d": "2026-05-29", "a": 110000.0}], "recs": [{"d": "2026-06-18", "a": 44000.0}], "exts": [], "nodes": []}, {"id": "P038", "name": "MINISOx Fifa", "client": "名创优品", "bd": "Nico", "ae": "胡蓉 Yico", "type": "直客", "ctype": "老客户续约", "source": "自己开发", "note": "", "lead": "2026-05-08", "appr": "2026-05-08", "sign": "2026-05-08", "lost": "", "why": "", "status": "项目已完成，待付款", "amt": 49290, "due": "2026-05-30", "done": "", "extPlan": 0, "gpr": 100.0, "invs": [{"d": "2026-05-18", "a": 49290.0}], "recs": [{"d": "2026-05-28", "a": 49290.0}], "exts": [], "nodes": []}, {"id": "P039", "name": "MINISOX蒙奇奇", "client": "名创优品", "bd": "Nico", "ae": "王雨涵 Norah", "type": "直客", "ctype": "老客户续约", "source": "自己开发", "note": "", "lead": "2026-04-24", "appr": "2026-04-24", "sign": "2026-04-24", "lost": "", "why": "", "status": "项目已完成，待付款", "amt": 49290, "due": "2026-06-14", "done": "", "extPlan": 1000, "gpr": 98.0, "invs": [{"d": "2026-05-18", "a": 49290.0}], "recs": [{"d": "2026-05-21", "a": 49290.0}], "exts": [], "nodes": []}, {"id": "P040", "name": "动量常数Intro-AI视频创意与执行项目", "client": "鸿鹄汇", "bd": "ZZ", "ae": "张泽 ZZ", "type": "直客", "ctype": "新开发客户", "source": "公司项目", "note": "", "lead": "2026-04-15", "appr": "2026-04-15", "sign": "2026-04-23", "lost": "", "why": "", "status": "已签订合同，已付款", "amt": 30000, "due": "2026-05-31", "done": "2026-06-18", "extPlan": 3000, "gpr": 90.0, "invs": [{"d": "2026-05-28", "a": 30000.0}], "recs": [{"d": "2026-04-30", "a": 30000.0}], "exts": [{"d": "2026-06-05", "a": 3000.0, "sup": "外部团队"}], "nodes": []}, {"id": "P041", "name": "麦当劳 61动画制作", "client": "才殿传媒", "bd": "Yico", "ae": "王雨涵 Norah", "type": "第三方", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-04-13", "appr": "2026-04-13", "sign": "2026-03-15", "lost": "", "why": "", "status": "项目制作中", "amt": 20000, "due": "", "done": "", "extPlan": 0, "gpr": 100.0, "invs": [], "recs": [], "exts": [], "nodes": []}, {"id": "P042", "name": "迪士尼x F1 联名预热视频", "client": "名创优品", "bd": "Nico", "ae": "王雨涵 Norah", "type": "直客", "ctype": "老客户续约", "source": "自己开发", "note": "", "lead": "2026-03-11", "appr": "2026-03-11", "sign": "2026-03-11", "lost": "", "why": "", "status": "项目已完成，待付款", "amt": 30000, "due": "2026-03-20", "done": "", "extPlan": 0, "gpr": 100.0, "invs": [{"d": "2026-03-30", "a": 30000.0}], "recs": [{"d": "2026-04-07", "a": 30000.0}], "exts": [], "nodes": []}, {"id": "P043", "name": "TCL ×米兰冬奥品牌TVC", "client": "意山海", "bd": "Nico", "ae": "王雨涵 Norah", "type": "第三方", "ctype": "新开发客户", "source": "自己开发", "note": "", "lead": "2026-01-13", "appr": "2026-01-13", "sign": "2026-01-13", "lost": "", "why": "", "status": "项目已完成，待付款", "amt": 156840, "due": "2026-03-14", "done": "", "extPlan": 45000, "gpr": 71.3, "invs": [{"d": "2026-02-02", "a": 58800.0}, {"d": "2026-03-09", "a": 58800.0}, {"d": "2026-05-08", "a": 39240.0}], "recs": [{"d": "2026-02-13", "a": 58800.0}], "exts": [], "nodes": []}, {"id": "P044", "name": "毛戈平美肌粉膏AI视频", "client": "毛戈平", "bd": "Norah", "ae": "王雨涵 Norah", "type": "直客", "ctype": "老客户续约", "source": "自己开发", "note": "", "lead": "2025-12-25", "appr": "2025-12-25", "sign": "2025-12-25", "lost": "", "why": "", "status": "项目已完成，已付款", "amt": 11000, "due": "", "done": "", "extPlan": 0, "gpr": 100.0, "invs": [{"d": "2026-04-02", "a": 11000.0}], "recs": [{"d": "2026-04-14", "a": 11000.0}], "exts": [], "nodes": []}, {"id": "P045", "name": "星巴克Social-3月Spring1-樱花季物料制作", "client": "星巴克", "bd": "Harrison", "ae": "王雨涵 Norah,胡蓉 Yico", "type": "直客", "ctype": "老客户续约", "source": "自己开发", "note": "", "lead": "2025-12-21", "appr": "2025-12-21", "sign": "2026-03-23", "lost": "", "why": "", "status": "项目已完成，已付款", "amt": 108756, "due": "", "done": "", "extPlan": 47600, "gpr": 56.2, "invs": [{"d": "2026-03-27", "a": 108756.0}], "recs": [{"d": "2026-04-22", "a": 108756.0}], "exts": [], "nodes": []}, {"id": "P046", "name": "星巴克早餐策略梳理&创意规划", "client": "星巴克", "bd": "Harrison", "ae": "胡蓉 Yico", "type": "直客", "ctype": "老客户续约", "source": "自己开发", "note": "", "lead": "2025-12-02", "appr": "2025-12-02", "sign": "2026-01-14", "lost": "", "why": "", "status": "项目已完成，已付款", "amt": 48000, "due": "", "done": "", "extPlan": 43200, "gpr": 10.0, "invs": [{"d": "2026-01-28", "a": 48000.0}], "recs": [{"d": "2026-02-25", "a": 48000.0}], "exts": [{"d": "2026-04-23", "a": 43200.0, "sup": "外部团队"}], "nodes": []}, {"id": "P047", "name": "Yogo robot出海项目", "client": "深圳启罗", "bd": "Harrison", "ae": "胡蓉 Yico", "type": "第三方", "ctype": "新开发客户", "source": "朋友推荐", "note": "", "lead": "2025-12-01", "appr": "2025-12-01", "sign": "2026-01-31", "lost": "", "why": "", "status": "项目已完成，已付款", "amt": 289100, "due": "", "done": "", "extPlan": 78960, "gpr": 72.7, "invs": [{"d": "2026-03-30", "a": 20000.0}, {"d": "2026-05-28", "a": 269100.0}], "recs": [{"d": "2026-03-31", "a": 20000.0}, {"d": "2026-05-08", "a": 269100.0}], "exts": [{"d": "2025-12-19", "a": 33960.0, "sup": "外部团队"}], "nodes": []}, {"id": "P048", "name": "曹宝记文化节", "client": "苏州音昱", "bd": "Harrison", "ae": "胡蓉 Yico", "type": "直客", "ctype": "老客户续约", "source": "其他", "note": "", "lead": "2026-03-03", "appr": "2026-03-03", "sign": "2026-03-12", "lost": "", "why": "", "status": "项目已完成，待付款", "amt": 100000, "due": "", "done": "", "extPlan": 0, "gpr": 100.0, "invs": [], "recs": [], "exts": [], "nodes": []}], "dq": ["线索「波司登品牌管理中心 社媒内容制作」没填项目 BD，团队经营里不会计入任何人", "周同学动态海报制作 没填项目 BD，已按 AE（曾磊 Nico）归属", "TPC2026 impact week 有合同金额 90,000 但既无签订时间也无开票回款，暂不计入签约", "百利猫粮-AI 动画风格制作需求 没填合同签订时间，已按项目启动日 2026-05-23 计入签约", "MINISO  x YOYO 没填合同签订时间，已按项目启动日 2026-05-09 计入签约", "曹宝记文化节 项目启动日期填的是 2025-03-03，与项目周期归属 2026 Q1 差了一年以上，已按 2026-03-03 处理", "动量常数Intro-AI视频创意与执行项目 的回款日期 2026-04-30 早于开票日期 2026-05-28，单据顺序需核对", "14 条线索没填预测合同金额（波司登品牌管理中心 社媒内容制作、蔚来汽车入库、维他柠檬茶入库 等），金额口径的漏斗转化率会偏高"]};
+/* ===================== 2025 演示数据（非源表） =====================
+   源表实际只从 2025-12 起，年度 / 季度图只有一根柱、趋势看不出形状。
+   下面 12 条纯粹为让原型图表完整而补，每条带 demo:1，页头常驻标注、填报提示里逐条列出。
+   全部日期锁死在 2025 内（含开票与回款），所以 2026 的真实数字一分未动。
+   上线前删掉 DEMO2025 与下一行 push 即可回到纯源表。 */
+const DEMO2025 = [
+  {"id":"D001","name":"星巴克 2025 春季 Social 物料","client":"星巴克","bd":"Nico","ae":"Norah","type":"直客","ctype":"新开发客户","source":"自己开发","note":"","lead":"2025-01-08","appr":"2025-01-15","sign":"2025-01-22","lost":"","why":"","status":"项目已完成，已付款","due":"2025-03-06","done":"2025-03-06","amt":128000,"extPlan":18000,"gpr":85.9,"invs":[{"d":"2025-02-05","a":128000}],"recs":[{"d":"2025-03-06","a":128000}],"exts":[{"d":"2025-02-05","a":18000}],"nodes":[],"demo":1},
+  {"id":"D002","name":"MINISO 2025 新春 IP 联名短片","client":"名创优品","bd":"Tori","ae":"Yico","type":"直客","ctype":"新开发客户","source":"自己开发","note":"","lead":"2025-01-20","appr":"2025-02-03","sign":"2025-02-12","lost":"","why":"","status":"项目已完成，已付款","due":"2025-04-02","done":"2025-04-02","amt":216000,"extPlan":42000,"gpr":80.6,"invs":[{"d":"2025-03-01","a":216000}],"recs":[{"d":"2025-04-02","a":216000}],"exts":[{"d":"2025-03-01","a":42000}],"nodes":[],"demo":1},
+  {"id":"D003","name":"蜜雪冰城 品牌宣传片","client":"蜜雪冰城","bd":"Harrison","ae":"Nico","type":"直客","ctype":"新开发客户","source":"朋友推荐","note":"","lead":"2025-02-14","appr":"2025-03-04","sign":"2025-03-18","lost":"","why":"","status":"项目已完成，已付款","due":"2025-05-12","done":"2025-05-12","amt":305000,"extPlan":76000,"gpr":75.1,"invs":[{"d":"2025-04-10","a":305000}],"recs":[{"d":"2025-05-12","a":305000}],"exts":[{"d":"2025-04-10","a":76000}],"nodes":[],"demo":1},
+  {"id":"D004","name":"Yogo robot 2025 海外发布会","client":"深圳启罗","bd":"Yico","ae":"Yico","type":"第三方","ctype":"新开发客户","source":"自己开发","note":"","lead":"2025-03-02","appr":"2025-03-20","sign":"2025-04-01","lost":"","why":"","status":"项目已完成，已付款","due":"2025-06-05","done":"2025-06-05","amt":188000,"extPlan":35000,"gpr":81.4,"invs":[{"d":"2025-05-06","a":188000}],"recs":[{"d":"2025-06-05","a":188000}],"exts":[{"d":"2025-05-06","a":35000}],"nodes":[],"demo":1},
+  {"id":"D005","name":"毛戈平 618 美妆种草视频","client":"毛戈平","bd":"Norah","ae":"Norah","type":"直客","ctype":"新开发客户","source":"自己开发","note":"","lead":"2025-04-05","appr":"2025-04-18","sign":"2025-04-28","lost":"","why":"","status":"项目已完成，已付款","due":"2025-07-01","done":"2025-07-01","amt":96000,"extPlan":12000,"gpr":87.5,"invs":[{"d":"2025-06-02","a":96000}],"recs":[{"d":"2025-07-01","a":96000}],"exts":[{"d":"2025-06-02","a":12000}],"nodes":[],"demo":1},
+  {"id":"D006","name":"梵也 夏季服饰 TVC","client":"广州梵也","bd":"ZZ","ae":"Tori","type":"第三方","ctype":"新开发客户","source":"朋友推荐","note":"","lead":"2025-04-22","appr":"2025-05-09","sign":"2025-05-20","lost":"","why":"","status":"项目已完成，已付款","due":"2025-07-24","done":"2025-07-24","amt":242000,"extPlan":58000,"gpr":76.0,"invs":[{"d":"2025-06-25","a":242000}],"recs":[{"d":"2025-07-24","a":242000}],"exts":[{"d":"2025-06-25","a":58000}],"nodes":[],"demo":1},
+  {"id":"D007","name":"众羽 户外装备 产品片","client":"东莞众羽","bd":"Nico","ae":"Nico","type":"直客","ctype":"新开发客户","source":"自己开发","note":"","lead":"2025-05-18","appr":"2025-06-02","sign":"2025-06-16","lost":"","why":"","status":"项目已完成，已付款","due":"2025-08-19","done":"2025-08-19","amt":164000,"extPlan":31000,"gpr":81.1,"invs":[{"d":"2025-07-20","a":164000}],"recs":[{"d":"2025-08-19","a":164000}],"exts":[{"d":"2025-07-20","a":31000}],"nodes":[],"demo":1},
+  {"id":"D008","name":"意山海 品牌升级 全案","client":"意山海","bd":"Tori","ae":"Yico","type":"第三方","ctype":"新开发客户","source":"自己开发","note":"","lead":"2025-06-10","appr":"2025-06-28","sign":"2025-07-10","lost":"","why":"","status":"项目已完成，已付款","due":"2025-09-16","done":"2025-09-16","amt":278000,"extPlan":64000,"gpr":77.0,"invs":[{"d":"2025-08-15","a":278000}],"recs":[{"d":"2025-09-16","a":278000}],"exts":[{"d":"2025-08-15","a":64000}],"nodes":[],"demo":1},
+  {"id":"D009","name":"特美刻 秋冬保温杯 电商素材","client":"特美刻","bd":"Rebecca","ae":"Norah","type":"直客","ctype":"新开发客户","source":"朋友推荐","note":"","lead":"2025-07-08","appr":"2025-07-25","sign":"2025-08-06","lost":"","why":"","status":"项目已完成，已付款","due":"2025-10-09","done":"2025-10-09","amt":132000,"extPlan":26000,"gpr":80.3,"invs":[{"d":"2025-09-10","a":132000}],"recs":[{"d":"2025-10-09","a":132000}],"exts":[{"d":"2025-09-10","a":26000}],"nodes":[],"demo":1},
+  {"id":"D010","name":"星巴克 2025 圣诞档 内容套装","client":"星巴克","bd":"Nico","ae":"Norah","type":"直客","ctype":"老客户续约","source":"自己开发","note":"","lead":"2025-08-20","appr":"2025-09-05","sign":"2025-09-18","lost":"","why":"","status":"项目已完成，已付款","due":"2025-11-20","done":"2025-11-20","amt":196000,"extPlan":34000,"gpr":82.7,"invs":[{"d":"2025-10-22","a":196000}],"recs":[{"d":"2025-11-20","a":196000}],"exts":[{"d":"2025-10-22","a":34000}],"nodes":[],"demo":1},
+  {"id":"D011","name":"嘉士伯 世界杯预热 短视频","client":"嘉士伯","bd":"Harrison","ae":"Nico","type":"直客","ctype":"新开发客户","source":"自己开发","note":"","lead":"2025-09-14","appr":"2025-10-06","sign":"2025-10-20","lost":"","why":"","status":"项目已完成，已付款","due":"2025-12-18","done":"2025-12-18","amt":354000,"extPlan":92000,"gpr":74.0,"invs":[{"d":"2025-11-25","a":354000}],"recs":[{"d":"2025-12-18","a":354000}],"exts":[{"d":"2025-11-25","a":92000}],"nodes":[],"demo":1},
+  {"id":"D012","name":"MINISO 2026 年货节 预热物料","client":"名创优品","bd":"Tori","ae":"Yico","type":"直客","ctype":"老客户续约","source":"朋友推荐","note":"","lead":"2025-10-30","appr":"2025-11-18","sign":"2025-12-02","lost":"","why":"","status":"项目已完成，已付款","due":"2025-12-26","done":"2025-12-26","amt":148000,"extPlan":29000,"gpr":80.4,"invs":[{"d":"2025-12-08","a":148000}],"recs":[{"d":"2025-12-26","a":148000}],"exts":[{"d":"2025-12-08","a":29000}],"nodes":[],"demo":1}
+];
+DEMO2025.forEach(r => RAW.rows.push(r));
+
+const DATA = RAW.rows, DQ = RAW.dq;
+/* ===================== 基础工具 ===================== */
+const TODAY = "2026-08-10";   /* 数据截至日 */
+const $ = s => document.querySelector(s);
+const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
+const yOf = d => d.slice(0, 4);
+const mOf = d => d.slice(0, 7);
+const qOf = d => d.slice(0, 4) + "Q" + (Math.floor((+d.slice(5, 7) - 1) / 3) + 1);
+const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
+const pad = n => String(n).padStart(2, "0");
+const eom = (y, m) => new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+const addD = (ds, n) => { const d = new Date(ds + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const cn = d => d ? (+d.slice(5, 7)) + "/" + (+d.slice(8, 10)) : "";
+const cny = d => d ? d.slice(0, 4) + "/" + (+d.slice(5, 7)) + "/" + (+d.slice(8, 10)) : "";
+
+function money(n, dp) {
+  if (n == null || isNaN(n)) return "—";
+  const s = n < 0 ? "-" : ""; n = Math.abs(n);
+  if (n >= 1e8) return s + "¥" + (n / 1e8).toFixed(2) + "亿";
+  if (n >= 1e4) return s + "¥" + (n / 1e4).toFixed(dp == null ? 1 : dp) + "万";
+  return s + "¥" + Math.round(n).toLocaleString();
+}
+const wan = n => (n == null || isNaN(n)) ? "—" : (n >= 1e6 ? (n / 1e4).toFixed(0) : (n / 1e4).toFixed(1));
+const pct = (a, b) => (!b ? "—" : (a / b * 100).toFixed(1) + "%");
+const pctn = (a, b) => (!b ? 0 : a / b * 100);
+function delta(cur, prev) {
+  if (prev == null || prev === 0) return { txt: "—", cls: "flat", v: null, none: 1 };
+  const v = (cur - prev) / Math.abs(prev) * 100;
+  const cls = v > 0.5 ? "up" : (v < -0.5 ? "down" : "flat");
+  if (v > 400) { const x = cur / prev; return { txt: "×" + (x >= 10 ? x.toFixed(0) : x.toFixed(1)), cls, v, mult: 1 }; }
+  return { txt: (v >= 0 ? "+" : "") + v.toFixed(1) + "%", cls, v };
+}
+function deltaPP(cur, prev) {
+  if (prev == null || isNaN(prev) || prev === 0) return { txt: "—", cls: "flat", v: null, none: 1 };
+  const v = cur - prev;
+  return { txt: (v >= 0 ? "+" : "") + v.toFixed(1) + "pp", cls: v > .3 ? "up" : (v < -.3 ? "down" : "flat"), v };
+}
+
+/* ===================== 周期 ===================== */
+const LEVELS = [["all", "全部"], ["year", "年度"], ["quarter", "季度"], ["month", "月度"]];
+const keyOf = (d, lv) => lv === "all" ? "ALL" : lv === "year" ? yOf(d) : lv === "quarter" ? qOf(d) : mOf(d);
+const inP = (d, lv, k) => !d ? false : lv === "all" ? true : keyOf(d, lv) === k;
+function prevKey(lv, k) {
+  if (lv === "year") return String(+k - 1);
+  if (lv === "quarter") { const y = +k.slice(0, 4), q = +k.slice(5); return q === 1 ? (y - 1) + "Q4" : y + "Q" + (q - 1); }
+  if (lv === "month") { const y = +k.slice(0, 4), m = +k.slice(5); return m === 1 ? (y - 1) + "-12" : y + "-" + pad(m - 1); }
+  return null;
+}
+function labelOf(lv, k) {
+  if (lv === "all") return "全部周期";
+  if (lv === "year") return k + " 全年";
+  if (lv === "quarter") return k.slice(0, 4) + " " + k.slice(4);
+  return k.slice(0, 4) + "年" + (+k.slice(5)) + "月";
+}
+function rangeOf(lv, k) {
+  if (lv === "all") return ["2000-01-01", "2999-12-31"];
+  if (lv === "year") return [k + "-01-01", k + "-12-31"];
+  if (lv === "quarter") { const y = +k.slice(0, 4), q = +k.slice(5), m0 = (q - 1) * 3 + 1; return [y + "-" + pad(m0) + "-01", eom(y, m0 + 2)]; }
+  return [k + "-01", eom(+k.slice(0, 4), +k.slice(5))];
+}
+const ALLDATES = (() => {
+  const ds = [];
+  DATA.forEach(p => { [p.lead, p.appr, p.sign].forEach(d => d && ds.push(d)); p.invs.concat(p.recs, p.exts).forEach(r => ds.push(r.d)); });
+  return ds;
+})();
+function optsFor(lv) {
+  if (lv === "all") return ["ALL"];
+  return [...new Set(ALLDATES.map(d => keyOf(d, lv)))].filter(k => k <= keyOf(TODAY, lv)).sort().reverse();
+}
+function nextKey(lv, k) {
+  if (lv === "year") return String(+k + 1);
+  if (lv === "quarter") { const y = +k.slice(0, 4), q = +k.slice(5); return q === 4 ? (y + 1) + "Q1" : y + "Q" + (q + 1); }
+  const y = +k.slice(0, 4), m = +k.slice(5); return m === 12 ? (y + 1) + "-01" : y + "-" + pad(m + 1);
+}
+const MINDATE = ALLDATES.reduce((a, b) => a < b ? a : b);
+/* 图上的柱子＝同一粒度的各个周期横向对比：年度看每一年，季度看每个季度，月度看每个月 */
+function subKeys(lv, k) {
+  const unit = (lv === "all" || lv === "year") ? "year" : lv;
+  const cap = { year: 8, quarter: 8, month: 12 }[unit];
+  const full = []; let c = keyOf(MINDATE, unit), last = keyOf(TODAY, unit);
+  while (c <= last && full.length < 120) { full.push(c); c = nextKey(unit, c); }
+  if (full.length <= cap) return { lv: unit, keys: full };
+  let end = full.length - 1, start = end - cap + 1;
+  const pos = full.indexOf(k);
+  if (pos >= 0 && pos < start) { start = pos; end = Math.min(full.length - 1, start + cap - 1); }
+  return { lv: unit, keys: full.slice(start, end + 1) };
+}
+const isFuture = (lv, k) => lv !== "all" && k > keyOf(TODAY, lv);
+function timeProgOf(lv, k) {
+  if (lv === "all") return 1;
+  const [a, b] = rangeOf(lv, k);
+  if (TODAY < a) return 0; if (TODAY > b) return 1;
+  return (days(a, TODAY) + 1) / (days(a, b) + 1);
+}
+/* 当期实际走完的区间（周期未走完时截到今天） */
+function effRange(lv, k) {
+  const [a, b] = rangeOf(lv, k);
+  const partial = b > TODAY && TODAY >= a;
+  return { a, b, eff: b > TODAY ? (TODAY < a ? a : TODAY) : b, partial };
+}
+
+/* ===================== 财务 ===================== */
+function finRange(a, b) {
+  const hit = d => d && d >= a && d <= b;
+  const ps = DATA.filter(p => hit(p.sign));
+  const contract = sum(ps, p => p.amt), extPlan = sum(ps, p => p.extPlan);
+  const invoiced = sum(DATA, p => sum(p.invs.filter(r => hit(r.d)), r => r.a));
+  const received = sum(DATA, p => sum(p.recs.filter(r => hit(r.d)), r => r.a));
+  const extcost = sum(DATA, p => sum(p.exts.filter(r => hit(r.d)), r => r.a));
+  return { contract, invoiced, received, extcost, extPlan, profit: contract - extPlan,
+           gpr: contract ? (contract - extPlan) / contract * 100 : 0, cnt: ps.length };
+}
+const finOf = (lv, k) => finRange(...rangeOf(lv, k).slice(0, 2));
+/* 同比＝去年同一段日期；环比＝上一周期同一段日期。周期未走完时两边都截到相同天数 */
+function compare(lv, k) {
+  const E = effRange(lv, k);
+  if (lv === "all") return { partial: false, cur: finRange(E.a, E.eff), yoy: null, qoq: null, R: null };
+  const el = days(E.a, E.eff);
+  const shiftY = (d, n) => (+d.slice(0, 4) + n) + d.slice(4);
+  const ya = shiftY(E.a, -1), yb = addD(ya, el);
+  const pa = rangeOf(lv, prevKey(lv, k))[0], pb = addD(pa, el);
+  const has = (a, b) => ALLDATES.some(d => d >= a && d <= b);
+  return { partial: E.partial, elapsed: el, cur: finRange(E.a, E.eff),
+    yoy: has(ya, yb) ? finRange(ya, yb) : null, qoq: lv === "year" ? null : (has(pa, pb) ? finRange(pa, pb) : null),
+    R: { cur: [E.a, E.eff], yoy: [ya, yb], qoq: lv === "year" ? null : [pa, pb] } };
+}
+
+/* ===================== 项目状态 ===================== */
+const invTotal = p => sum(p.invs, r => r.a);
+const recTotal = p => sum(p.recs, r => r.a);
+const extPaid = p => sum(p.exts, r => r.a);
+const netOf = p => recTotal(p) * (p.gpr == null ? 1 : p.gpr / 100);   // 已回款里属于净利的部分
+function openInvoices() {
+  const out = [];
+  DATA.forEach(p => { let paid = recTotal(p);
+    p.invs.forEach(iv => { const c = Math.min(paid, iv.a); paid -= c; const left = iv.a - c;
+      if (left > 0) out.push({ p, d: iv.d, left, age: days(iv.d, TODAY) }); }); });
+  return out.sort((a, b) => b.age - a.age);
+}
+const STATUSES = ["在谈线索", "立项中", "项目制作中", "项目已完成，待付款", "已签订合同，已付款", "项目已完成，已付款"];
+const STCOLOR = { "在谈线索": "#7C6BD6", "立项中": "#D9962C", "项目制作中": "#3E86C4",
+  "项目已完成，待付款": "#DD5F4C", "已签订合同，已付款": "#12B394", "项目已完成，已付款": "#0B7D66" };
+
+/* ===================== 人 ===================== */
+const BD = {
+  Nico:     { full: "曾磊 Nico",      c: "#12B394" },
+  Harrison: { full: "凌卿 Harrison",  c: "#0F3D36" },
+  ZZ:       { full: "张泽 ZZ",        c: "#D9962C" },
+  Tori:     { full: "季涵玥 Tori",    c: "#3E86C4" },
+  Rebecca:  { full: "刘喻薇 Rebecca", c: "#7C6BD6" },
+  Norah:    { full: "王雨涵 Norah",   c: "#5FBFA6" },
+  Yico:     { full: "胡蓉 Yico",      c: "#C98BA0" },
+};
+const BDS = Object.keys(BD);
+const bdName = b => BD[b] ? BD[b].full : "未分配";
+
+/* ===================== 目标 ===================== */
+const GOALDEF = [
+  { id: "contract", name: "合同金额", fmt: money },
+  { id: "received", name: "回款金额", fmt: money },
+  { id: "profit", name: "总利润", fmt: money },
+  { id: "newclients", name: "新客户数", fmt: v => (Math.round(v * 10) / 10) + " 家" },
+];
+let GOALS = {
+  year: "2026",
+  company: { contract: 14300000, received: 11000000, profit: 8500000, newclients: 12 },
+  qw: [.20, .26, .28, .26],
+  mw: [.30, .33, .37],
+  bd: { Nico: 5000000, Harrison: 3000000, ZZ: 1500000, Tori: 2200000, Rebecca: 2000000, Norah: 600000, Yico: 0 },
+};
+function factorOf(lv, k) {
+  if (lv === "all" || k.slice(0, 4) !== GOALS.year) return null;
+  if (lv === "year") return 1;
+  if (lv === "quarter") return GOALS.qw[+k.slice(5) - 1];
+  const m = +k.slice(5), q = Math.floor((m - 1) / 3);
+  return GOALS.qw[q] * GOALS.mw[(m - 1) % 3];
+}
+const targetOf = (mt, lv, k) => { const f = factorOf(lv, k); return f == null ? null : GOALS.company[mt] * f; };
+const bdTargetOf = (b, lv, k) => { const f = factorOf(lv, k); return f == null ? null : (GOALS.bd[b] || 0) * f; };
+function goalActual(lv, k) {
+  const f = finOf(lv, k);
+  const nc = new Set(DATA.filter(p => inP(p.sign, lv, k) && String(p.ctype).indexOf("新") === 0).map(p => p.client)).size;
+  return { contract: f.contract, received: f.received, profit: f.profit, newclients: nc };
+}
+
+/* ===================== 团队 ===================== */
+function teamOf(lv, k) {
+  const rows = BDS.map(b => {
+    const ps = DATA.filter(p => p.bd === b && inP(p.sign, lv, k));
+    const leads = DATA.filter(p => p.bd === b && !p.sign && inP(p.lead, lv, k));
+    const rec = sum(DATA.filter(p => p.bd === b), p => sum(p.recs.filter(r => inP(r.d, lv, k)), r => r.a));
+    return { b, tgt: bdTargetOf(b, lv, k) || 0, amt: sum(ps, p => p.amt), rec,
+      leadA: sum(leads, p => p.amt), leadN: leads.length, n: ps.length,
+      wip: DATA.filter(p => p.bd === b && p.status.indexOf("制作") >= 0).length };
+  });
+  const T = ["tgt", "amt", "rec", "leadA", "leadN", "n", "wip"].reduce((o, kk) => (o[kk] = sum(rows, r => r[kk]), o), { b: "TOTAL" });
+  rows.sort((x, y) => y.amt - x.amt || y.tgt - x.tgt);
+  return { rows, T };
+}
+
+/* ===================== 客户集中度 ===================== */
+function concOf(lv, k, basis) {
+  const m = {}, tp = {};
+  if (basis === "received") DATA.forEach(p => { const v = sum(p.recs.filter(r => inP(r.d, lv, k)), r => r.a);
+    if (v) { m[p.client] = (m[p.client] || 0) + v; tp[p.client] = p.type; } });
+  else DATA.filter(p => inP(p.sign, lv, k)).forEach(p => { m[p.client] = (m[p.client] || 0) + p.amt; tp[p.client] = p.type; });
+  const rows = Object.entries(m).map(([c, a]) => ({ c, a, type: tp[c] })).sort((x, y) => y.a - x.a);
+  const tot = sum(rows, r => r.a);
+  const hhi = tot ? Math.round(sum(rows, r => Math.pow(r.a / tot * 100, 2))) : 0;
+  const cr = n => tot ? sum(rows.slice(0, n), r => r.a) / tot * 100 : 0;
+  return { rows, tot, hhi, cr1: cr(1), cr3: cr(3), cr5: cr(5) };
+}
+function allocDots(parts, total) {
+  if (!total) return parts.map(() => 0);
+  const raw = parts.map(v => v / total * 100), base = raw.map(Math.floor);
+  let left = 100 - base.reduce((a, b) => a + b, 0);
+  raw.map((v, i) => [v - base[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { base[i]++; left--; } });
+  return base;
+}
+
+/* ===================== 漏斗（金额口径 + 转化率） ===================== */
+function funnelOf(lv, k, bd) {
+  const pool = DATA.filter(p => (!bd || p.bd === bd) && inP(p.lead, lv, k));
+  const appr = pool.filter(p => p.appr), sign = pool.filter(p => p.sign);
+  const recA = sum(sign, p => recTotal(p)), netA = sum(sign, p => netOf(p));
+  return { pool, appr, sign, steps: [
+    { id: "lead", name: "在谈线索", color: "#7C6BD6", a: sum(pool, p => p.amt), n: pool.length, u: "条", note: "预测合同金额" },
+    { id: "appr", name: "已立项", color: "#3E86C4", a: sum(appr, p => p.amt), n: appr.length, u: "个", note: "立项报备金额", rate: "立项转化率" },
+    { id: "sign", name: "已签约", color: "#12B394", a: sum(sign, p => p.amt), n: sign.length, u: "个", note: "实际合同金额", rate: "签约转化率" },
+    { id: "recv", name: "已回款", color: "#0B7D66", a: recA, n: sign.filter(p => recTotal(p) > 0).length, u: "个有回款", note: "实际到账金额", rate: "回款率" },
+    { id: "net", name: "净利润", color: "#0F3D36", a: netA, n: null, note: "回款 × 项目毛利率", rate: "净利率" },
+  ] };
+}
+const CONVS = [
+  { id: "c1", from: 0, to: 1, name: "线索 → 立项", color: "#3E86C4", mature: 45 },
+  { id: "c2", from: 1, to: 2, name: "立项 → 签约", color: "#12B394", mature: 80 },
+  { id: "c3", from: 2, to: 3, name: "签约 → 回款", color: "#0B7D66", mature: 150 },
+  { id: "c4", from: 3, to: 4, name: "回款 → 净利润", color: "#0F3D36", mature: 150 },
+];
+const matured = (lv, k, m) => lv === "all" ? true : (!isFuture(lv, k) && days(rangeOf(lv, k)[1], TODAY) >= m);
+function convSeries(lv, k, bd) {
+  const s = subKeys(lv, k);
+  const at = (l, kk) => funnelOf(l, kk, bd).steps;
+  return { lv: s.lv, keys: s.keys, rows: CONVS.map(cv => {
+    const val = st => ({ n: st[cv.to].a, d: st[cv.from].a, r: pctn(st[cv.to].a, st[cv.from].a) });
+    const thin = (l, kk) => funnelOf(l, kk, bd).pool.length < 3;   // 基数不足 3 条不做比较
+    const yk = lv === "year" ? String(+k - 1) : (+k.slice(0, 4) - 1) + k.slice(4);
+    const pk = lv === "all" ? null : prevKey(lv, k);
+    return { cv, pts: s.keys.map(kk => val(at(s.lv, kk))), cur: val(at(lv, k)),
+      prev: (lv === "all" || thin(lv, pk)) ? null : val(at(lv, pk)),
+      yoy: (lv === "all" || thin(lv, yk)) ? null : val(at(lv, yk)) };
+  }) };
+}
+
+/* ===================== 近期动态 ===================== */
+const EVT = { 建联: { c: "#5B49B8", bg: "#EEEBFB" }, 立项: { c: "#A8701A", bg: "#FCF4E6" },
+  签约: { c: "#0B7D66", bg: "#E4F7F1" }, 开票: { c: "#2A6494", bg: "#E8F1F9" },
+  回款: { c: "#0B7D66", bg: "#E4F7F1" }, 付款: { c: "#B7402D", bg: "#FDEEEB" } };
+function buildEvents() {
+  const e = [];
+  DATA.forEach(p => {
+    const b = { pj: p.name, cl: p.client, bd: p.bd, ae: p.ae };
+    if (p.lead) e.push({ ...b, d: p.lead, t: "建联", sub: [p.source, p.ctype, p.type].filter(Boolean).join(" · ") || p.note || "已建联", amt: p.amt, own: bdName(p.bd) });
+    if (p.appr) e.push({ ...b, d: p.appr, t: "立项", sub: p.status, amt: p.amt, own: bdName(p.bd) });
+    if (p.sign) e.push({ ...b, d: p.sign, t: "签约", sub: "合同已签订" + (p.ae ? " · " + p.ae : ""), amt: p.amt, own: p.ae || bdName(p.bd) });
+    p.invs.forEach(x => e.push({ ...b, d: x.d, t: "开票", sub: "已开具", amt: x.a, own: p.ae || bdName(p.bd) }));
+    p.recs.forEach(x => e.push({ ...b, d: x.d, t: "回款", sub: x.est ? "到账（原表未填回款时间，按开票日估算）" : "到账", amt: x.a, own: p.ae || bdName(p.bd) }));
+    p.exts.forEach(x => e.push({ ...b, d: x.d, t: "付款", sub: "支付外部团队", amt: x.a, own: p.ae || bdName(p.bd) }));
+  });
+  return e.filter(x => x.d && x.d <= TODAY).sort((a, b) => b.d.localeCompare(a.d));
+}
+
+/* ===================== 应收 / 逾期 ===================== */
+const outstanding = p => Math.max(0, p.amt - recTotal(p));
+function overdueList() {
+  return DATA.filter(p => p.sign && p.due && p.due < TODAY && outstanding(p) > 0)
+    .map(p => ({ p, days: days(p.due, TODAY), left: outstanding(p) }))
+    .sort((a, b) => b.days - a.days);
+}
+
+
+/* =========================================================================
+   渲染层 —— 组件词汇全部取自业务层 Redesign：
+   .muse / .slist·.sitem·.stag / .kpigrid·.ringcard·.knums·.stack·.tmark /
+   .segbar·.seglegend / .flow·.fnode·.farrow / table(thead·datarow·detailrow) /
+   .minicard / .tsel / .toast —— 管理层不另起一套视觉。
+   ========================================================================= */
+
+/* ---------- 通用 ---------- */
+const toastEl = document.getElementById("toast");
+let toastTimer = null;
+function toast(msg, disclose) {
+  toastEl.innerHTML = msg + (disclose ? `<span class="tdis">${disclose}</span>` : "");
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3600);
+}
+const raf = fn => requestAnimationFrame(() => requestAnimationFrame(fn));
+const growAll = root => raf(() => (root || document).querySelectorAll("[data-w]").forEach(e => e.style.width = e.dataset.w + "%"));
+const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const hashStr = s => { let h = 0; s = String(s); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
+const AV_PALETTE = ["linear-gradient(140deg,#9ADCCB,#49B6D8)", "linear-gradient(140deg,#A7E885,#34A85E)",
+  "linear-gradient(140deg,#F7D9A8,#EBA33F)", "linear-gradient(140deg,#B9E3F5,#008AA8)",
+  "linear-gradient(140deg,#D6C8F5,#7C6BD6)", "linear-gradient(140deg,#8BD98C,#0c7074)"];
+const avGrad = name => AV_PALETTE[hashStr(name) % AV_PALETTE.length];
+/* 圆环：与业务层 ringSVG 逐字同一份实现 */
+function ringSVG(pct, color, size, sw) {
+  const r = (size - sw) / 2, c = 2 * Math.PI * r, off = c * (1 - Math.max(0, Math.min(1, pct)));
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="#E6EEEE" stroke-width="${sw}"/>
+    <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
+      stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}"
+      transform="rotate(-90 ${size / 2} ${size / 2})"/></svg>`;
+}
+const ringColor = v => v >= 85 ? "#3FB36A" : v >= 70 ? "#49B6D8" : "#FF9F6E";
+/* Catmull-Rom → 三次贝塞尔（V2：时间序列用平滑多线，不用堆叠面积） */
+function smoothPath(pts) {
+  if (!pts.length) return "";
+  if (pts.length === 1) return `M${pts[0][0]},${pts[0][1]}`;
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)},${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)}`
+       + ` ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)},${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)}`
+       + ` ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+/* 瓦片下拉：替代原生 select（业务层 §8 同款） */
+function tileSelect(host, opts, cur, onPick) {
+  const label = (opts.find(o => o.v === cur) || opts[0] || { n: "—" }).n;
+  host.className = "tsel";
+  host.innerHTML = `<div class="tt" tabindex="0" role="button"><span class="lft">${label}</span></div>
+    <div class="tpop">${opts.map(o => `<div class="topt${o.v === cur ? " sel" : ""}" data-v="${esc(o.v)}">${o.n}</div>`).join("")}</div>`;
+  const tt = host.querySelector(".tt");
+  tt.onclick = e => { e.stopPropagation(); document.querySelectorAll(".tsel.open").forEach(x => { if (x !== host) x.classList.remove("open"); }); host.classList.toggle("open"); };
+  tt.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tt.click(); } };
+  host.querySelectorAll(".topt").forEach(o => o.onclick = e => { e.stopPropagation(); host.classList.remove("open"); onPick(o.dataset.v); });
+}
+document.addEventListener("click", () => document.querySelectorAll(".tsel.open").forEach(x => x.classList.remove("open")));
+/* 表头排序交互（业务层应收表同款） */
+function bindSort(tableId, state, redraw) {
+  document.querySelectorAll(`#${tableId} th.sortable`).forEach(th => {
+    th.onclick = () => {
+      const k = th.dataset.sort;
+      state.dir = state.key === k ? -state.dir : -1;
+      state.key = k;
+      document.querySelectorAll(`#${tableId} th.sortable`).forEach(x => {
+        x.classList.toggle("sorted", x === th);
+        if (x !== th) x.querySelector(".sa").textContent = "↕";
+      });
+      th.querySelector(".sa").textContent = state.dir === 1 ? "↑" : "↓";
+      redraw();
+    };
+  });
+}
+
+/* ---------- 各板块独立筛选 ---------- */
+const CURY = keyOf(TODAY, "year");
+const F = {
+  goal: { lv: "year", k: CURY, lvs: ["year", "quarter", "month"] },
+  fin:  { lv: "year", k: CURY, lvs: ["all", "year", "quarter", "month"] },
+  team: { lv: "year", k: CURY, lvs: ["all", "year", "quarter", "month"] },
+  conc: { lv: "year", k: CURY, lvs: ["all", "year", "quarter", "month"] },
+  fun:  { lv: "year", k: CURY, lvs: ["all", "year", "quarter", "month"] },
+};
+let concBasis = "contract", feedType = "全部", funBd = "";
+const RENDER = {};
+function renderFilter(name) {
+  const f = F[name], host = document.getElementById("f-" + name);
+  host.innerHTML = `<div class="segctrl">${LEVELS.filter(([k]) => f.lvs.includes(k)).map(([k, n]) =>
+      `<button class="${f.lv === k ? "on" : ""}" onclick="setLv('${name}','${k}')">${n}</button>`).join("")}</div>`
+    + (f.lv === "all" ? "" : `<div class="tsel" id="ts-${name}"></div>`);
+  if (f.lv !== "all") tileSelect(document.getElementById("ts-" + name),
+    optsFor(f.lv).map(k => ({ v: k, n: labelOf(f.lv, k) })), f.k, v => setK(name, v));
+}
+function setLv(name, lv) { F[name].lv = lv; F[name].k = optsFor(lv)[0]; RENDER[name](); }
+function setK(name, k) { F[name].k = k; RENDER[name](); }
+
+/* =========================================================================
+   ① 经营简报：日报 / 周报 / 月报（左结论卡 + 右字段行）
+   ========================================================================= */
+let briefMode = "day", briefOff = 0;
+const MODES = [["day", "日报"], ["week", "周报"], ["month", "月报"]];
+const WD = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+const dow = d => new Date(d + "T00:00:00Z").getUTCDay();
+const mondayOf = d => addD(d, -((dow(d) + 6) % 7));
+function briefRange(mode, off) {
+  if (mode === "day") { const d = addD(TODAY, off);
+    return { a: d, b: d, full: `${d.slice(0, 4)}/${+d.slice(5, 7)}/${+d.slice(8, 10)}`, wd: WD[dow(d)], en: d.replace(/-/g, " / ") }; }
+  if (mode === "week") { const a = addD(mondayOf(TODAY), off * 7), b = addD(a, 6);
+    return { a, b, full: `${cn(a)} – ${cn(b)}`, wd: "周", en: `${cny(a)} – ${cn(b)}` }; }
+  const y = +TODAY.slice(0, 4), m = +TODAY.slice(5, 7) + off, yy = y + Math.floor((m - 1) / 12), mm = ((m - 1) % 12 + 12) % 12 + 1;
+  const a = yy + "-" + pad(mm) + "-01";
+  return { a, b: eom(yy, mm), full: `${yy}年${mm}月`, wd: "", en: `${cny(a)} – ${cn(eom(yy, mm))}` };
+}
+function briefStat(a, b) {
+  const hit = d => d && d >= a && d <= b;
+  return {
+    rec: sum(DATA, p => sum(p.recs.filter(r => hit(r.d)), r => r.a)),
+    inv: sum(DATA, p => sum(p.invs.filter(r => hit(r.d)), r => r.a)),
+    ext: sum(DATA, p => sum(p.exts.filter(r => hit(r.d)), r => r.a)),
+    leads: DATA.filter(p => hit(p.lead)), apprs: DATA.filter(p => hit(p.appr)), signs: DATA.filter(p => hit(p.sign)),
+    get signA() { return sum(this.signs, p => p.amt); }, get leadA() { return sum(this.leads, p => p.amt); }
+  };
+}
+const N = (v, cls) => `<span class="n${cls ? " " + cls : ""}">${v}</span>`;
+const SEP = `<span class="sep">·</span>`;
+function briefUpcoming(from, to) {
+  const out = [];
+  DATA.forEach(p => {
+    if (p.sign && p.due && p.due >= from && p.due <= to && Math.max(0, p.amt - recTotal(p)) > 0)
+      out.push({ d: p.due, t: "回款到期", p, a: Math.max(0, p.amt - recTotal(p)) });
+    if (p.done && p.done >= from && p.done <= to) out.push({ d: p.done, t: "预计交付", p, a: 0 });
+  });
+  return out.sort((x, y) => x.d.localeCompare(y.d));
+}
+/* 字段行的标签色：一处定义，跨行复用 */
+const BTAG = { 财务: ["#008AA8", "#E0F4F8"], 数据变化: ["#008AA8", "#E0F4F8"], 财务情况: ["#008AA8", "#E0F4F8"],
+  客户跟进: ["#2563EB", "#E4EEFB"], "客户 / 项目": ["#2563EB", "#E4EEFB"], 项目进度: ["#0c7074", "#DDF1F1"],
+  "未来 14 天": ["#C77B26", "#FDF1E3"], 下周: ["#C77B26", "#FDF1E3"], 下月: ["#C77B26", "#FDF1E3"],
+  逾期明细: ["#D6455B", "#FDE9EC"], 目标达成: ["#1A9E4B", "#EAF6EE"], 外部动态: ["#94A3B8", "#F1F4F4"] };
+function renderBrief(spin) {
+  const R = briefRange(briefMode, briefOff), S = briefStat(R.a, R.b);
+  const ar = sum(DATA.filter(p => p.sign), p => Math.max(0, p.amt - recTotal(p)));
+  const od = overdueList(), odA = sum(od, x => x.left);
+  const wip = DATA.filter(p => p.status.indexOf("制作") >= 0);
+  const pend = DATA.filter(p => p.status.indexOf("待付款") >= 0);
+  const pendLeft = sum(pend, p => Math.max(0, p.amt - recTotal(p)));
+
+  document.getElementById("briefSeg").innerHTML = MODES.map(([v, n]) =>
+    `<button class="${briefMode === v ? "on" : ""}" onclick="briefMode='${v}';briefOff=0;renderBrief()">${n}</button>`).join("");
+  document.getElementById("briefNav").innerHTML = `
+    <button onclick="briefOff--;renderBrief()" title="上一期">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <span class="blbl">${R.full}${R.wd ? `<s>${R.wd}</s>` : ""}</span>
+    <button onclick="briefOff++;renderBrief()" ${briefOff >= 0 ? "disabled" : ""} title="${briefOff >= 0 ? "还没到" : "下一期"}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>`;
+
+  const cashLine = (S.rec || S.inv || S.ext)
+    ? [S.rec ? `到账 ${N(money(S.rec))}` : "", S.inv ? `开票 ${N(money(S.inv))}` : "", S.ext ? `付外部团队 ${N(money(S.ext))}` : ""].filter(Boolean).join(SEP)
+    : `<span class="dim">${briefMode === "day" ? "当日" : "本期"}无新收款 / 开票 / 付款</span>`;
+  const arLine = `应收在外 ${N(money(ar))}${SEP}已逾期 ${N(money(odA), od.length ? "errn" : "")} ${N(od.length)} 笔`;
+  const custLine = `新建联 ${N(S.leads.length)} 条 预测 ${N(money(S.leadA))}${SEP}新立项 ${N(S.apprs.length)}${SEP}新签约 ${N(S.signs.length)}${S.signA ? ` ${N(money(S.signA))}` : ""}`;
+  const wipLine = `制作中 ${N(wip.length)} 个 ${N(money(sum(wip, p => p.amt)))}${SEP}已完成待付款 ${N(pend.length)} 个 ${N(money(pendLeft), "warnn")} 未收`;
+  const odLine = od.length
+    ? od.slice(0, 3).map(x => `${esc(x.p.client)} ${N(money(x.left), "errn")} 逾期 ${N(x.days)} 天`).join(SEP)
+      + (od.length > 3 ? `${SEP}<span class="dim">还有 ${od.length - 3} 笔</span>` : "")
+    : `<span class="dim">无逾期</span>`;
+  const up = briefUpcoming(addD(R.b, 1), addD(R.b, 14)), nx = briefUpcoming(addD(TODAY, 1), "2999-12-31")[0];
+  const upLine = up.length
+    ? up.slice(0, 3).map(x => `${x.t} <b>${esc(x.p.name)}</b> <span class="dim">${cn(x.d)}</span>${x.a ? ` ${N(money(x.a))}` : ""}`).join(SEP)
+    : `<span class="dim">没有约定的回款到期，也没有项目交付${nx ? `——最近一个节点是 ${cn(nx.d)}「${esc(nx.p.name)}」${nx.t}` : ""}</span>`;
+
+  const tpY = timeProgOf("year", GOALS.year), actY = goalActual("year", GOALS.year);
+  const fu = funnelOf("year", GOALS.year, "").steps, fy = finOf("year", GOALS.year), cc = concOf("year", GOALS.year, "contract");
+  let hero, rows;
+  if (briefMode === "day") {
+    hero = od.length ? `${od.length} 笔回款已逾期，最久 <span class="hn">${od[0].days}</span> 天。`
+      : (S.rec || S.inv ? `当日到账 <span class="hn">${money(S.rec)}</span>、开票 <span class="hn">${money(S.inv)}</span>。` : "无逾期回款，未来节点见下。");
+    rows = [["财务", cashLine + SEP + arLine], ["客户跟进", custLine], ["项目进度", wipLine],
+            ["未来 14 天", upLine], ["逾期明细", odLine]];
+  } else {
+    const prev = briefMode === "week" ? [addD(R.a, -7), addD(R.a, -1)]
+      : (() => { const pm = briefRange("month", briefOff - 1); return [pm.a, pm.b]; })();
+    const P = briefStat(prev[0], prev[1]), pn = briefMode === "week" ? "上周" : "上月";
+    const cmp = (c, p) => `${N(money(c))} <span class="dim">${pn} ${money(p)}</span>`;
+    const mk = keyOf(TODAY, "month"), mAct = finOf("month", mk), mTgt = targetOf("received", "month", mk);
+    hero = briefMode === "week"
+      ? `本周签约 <span class="hn">${money(S.signA)}</span>、到账 <span class="hn">${money(S.rec)}</span>。`
+      : `本月签约 <span class="hn">${money(S.signA)}</span>、到账 <span class="hn">${money(S.rec)}</span>${mTgt ? `，回款完成月目标 <span class="hn">${pct(mAct.received, mTgt)}</span>` : ""}。`;
+    rows = [
+      ["数据变化", `签约 ${cmp(S.signA, P.signA)}${SEP}到账 ${cmp(S.rec, P.rec)}${SEP}开票 ${cmp(S.inv, P.inv)}`],
+      ["财务情况", `${arLine}${SEP}本月到账 ${N(money(mAct.received))}${mTgt ? ` / 月目标 ${N(money(mTgt))}` : ` / <span class="dim">该月未设目标</span>`}${SEP}在制作中 ${N(money(sum(wip, p => p.amt)))}`],
+      ["客户 / 项目", custLine + "<br>" + wipLine],
+      [briefMode === "week" ? "下周" : "下月", upLine],
+      ["目标达成", `时间进度 ${N((tpY * 100).toFixed(0) + "%")}${SEP}` + GOALDEF.filter(d => d.id !== "profit").map(d => {
+        const t = targetOf(d.id, "year", GOALS.year);
+        return `${d.name.replace("金额", "")} ${N(d.fmt(actY[d.id]))}${t ? `/${d.fmt(t)} ${N(pct(actY[d.id], t))}` : ""}`; }).join(SEP)],
+      ["外部动态", `<span class="ph">接入外部行业情报源后自动生成 · 当前未接入</span>`]
+    ];
+  }
+  const run = tpY ? actY.contract / tpY : 0;
+  document.getElementById("briefKicker").textContent = "经营简报 · " + MODES.find(m => m[0] === briefMode)[1];
+  document.getElementById("briefHero").innerHTML = (R.b > TODAY ? `<span style="font-size:13px;font-weight:500;color:rgba(255,255,255,.66);display:block;margin-bottom:8px">该周期还没走完，只统计到 ${cny(TODAY)}</span>` : "") + hero;
+  document.getElementById("briefJudge").innerHTML = briefMode === "day"
+    ? `按当前进度全年约 ${N(money(run))}，年度目标 ${N(money(GOALS.company.contract))}，已完成 ${N(pct(actY.contract, GOALS.company.contract))}。详细拆解见周报。`
+    : `按当前进度全年约 ${N(money(run))}，年度目标 ${N(money(GOALS.company.contract))}，已完成 ${N(pct(actY.contract, GOALS.company.contract))}。漏斗：线索→立项 ${N(pct(fu[1].a, fu[0].a))}、立项→签约 ${N(pct(fu[2].a, fu[1].a))}；前三大客户占 ${N(cc.cr3.toFixed(0) + "%")}；年内毛利率 ${N(fy.gpr.toFixed(1) + "%")}。`;
+  document.getElementById("briefDate").textContent = R.en;
+  document.getElementById("briefCt").textContent = rows.length;
+  document.getElementById("briefRows").innerHTML = rows.map(([l, v]) => {
+    const c = BTAG[l] || ["#64748b", "#F1F4F4"];
+    return `<div class="sitem"><span class="stag" style="color:${c[0]};background:${c[1]}"><span class="sd2" style="background:${c[0]}"></span>${l}</span>
+      <div class="sbody">${v}</div></div>`;
+  }).join("");
+  if (spin) toast("已按源表快照重新计算", "原型演示，未连接后端，不会拉取新数据。");
+}
+function showDQ() {
+  document.getElementById("mask").innerHTML = `<div class="maskbg" onclick="if(event.target===this)closeM()"><div class="modal">
+    <div class="mhd2"><h3>原表填写提示</h3><span class="pill p-gray">${DQ.length} 条</span><button class="x" onclick="closeM()">×</button></div>
+    <div class="mbd"><div style="font-size:12px;color:var(--muted);line-height:1.85;margin-bottom:14px">
+      下面这些字段在源表里是空的或对不上，看板已按规则兜底，并在相关模块标注了口径。补齐后数字会更准。</div>
+      ${DQ.map((x, i) => `<div class="dqrow"><s>${i + 1}</s><span>${x}</span></div>`).join("")}
+      <div class="sublabel" style="margin:22px 0 6px">2025 演示数据<span class="ct">${DEMO2025.length}</span><span class="ln"></span></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.85;margin-bottom:10px">
+        源表实际只从 2025-12 起，年度 / 季度图只有一根柱、趋势看不出形状。下面 12 条是为让原型图表完整而补的<b>演示记录</b>，
+        均带 <code style="font-family:var(--en)">demo</code> 标记；<b>2026 的真实数字一条未改</b>。上线前删掉 DEMO2025 即可回到纯源表。</div>
+      ${DEMO2025.map((p, i) => `<div class="dqrow"><s>D${i + 1}</s><span>${esc(p.sign)} · ${esc(p.client)} · ${esc(p.name)} · ${money(p.amt)}（毛利率 ${p.gpr}%）</span></div>`).join("")}</div>
+    <div class="mft"><span style="flex:1;font-size:11px;color:var(--muted2)">兜底规则不改写源表，仅影响本页展示</span>
+      <button class="ghostbtn solid" onclick="closeM()">知道了</button></div></div></div>`;
+}
+function closeM() { document.getElementById("mask").innerHTML = ""; }
+
+/* =========================================================================
+   ② 经营目标达成情况：大环 + 四个数 + 结构堆叠条（业务层 ② 同构）
+   ========================================================================= */
+RENDER.goal = renderGoals;
+/* 四个指标的显示名 / 问号里的解释 / 计算式 —— 一处定义，标题与浮窗共用 */
+const GOALMETA = {
+  contract:   { n: "合同金额", c: "#008AA8", q: "本期签订的合同金额，对照本期的合同金额目标。按合同签订日期归属，未签的在谈线索不计入。", f: "合同金额 / 合同金额目标" },
+  received:   { n: "收款金额", c: "#1A9E4B", q: "本期实际到账的金额，对照本期的收款额目标。按回款到账日期归属，开了票没到账的不算。", f: "收款额 / 收款额目标" },
+  profit:     { n: "毛利润",   c: "#0c7074", q: "本期签约合同额扣掉这些项目的外采预算，对照本期的毛利润目标。不含内部人力成本。", f: "毛利润 / 毛利润目标" },
+  newclients: { n: "新客户",   c: "#EBA33F", q: "本期首次签约的新客户家数，对照本期的新客户数目标。同一客户多个项目只算一家。", f: "新客户数 / 新客户数目标" },
+};
+/* 点问号出解释浮窗（不是 title 提示，触屏也能用） */
+let infoEl = null;
+function closeInfo() {
+  if (infoEl) { infoEl.remove(); infoEl = null; }
+  document.querySelectorAll(".help.on").forEach(x => x.classList.remove("on"));
+}
+function openInfo(e, title, text, formula) {
+  e.stopPropagation();
+  const btn = e.currentTarget, was = btn.classList.contains("on");
+  closeInfo();
+  if (was) return;
+  btn.classList.add("on");
+  infoEl = document.createElement("div");
+  infoEl.className = "infopop";
+  infoEl.innerHTML = `<b>${title}</b>${text}<span class="fml">${formula}</span>`;
+  infoEl.onclick = ev => ev.stopPropagation();
+  document.body.appendChild(infoEl);
+  const rc = btn.getBoundingClientRect(), w = infoEl.offsetWidth;
+  infoEl.style.left = Math.max(12, Math.min(window.innerWidth - w - 12, rc.left + rc.width / 2 - w / 2)) + "px";
+  infoEl.style.top = (rc.bottom + window.scrollY + 9) + "px";
+}
+document.addEventListener("click", closeInfo);
+window.addEventListener("scroll", closeInfo, { passive: true });
+function renderGoals() {
+  renderFilter("goal");
+  const { lv, k } = F.goal, act = goalActual(lv, k), tp = timeProgOf(lv, k);
+
+  const tgtC = targetOf("contract", lv, k);
+  const rate = tgtC ? act.contract / tgtC : null;
+  const rc = rate == null ? "#C2CFCA" : ringColor(rate * 100);
+  document.getElementById("goalRing").innerHTML = ringSVG(rate || 0, rc, 190, 15) +
+    `<div class="rv2"><b style="color:${rate == null ? "#94a3b8" : rc}">${rate == null ? "—" : (rate * 100).toFixed(1)}${rate == null ? "" : `<span style="font-size:22px">%</span>`}</b>
+      <span>${rate == null ? "该周期未设目标" : `已签约 ${money(act.contract)} / 目标 ${money(tgtC)}`}</span></div>`;
+  document.getElementById("goalRsub").innerHTML = rate == null ? "只显示实际值，不按 0 填充"
+    : (rate >= tp ? `领先时间进度 ${((rate - tp) * 100).toFixed(0)} 个百分点` : `落后时间进度 ${((tp - rate) * 100).toFixed(0)} 个百分点`);
+
+  document.getElementById("goalNums").innerHTML = GOALDEF.map(d => {
+    const cur = act[d.id], tgt = targetOf(d.id, lv, k), r = tgt ? cur / tgt : null;
+    const M = GOALMETA[d.id], acc = M.c;
+    return `<div class="knum" style="--acc:${acc}">
+      <div class="kl"><span class="kd"></span>${M.n}<button class="help" onclick="openInfo(event,'${M.n}','${M.q}','${M.f}')">?</button></div>
+      <div class="kv">${d.fmt(cur)}</div>
+      <div class="kt">${tgt == null ? `<span style="color:var(--muted2)">该周期未设目标</span>`
+        : `目标 ${d.fmt(tgt)} · <b style="color:${r >= tp ? "#1A9E4B" : "#D6455B"}">${(r * 100).toFixed(0)}%</b>`}</div>
+      <div class="kbar"><i data-w="${tgt ? Math.min(100, r * 100).toFixed(1) : 0}" style="background:${tgt ? acc : "#DCE6E3"}"></i></div>
+      <div class="kc">${tgt ? (r >= 1 ? `已超目标 ${d.fmt(cur - tgt)}` : `还差 ${d.fmt(tgt - cur)}`) : "不在目标区间内"}</div></div>`;
+  }).join("");
+  document.getElementById("goalRsub").insertAdjacentHTML("beforeend",
+    `<div style="margin-top:6px;color:var(--muted2)">${labelOf(lv, k)} · 时间进度 ${(tp * 100).toFixed(0)}%</div>`);
+
+  /* 结构堆叠条：已回款 / 已签待回 / 在谈线索（未落定）—— 三段互斥，画前 assert */
+  const rec = finOf(lv, k).received, signedLeft = Math.max(0, act.contract - rec);
+  const pipe = sum(DATA.filter(p => !p.sign && inP(p.lead, lv, k)), p => p.amt);
+  if (Math.abs(rec + signedLeft - act.contract) > 1) console.warn("目标结构条求和不等于已签约额", rec + signedLeft, act.contract);
+  const denom = Math.max(tgtC || 0, act.contract + pipe) || 1, P = v => v / denom * 100;
+  document.getElementById("goalStack").innerHTML = `
+    <i style="width:0;background:#1A9E4B" data-w="${P(rec).toFixed(2)}">${P(rec) >= 8 ? money(rec) : ""}</i>
+    <i style="width:0;background:#008AA8" data-w="${P(signedLeft).toFixed(2)}">${P(signedLeft) >= 8 ? money(signedLeft) : ""}</i>
+    <i style="width:0;background:repeating-linear-gradient(45deg,#EBA33F 0 6px,#F7D9A8 6px 12px);color:#5A6B66"
+       data-w="${P(pipe).toFixed(2)}">${P(pipe) >= 8 ? money(pipe) : ""}</i>`;
+  const mark = document.getElementById("goalMark");
+  mark.style.left = tgtC ? Math.min(100, tgtC / denom * 100) + "%" : "-100%";
+  document.getElementById("goalMarkTxt").textContent = tgtC ? "目标 " + money(tgtC) : "";
+  document.getElementById("goalNote").innerHTML = tgtC
+    ? `已签约 <b>${money(act.contract)}</b> 占目标 ${pct(act.contract, tgtC)}，时间已过 ${(tp * 100).toFixed(0)}%；`
+      + `在谈线索还有 <b>${money(pipe)}</b>，${act.contract + pipe >= tgtC
+        ? `即使按原值全部转化也只是刚好覆盖目标并超出 <b>${money(act.contract + pipe - tgtC)}</b>。`
+        : `全部转化仍差 <b class="bad">${money(tgtC - act.contract - pipe)}</b> —— 缺口不是执行问题，是线索总量不够。`}`
+    : `该周期不在 ${GOALS.year} 目标区间内，只画实际发生额，不按 0 填充目标。`;
+  growAll(document.getElementById("goalNums"));
+  raf(() => document.querySelectorAll("#goalStack > i").forEach(i => i.style.width = i.dataset.w + "%"));
+}
+
+/* =========================================================================
+   ③ 经营财务：四个主数 + 平滑多线时间序列 + 毛利率环 + 结构分段条
+   ========================================================================= */
+RENDER.fin = renderFin;
+const LINES = [
+  { id: "contract", name: "合同总额", color: "#008AA8", hint: "本期签约的合同金额（按合同签订时间归属）" },
+  { id: "invoiced", name: "开票金额", color: "#49B6D8", hint: "本期开具发票的金额（按开票日期归属）" },
+  { id: "received", name: "回款金额", color: "#3FB36A", hint: "本期实际到账的金额（按回款时间归属）" },
+  { id: "extcost", name: "外部成本", color: "#EBA33F", hint: "本期实际支付给外部团队的金额（按付款日期归属）" },
+];
+function renderFin() {
+  renderFilter("fin");
+  const { lv, k } = F.fin, C = compare(lv, k), cur = C.cur, s = subKeys(lv, k);
+  const rg = (a, b) => cny(a) + " – " + cn(b);
+  document.getElementById("finsub").innerHTML = labelOf(lv, k) + " · " + cur.cnt + " 个签约项目"
+    + (C.partial ? ` <span class="pill p-amber">周期未走完，只统计到 ${cny(TODAY)}</span>` : "");
+
+  document.getElementById("finNums").innerHTML = LINES.map(m => {
+    const dy = C.yoy ? delta(cur[m.id], C.yoy[m.id]) : { txt: "—", cls: "flat" };
+    const dq = lv === "year" ? { txt: "—", cls: "flat" } : (C.qoq ? delta(cur[m.id], C.qoq[m.id]) : { txt: "—", cls: "flat" });
+    const sub = { contract: `${cur.cnt} 单，均单 ${money(cur.cnt ? cur.contract / cur.cnt : 0)}`,
+      invoiced: `已签约未开票 ${money(Math.max(0, cur.contract - cur.invoiced))}`,
+      received: `开票回款率 ${pct(cur.received, cur.invoiced)}`,
+      extcost: `外采预算 ${money(cur.extPlan)}，已付 ${pct(cur.extcost, cur.extPlan)}` }[m.id];
+    return `<div class="knum" style="--acc:${m.color}">
+      <div class="kl"><span class="kd"></span>${m.name}<span class="help" title="${m.hint}">?</span></div>
+      <div class="kv">${money(cur[m.id])}</div>
+      <div class="dcs">
+        <span class="dc ${dy.cls}" title="${C.yoy ? `去年同期（${rg(C.R.yoy[0], C.R.yoy[1])}）${money(C.yoy[m.id])}` : "去年同期没有数据（源表从 2025-12 起）"}">同比 <b>${dy.txt}</b></span>
+        <span class="dc ${dq.cls}" title="${lv === "year" ? "年度的环比就是同比" : (C.qoq ? `上一周期同期（${rg(C.R.qoq[0], C.R.qoq[1])}）${money(C.qoq[m.id])}` : "上一周期没有数据")}">环比 <b>${dq.txt}</b></span>
+      </div>
+      <div class="kc">${sub}</div></div>`;
+  }).join("");
+
+  const unit = { year: "年", quarter: "季度", month: "月" }[s.lv];
+  document.getElementById("trendCt").textContent = "按" + unit;
+  document.getElementById("trendsub").innerHTML = `签约 → 开票 → 回款 三段的时间差就是钱压在账上的时间，外采是同期流出去的钱。单位万元；${lv === "all"
+    ? "「全部」口径下不高亮某一期" : `虚线标的是 ${labelOf(s.lv, k)}`}`;
+  document.getElementById("lineleg").innerHTML = LINES.map(m => `<span title="${m.hint}"><i style="background:${m.color}"></i>${m.name}</span>`).join("");
+
+  /* 点多时给足横向空间：相邻两点至少 74px，容器放不下就在卡内左右滑，不把 12 个月挤成一团 */
+  const PL = 54, PR = 20, PT = 18, PB = 34, H = 300;
+  const W = Math.max(700, PL + PR + Math.max(1, s.keys.length - 1) * 74);
+  const iw = W - PL - PR, ih = H - PT - PB;
+  const series = LINES.map(m => ({ m, vals: s.keys.map(kk => isFuture(s.lv, kk) ? null : finOf(s.lv, kk)[m.id] / 1e4) }));
+  const maxV = Math.max(1, ...series.flatMap(x => x.vals.filter(v => v != null)));
+  const stepU = Math.pow(10, Math.floor(Math.log10(maxV))), topV = Math.ceil(maxV / stepU * 1.05) * stepU;
+  const X = i => PL + (s.keys.length === 1 ? iw / 2 : i * iw / (s.keys.length - 1));
+  const Y = v => PT + ih - v / topV * ih;
+  const grid = [0, .25, .5, .75, 1].map(t => {
+    const y = (PT + ih - t * ih).toFixed(1);
+    return `<line x1="${PL}" y1="${y}" x2="${W - PR}" y2="${y}" stroke="#E8EFEF" stroke-width="1"/>
+      <text x="${PL - 10}" y="${(+y + 4).toFixed(1)}" text-anchor="end" font-size="10.5" fill="#94a3b8" font-family="Outfit">${(topV * t).toFixed(topV >= 100 ? 0 : 1)}</text>`;
+  }).join("");
+  const selI = s.keys.indexOf(k);
+  const xlab = kk => s.lv === "month" ? (+kk.slice(5)) + "月" : s.lv === "quarter" ? kk.slice(4) : kk;
+  const paths = series.map(x => {
+    const pts = [], idx = [];
+    x.vals.forEach((v, i) => { if (v != null) { pts.push([X(i), Y(v)]); idx.push(i); } });
+    return `<path d="${smoothPath(pts)}" fill="none" stroke="${x.m.color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`
+      + pts.map((p, j) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${idx[j] === selI ? 4.8 : 2.9}" fill="#fff"
+          stroke="${x.m.color}" stroke-width="2.2"><title>${x.m.name} · ${labelOf(s.lv, s.keys[idx[j]])}：${money(x.vals[idx[j]] * 1e4)}</title></circle>`).join("");
+  }).join("");
+  document.getElementById("trendbox").innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="min-width:${W}px">
+    ${grid}${selI >= 0 ? `<line x1="${X(selI)}" y1="${PT}" x2="${X(selI)}" y2="${PT + ih}" stroke="#1b2430" stroke-width="1" stroke-dasharray="3 4" opacity=".3"/>` : ""}
+    ${paths}${s.keys.map((kk, i) => `<text x="${X(i).toFixed(1)}" y="${H - 10}" text-anchor="middle" font-size="11"
+      fill="${kk === k ? "#1b2430" : "#94a3b8"}" font-weight="${kk === k ? 700 : 500}" font-family="Outfit">${xlab(kk)}</text>`).join("")}
+    <text x="${PL - 10}" y="${PT - 5}" text-anchor="end" font-size="10" fill="#cbd5d5" font-family="Outfit">万</text></svg>`;
+
+  document.getElementById("trendhint").innerHTML = s.keys.length > 6
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg>
+       共 ${s.keys.length} 个${unit}，图比卡片宽时可在卡内左右滑动`
+    : "";
+
+  /* —— 毛利润：各期柱图 + 合同额结构 —— */
+  const xlab2 = kk => s.lv === "month" ? (+kk.slice(5)) + "月" : s.lv === "quarter" ? kk.slice(4) : kk;
+  const pf = s.keys.map(kk => ({ k: kk, f: finOf(s.lv, kk), future: isFuture(s.lv, kk) }));
+  const dyP = C.yoy ? delta(cur.profit, C.yoy.profit) : { txt: "—", cls: "flat" };
+  const dqP = lv === "year" ? { txt: "—", cls: "flat" } : (C.qoq ? delta(cur.profit, C.qoq.profit) : { txt: "—", cls: "flat" });
+  document.getElementById("profitsub").innerHTML = `${labelOf(lv, k)} · 已扣掉外包 ${money(cur.extPlan)} · 每根柱是一个${unit}的毛利润`;
+  document.getElementById("profitNum").innerHTML = `<b style="color:#0c7074">${money(cur.profit)}</b>
+    <span class="dc ${dyP.cls}">同比 <b>${dyP.txt}</b></span><span class="dc ${dqP.cls}">环比 <b>${dqP.txt}</b></span>`;
+  drawBars("profitBars", "profitX", pf.map(x => ({
+    k: x.k, v: x.future ? null : x.f.profit, sel: x.k === k, x: xlab2(x.k),
+    label: x.future ? "" : wan(x.f.profit), tip: `${labelOf(s.lv, x.k)}：${x.future ? "未开始" : money(x.f.profit)}`
+  })), "#0c7074", { unit: "万" });
+
+  const segs = [{ n: "毛利润", v: cur.profit, c: "#0c7074", lt: 0 }, { n: "外采预算", v: cur.extPlan, c: "#EBA33F", lt: 1 }];
+  if (cur.contract && Math.abs(segs[0].v + segs[1].v - cur.contract) > 1) console.warn("结构条求和不等于合同总额", segs[0].v + segs[1].v, cur.contract);
+  document.getElementById("gprSeg").innerHTML = cur.contract
+    ? segs.map(x => { const p = x.v / cur.contract * 100;
+        return `<i style="width:calc(${p.toFixed(2)}% - 4px);background:${x.c}${x.lt ? ";color:#5A6B66" : ""}">${p >= 12 ? p.toFixed(0) + "%" : ""}</i>`; }).join("")
+    : `<i style="width:100%;background:#EAF1F1"></i>`;
+  document.getElementById("gprLeg").innerHTML = cur.contract
+    ? segs.map(x => `<div class="segitem"><span class="sdot" style="background:${x.c}"></span>${x.n}
+        <span class="sp">${(x.v / cur.contract * 100).toFixed(0)}%</span><span class="sv">${money(x.v)}</span></div>`).join("")
+    : `<div class="segitem" style="color:var(--muted2)">该周期没有签约合同，不画空条</div>`;
+
+  /* —— 毛利率：各期柱图（无签约的期不画柱，不按 0 填充） —— */
+  const dyG = C.yoy && C.yoy.contract ? deltaPP(cur.gpr, C.yoy.gpr) : { txt: "—", cls: "flat" };
+  const dqG = lv === "year" ? { txt: "—", cls: "flat" } : (C.qoq && C.qoq.contract ? deltaPP(cur.gpr, C.qoq.gpr) : { txt: "—", cls: "flat" });
+  document.getElementById("gprsub").innerHTML = `${labelOf(lv, k)} · 合同 ${money(cur.contract)} · 外包 ${money(cur.extPlan)}`;
+  document.getElementById("gprNum").innerHTML = cur.contract
+    ? `<b style="color:#1A9E4B">${cur.gpr.toFixed(1)}</b><span class="bu">%</span>
+       <span class="dc ${dyG.cls}">同比 <b>${dyG.txt}</b></span><span class="dc ${dqG.cls}">环比 <b>${dqG.txt}</b></span>`
+    : `<b style="color:#94a3b8">—</b><span class="bu">本期无签约合同，毛利率不成立</span>`;
+  drawBars("gprBars", "gprX", pf.map(x => ({
+    k: x.k, v: (x.future || !x.f.contract) ? null : x.f.gpr, sel: x.k === k, x: xlab2(x.k),
+    label: (x.future || !x.f.contract) ? "" : x.f.gpr.toFixed(0) + "%",
+    tip: `${labelOf(s.lv, x.k)}：${x.future ? "未开始" : (x.f.contract ? x.f.gpr.toFixed(1) + "%" : "本期无签约，毛利率不适用")}`
+  })), "#3FB36A", { max: 100 });
+}
+/* 迷你柱图：v 为 null 的周期不画柱（V2：0 数据不画空条） */
+function drawBars(barsId, xId, pts, color, opt) {
+  opt = opt || {};
+  const max = opt.max != null ? opt.max : Math.max(1, ...pts.map(p => p.v || 0));
+  document.getElementById(barsId).innerHTML = pts.map(p => `<div class="bar${p.sel ? " sel" : ""}" title="${p.tip}">
+      <span class="bv">${p.label || ""}</span>
+      <span class="bt"><i data-h="${p.v == null ? 0 : Math.max(p.v > 0 ? 3 : 0, p.v / max * 100).toFixed(1)}"
+        style="background:${color};opacity:${p.v == null ? .12 : (p.sel ? 1 : .58)}"></i></span></div>`).join("");
+  document.getElementById(xId).innerHTML = pts.map(p => `<span class="${p.sel ? "sel" : ""}">${p.x}</span>`).join("");
+  raf(() => document.querySelectorAll(`#${barsId} .bt > i`).forEach(e => e.style.height = e.dataset.h + "%"));
+}
+
+/* =========================================================================
+   ④ 团队经营：可排序表格 + 行内同刻度轨道 + 展开看结构
+   ========================================================================= */
+RENDER.team = renderTeam;
+const teamSort = { key: null, dir: -1 };
+function renderTeam() {
+  renderFilter("team");
+  const { lv, k } = F.team;
+  document.getElementById("teamsub").innerHTML = labelOf(lv, k) + " 口径 · 签约按合同签订时间归属、线索按建联时间归属 · 点行展开看金额结构";
+  drawTeam();
+}
+function drawTeam() {
+  const { lv, k } = F.team, { rows, T } = teamOf(lv, k), tp = timeProgOf(lv, k);
+  const max = Math.max(1, ...rows.map(r => Math.max(r.tgt, r.amt + r.leadA)));
+  const list = rows.slice();
+  if (teamSort.key) list.sort((a, b) => {
+    const v = x => teamSort.key === "rate" ? (x.tgt ? x.amt / x.tgt : -1) : x[teamSort.key];
+    return (v(a) - v(b)) * teamSort.dir;
+  });
+  /* 三段用实心色块，与「关系温度」同一套语言：绿=已回款 蓝=已签待回 灰=在谈未锁定。
+     金额为 0 的段直接不渲染，所以线索为空的 BD 不会拖一截空壳出来。 */
+  const rail = (r, mx) => {
+    const segs = [
+      { v: r.rec, c: "#1A9E4B", t: `已回款 ${money(r.rec)}` },
+      { v: Math.max(0, r.amt - r.rec), c: "#49B6D8", t: `已签约未回款 ${money(Math.max(0, r.amt - r.rec))}` },
+      { v: r.leadA, c: "#94A3B8", t: `在谈线索未锁定 ${r.leadN} 条 · ${money(r.leadA)}` },
+    ].filter(x => x.v > 0);
+    if (!segs.length) return `<div class="rail2 empty"><span class="rtrack"></span>
+      ${r.tgt ? `<span class="rtick" style="left:${Math.min(100, r.tgt / mx * 100).toFixed(2)}%" title="目标 ${money(r.tgt)}"></span>` : ""}
+      <span class="railempty">本期没有签约，也没有在谈线索</span></div>`;
+    return `<div class="rail2"><span class="rtrack"></span>
+      <span class="rsegs">${segs.map(x => { const p = x.v / mx * 100;
+        return `<i data-w="${p.toFixed(2)}" style="background:${x.c}" title="${x.t}">${p >= 14 ? p.toFixed(0) + "%" : ""}</i>`; }).join("")}</span>
+      ${r.tgt ? `<span class="rtick" style="left:${Math.min(100, r.tgt / mx * 100).toFixed(2)}%" title="目标 ${money(r.tgt)}"></span>` : ""}
+    </div>`;
+  };
+  const cell = (v, dim) => `<td class="num"><span class="amtcell ${v ? "" : "zero"}">${v ? money(v) : "—"}</span>${dim || ""}</td>`;
+  document.getElementById("teamBody").innerHTML = list.map((r, i) => {
+    const rate = r.tgt ? r.amt / r.tgt * 100 : null, ok = rate != null && rate >= tp * 100;
+    const lead = i === 0 && !teamSort.key && r.amt > 0;
+    const segs = [["已回款", r.rec, "#1A9E4B"], ["已签待回", Math.max(0, r.amt - r.rec), "#49B6D8"], ["在谈未锁定", r.leadA, "#94A3B8"]];
+    const tot = segs.reduce((a, x) => a + x[1], 0);
+    return `<tr class="datarow ${i % 2 ? "zebra" : ""}${lead ? " lead" : ""}">
+      <td><div class="owncell"><span class="rk">${i + 1}</span>
+        <span class="oav" style="background:${avGrad(r.b)}">${r.b[0]}</span>
+        <span><div class="pname">${BD[r.b].full.split(" ")[0]}</div><div class="pcust">${r.b}</div></span></div></td>
+      <td>${rail(r, max)}</td>
+      ${cell(r.tgt)}${cell(r.amt)}${cell(r.rec)}
+      <td class="num"><span class="amtcell ${r.leadA ? "" : "zero"}">${r.leadA ? money(r.leadA) : "—"}</span>${r.leadN ? `<div class="pcust">${r.leadN} 条</div>` : ""}</td>
+      <td class="num"><span class="ratecell" style="color:${rate == null ? "#94a3b8" : (ok ? "#1A9E4B" : "#D6455B")}">${rate == null ? "—" : rate.toFixed(0) + "%"}</span>
+        <div class="pcust">${rate == null ? "未设目标" : (ok ? "领先进度" : "落后进度")}</div></td>
+      <td class="caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></td></tr>
+    <tr class="detailrow ${i % 2 ? "zebra" : ""}"><td colspan="8"><div class="dwrap"><div class="dinner">
+      <div class="dstackwrap">
+        <div class="dstacklbl"><span>金额结构 · 合计 ${money(tot)}</span><span>三段互斥，不重复计入</span></div>
+        <div class="dstack">${tot ? segs.map(([, v, c]) => `<span style="width:${(v / tot * 100).toFixed(2)}%;background:${c}"></span>`).join("") : ""}</div>
+        <div class="dstackleg">${segs.map(([l, v, c]) => `<span><i style="background:${c}"></i>${l} ${money(v)}</span>`).join("")}</div>
+      </div>
+      <div class="dnote">${r.n ? `本期签约 ${r.n} 单，其中在制作 ${r.wip} 个。` : "本期没有签约项目。"}
+        ${r.tgt ? `目标 ${money(r.tgt)}，按时间进度 ${(tp * 100).toFixed(0)}% 应做到 ${money(r.tgt * tp)}。` : "源表未给这位 BD 设目标，完成率留空不按 0 计。"}</div>
+    </div></div></td></tr>`;
+  }).join("") + (() => {
+    const rate = T.tgt ? T.amt / T.tgt * 100 : null;
+    return `<tr class="datarow tot">
+      <td><div class="owncell"><span class="rk"></span><span style="width:32px"></span><span class="pname">合计</span></div></td>
+      <td>${rail(T, Math.max(1, T.tgt, T.amt + T.leadA))}</td>
+      ${cell(T.tgt)}${cell(T.amt)}${cell(T.rec)}
+      <td class="num"><span class="amtcell">${money(T.leadA)}</span><div class="pcust">${T.leadN} 条</div></td>
+      <td class="num"><span class="ratecell" style="color:${rate >= timeProgOf(lv, k) * 100 ? "#1A9E4B" : "#D6455B"}">${rate == null ? "—" : rate.toFixed(0) + "%"}</span></td>
+      <td class="caret"></td></tr>`;
+  })();
+  document.querySelectorAll("#teamBody tr.datarow:not(.tot)").forEach(tr => tr.onclick = () => {
+    const dr = tr.nextElementSibling, on = tr.classList.toggle("open");
+    dr.classList.toggle("show", on);
+  });
+  document.getElementById("teamLeg").innerHTML = `<span><i style="background:#1A9E4B"></i>已回款</span>
+    <span><i style="background:#49B6D8"></i>已签约未回款</span>
+    <span><i style="background:#94A3B8"></i>在谈线索（未锁定）</span>
+    <span><i class="tk"></i>个人目标</span>
+    <span class="note">除合计行外，所有 BD 共用同一刻度（上限 ${money(max)}），可直接横向比较</span>`;
+  growAll(document.getElementById("teamBody"));
+}
+
+/* =========================================================================
+   ⑤ 客户集中度：点阵 + 明细表（色点与点阵一一对应）
+   ========================================================================= */
+RENDER.conc = renderConc;
+const WCOLORS = ["#0c7074", "#008AA8", "#49B6D8", "#7FD2BE", "#B4DDD2"];
+const WREST = "#DCE6E3", WEMPTY = "#EDF3F2";
+const concSort = { key: null, dir: -1 };
+function renderConc() {
+  renderFilter("conc");
+  document.getElementById("concbasis").innerHTML = [["contract", "合同额"], ["received", "回款额"]]
+    .map(([v, n]) => `<button class="${concBasis === v ? "on" : ""}" onclick="concBasis='${v}';renderConc()">${n}</button>`).join("");
+  const { lv, k } = F.conc, c = concOf(lv, k, concBasis), bn = concBasis === "contract" ? "合同额" : "回款额";
+  document.getElementById("concsub").textContent = `${labelOf(lv, k)} · 按${bn}排序 · 共 ${c.rows.length} 家有金额的客户，合计 ${money(c.tot)}`;
+  document.getElementById("concCt").textContent = "按" + bn;
+
+  const top = c.rows.slice(0, 5), rest = c.rows.slice(5), restA = sum(rest, r => r.a);
+  const list = top.concat(restA ? [{ c: `其他 ${rest.length} 家`, a: restA, other: 1 }] : []);
+  const dots = allocDots(list.map(r => r.a), c.tot);
+  const cols = list.map((r, i) => r.other ? WREST : WCOLORS[i]);
+  const cells = []; dots.forEach((n, i) => { for (let j = 0; j < n; j++) cells.push(cols[i]); });
+  while (cells.length < 100) cells.push(WEMPTY);
+  document.getElementById("waffle").innerHTML = cells.slice(0, 100).map((col, i) =>
+    `<i style="background:${col};transition-delay:${(i % 10) * 12 + Math.floor(i / 10) * 22}ms"></i>`).join("");
+
+  const sorted = list.slice();
+  if (concSort.key) sorted.sort((a, b) => (a.a - b.a) * concSort.dir);
+  let cum = 0;
+  document.getElementById("concBody").innerHTML = sorted.length ? sorted.map((r, i) => {
+    const idx = list.indexOf(r), share = r.a / c.tot * 100; cum += share;
+    return `<tr class="datarow ${i % 2 ? "zebra" : ""}">
+      <td><span class="agecell" style="color:var(--ink)"><span class="adot" style="background:${cols[idx]}"></span>${esc(r.c)}</span></td>
+      <td>${r.other ? `<span class="pcust">尾部客户合计</span>`
+        : `<span class="stpill" style="background:${r.type === "第三方" ? "#FDF1E3" : "#F1F4F4"};color:${r.type === "第三方" ? "#C77B26" : "#8A9A95"}">
+            <span class="pd" style="background:${r.type === "第三方" ? "#C77B26" : "#8A9A95"}"></span>${r.type === "第三方" ? "代理" : "品牌方"}</span>`}</td>
+      <td class="num"><span class="amtcell">${money(r.a)}</span></td>
+      <td class="num"><div class="sharecell"><span class="sharebar"><i data-w="${(r.a / list[0].a * 100).toFixed(1)}" style="background:${cols[idx]}"></i></span>
+        <span class="amtcell" style="font-size:13px">${share.toFixed(1)}%</span></div></td>
+      <td class="num"><span class="cumcell">${concSort.key ? "—" : cum.toFixed(1) + "%"}</span></td></tr>`;
+  }).join("") : `<tr><td colspan="5" style="text-align:center;color:var(--muted2);font-size:12.5px">该周期没有可统计的客户</td></tr>`;
+
+  const risk = v => v > 60 ? ["p-err", "偏高"] : v > 40 ? ["p-amber", "需关注"] : ["p-ok", "健康"];
+  const [rc3, rl3] = risk(c.cr3), [rc5, rl5] = risk(c.cr5);
+  const hh = c.hhi > 2500 ? ["p-err", "高集中"] : c.hhi > 1500 ? ["p-amber", "中等集中"] : ["p-ok", "分散"];
+  document.getElementById("concmet").innerHTML = `
+    <div class="cm"><div class="l">CR3 前三大占比 <span class="pill ${rc3}">${rl3}</span></div><div class="v">${c.cr3.toFixed(1)}%</div>
+      <div class="h">${c.rows.slice(0, 3).map(r => esc(r.c)).join(" · ") || "—"}</div></div>
+    <div class="cm"><div class="l">CR5 前五大占比 <span class="pill ${rc5}">${rl5}</span></div><div class="v">${c.cr5.toFixed(1)}%</div>
+      <div class="h">第一大客户单独占 ${c.cr1.toFixed(1)}%</div></div>
+    <div class="cm"><div class="l">HHI 指数 <span class="help" title="各客户占比的平方和。低于 1500 分散，1500–2500 中等，高于 2500 高集中">?</span> <span class="pill ${hh[0]}">${hh[1]}</span></div>
+      <div class="v">${c.hhi}</div><div class="h">越低说明客户结构越分散</div></div>`;
+
+  const ag3 = c.rows.slice(0, 3).filter(r => r.type === "第三方");
+  const od = openInvoices().filter(x => x.age > 60), odAg = od.filter(x => x.p.type === "第三方").length;
+  document.getElementById("wfoot").innerHTML = c.rows.length
+    ? `前三家吃掉 <b>${c.cr3.toFixed(0)}%</b>${ag3.length ? `，其中 <b class="bad">${ag3.length} 家是代理不是品牌方</b>（${ag3.map(r => esc(r.c)).join("、")}）—— 账期不由我们控制${od.length ? `，账龄超 60 天的 ${od.length} 笔里有 ${odAg} 笔来自代理` : ""}。` : "，都是直客品牌方，账期可以直接谈。"}
+       ${c.rows.length > 5 ? `尾部 ${rest.length} 家合计只占 <b>${(restA / c.tot * 100).toFixed(0)}%</b>。` : ""}`
+    : "该周期没有可统计的客户。";
+  raf(() => document.getElementById("waffle").classList.add("lit"));
+  growAll(document.getElementById("concBody"));
+}
+
+/* =========================================================================
+   ⑥ 转化漏斗：流程图（圆节点 + 箭头上挂转化率）
+   ========================================================================= */
+RENDER.fun = renderFunnel;
+const FCOLOR = ["#94A3B8", "#49B6D8", "#008AA8", "#1A9E4B", "#0c7074"];
+const ARROW = `<svg viewBox="0 0 60 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h52"/><path d="M49 2l5 4-5 4"/></svg>`;
+function renderFunnel() {
+  renderFilter("fun");
+  tileSelect(document.getElementById("funbd"), [{ v: "", n: "全部 BD" }].concat(BDS.map(b => ({ v: b, n: BD[b].full }))), funBd,
+    v => { funBd = v; renderFunnel(); });
+  const { lv, k } = F.fun, f = funnelOf(lv, k, funBd), s = f.steps;
+  const noAmt = f.pool.filter(p => !p.sign && !p.amt).length;
+  const EN = ["Negotiating", "Approved", "Signed", "Collected", "Net Profit"];
+  document.getElementById("funsub").innerHTML = `${labelOf(lv, k)} · ${funBd ? BD[funBd].full : "全部 BD"} · ${s[0].n} 条线索进入漏斗`
+    + (noAmt ? ` <span class="pill p-amber" title="源表这些线索的「预测合同金额」是空的，金额口径的转化率会偏高">${noAmt} 条线索没填预测金额</span>` : "");
+
+  document.getElementById("fflow").innerHTML = s.map((x, i) => {
+    const node = `<div class="fnode">
+      <div class="fcircle" style="background:${FCOLOR[i]}">${wan(x.a)}<span class="fu">万</span></div>
+      <div class="fcn">${x.name}</div>
+      <div class="fen">${EN[i]}</div>
+      <div class="famt">${x.n != null ? x.n + `<span class="cnu"> ${x.u}</span>` : "—"}</div>
+      <div class="fnote">${x.note}</div></div>`;
+    if (!i) return node;
+    const prev = s[i - 1];
+    return `<div class="farrow" style="color:${FCOLOR[i]}">${ARROW}
+      <span class="fr">${pct(x.a, prev.a)}</span><span class="frn">${x.rate}</span></div>` + node;
+  }).join("");
+  document.getElementById("funnote").innerHTML = `口径说明：五个节点都按<b>金额</b>统计（圆内单位万元），按<b>线索建联时间</b>归入当期队列，看同一批线索最后跑成什么样；
+    节点下方的条数是同一批线索里到达该节点的<b>个数</b>，与金额不换算。${noAmt ? `本期有 <b>${noAmt}</b> 条线索没填预测金额，第一段分母偏小、转化率会偏高。` : ""}`;
+
+  const cs = convSeries(lv, k, funBd), SW = 200, SH = 42;
+  document.getElementById("convgrid").innerHTML = cs.rows.map(r => {
+    const young = !matured(lv, k, r.cv.mature);
+    const dy = r.yoy && r.yoy.d ? deltaPP(r.cur.r, r.yoy.r) : { txt: "—", cls: "flat" };
+    const dq = lv === "year" ? { txt: "—", cls: "flat" } : (r.prev && r.prev.d ? deltaPP(r.cur.r, r.prev.r) : { txt: "—", cls: "flat" });
+    const vals = r.pts.map((p, i) => isFuture(cs.lv, cs.keys[i]) || !p.d ? null : Math.min(100, p.r));
+    const ok = vals.filter(v => v != null);
+    const pts = vals.map((v, i) => v == null ? null : [8 + (vals.length === 1 ? SW / 2 : i * (SW - 16) / (vals.length - 1)), SH - 5 - v / 100 * (SH - 13)]).filter(Boolean);
+    const last = pts[pts.length - 1];
+    const spark = ok.length > 1
+      ? `<svg viewBox="0 0 ${SW} ${SH}" preserveAspectRatio="none"><path d="${smoothPath(pts)}" fill="none"
+           stroke="${r.cv.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+         <span class="sdot" style="color:${r.cv.color};left:${(last[0] / SW * 100).toFixed(2)}%;top:${(last[1] / SH * 100).toFixed(2)}%"></span>`
+      : `<div style="font-size:10.5px;color:var(--muted2);padding-top:13px">只有一个周期有基数，不画趋势线</div>`;
+    return `<div class="conv">
+      <div class="ch"><s style="background:${r.cv.color}"></s>${r.cv.name}
+        ${young ? `<span class="pill p-amber" title="这批线索还没走完 ${r.cv.mature} 天的成熟期，转化率会偏低">队列未跑完</span>` : ""}</div>
+      <div class="cv" style="color:${r.cv.color}">${r.cur.d ? r.cur.r.toFixed(1) + "%" : "—"}</div>
+      <div class="cd">${money(r.cur.n)} / ${money(r.cur.d)}</div>
+      <div class="dcs"><span class="dc ${young ? "flat" : dy.cls}" title="${r.yoy && r.yoy.d ? "去年同期 " + r.yoy.r.toFixed(1) + "%" : "去年同期没有数据"}">同比 <b>${dy.txt}</b></span>
+        <span class="dc ${young ? "flat" : dq.cls}" title="${lv === "year" ? "年度的环比就是同比" : (r.prev && r.prev.d ? "上一周期 " + r.prev.r.toFixed(1) + "%" : "上一周期没有数据")}">环比 <b>${dq.txt}</b></span></div>
+      <div class="spark">${spark}</div>
+      <div class="cf">近 ${ok.length} 个${{ year: "年", quarter: "季度", month: "月" }[cs.lv]}的走势，纵轴 0–100%</div></div>`;
+  }).join("");
+}
+
+/* =========================================================================
+   ⑦ 近期动态：事件表 + 项目阶段
+   ========================================================================= */
+const ALLEVT = buildEvents();
+
+/* 阶段口径与上方漏斗、与右上角筛选共用同一套节点名：
+   建联 → 立项 → 签约 → 开票 → 回款。每个已立项项目按「当前走到的最远节点」归入一档，
+   五档互斥。数据同源（项目的立项/签约日期 + 开票/回款流水），漏斗看金额转化，这里看项目个数分布。 */
+const STAGE_DEF = [
+  { k: "立项", n: "已立项 · 待签约", c: "#B9CBD6", d: "已报备立项，合同还没签" },
+  { k: "签约", n: "已签约 · 待开票", c: "#49B6D8", d: "合同已签，发票还没开" },
+  { k: "开票", n: "已开票 · 待回款", c: "#EBA33F", d: "发票已开，钱还没到账" },
+  { k: "回款", n: "部分回款",       c: "#3FB36A", d: "已到账一部分，还有尾款" },
+  { k: "结清", n: "已结清",         c: "#0c7074", d: "合同额已全额到账" },
+];
+const STAGEC = STAGE_DEF.reduce((o, s) => (o[s.k] = s, o), {});
+function stageOf(p) {
+  if (!p.appr && !p.sign) {
+    /* 源表状态已经过了「在谈线索」但没填立项 / 签约日期的，不能按日期归档就丢掉，
+       退回用状态字段兜底记进第一档，并在下方注明有几条是这么兜的。 */
+    return (p.status && p.status.indexOf("在谈") < 0) ? "立项" : null;
+  }
+  const rec = recTotal(p), inv = invTotal(p);
+  if (p.amt > 0 && rec >= p.amt - 1) return "结清";
+  if (rec > 0) return "回款";
+  if (inv > 0) return "开票";
+  if (p.sign) return "签约";
+  return "立项";
+}
+/* 右上角筛选与阶段共用词汇：点「签约」两边一起响应；「建联 / 付款」在本模块没有对应档 */
+const FEED2STAGE = { 立项: "立项", 签约: "签约", 开票: "开票", 回款: "回款" };
+
+let feedLimit = 14, stagePick = null;   /* null = 全部阶段 */
+function renderFeed() {
+  const types = ["全部", "建联", "立项", "签约", "开票", "回款", "付款"];
+  document.getElementById("feedfilter").innerHTML = types.map(t =>
+    `<button class="${feedType === t ? "on" : ""}" onclick="pickFeed('${t}')">${t}</button>`).join("");
+  const all = feedType === "全部" ? ALLEVT : ALLEVT.filter(e => e.t === feedType);
+  const list = all.slice(0, feedLimit);
+  document.getElementById("feedsub").textContent = "建联 / 立项 / 签约 / 开票 / 回款 / 付款六类状态变更，按发生日期倒序，事件金额不跨类型合计";
+  document.getElementById("feedCt").textContent = list.length + " / " + all.length;
+
+  const byDay = [];
+  list.forEach(e => {
+    const g = byDay[byDay.length - 1];
+    if (g && g.d === e.d) g.items.push(e); else byDay.push({ d: e.d, items: [e] });
+  });
+  const WDN = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+  document.getElementById("feedwrap").innerHTML = byDay.length ? byDay.map(g => {
+    const ago = days(g.d, TODAY);
+    return `<div class="fday"><span class="fd1">${g.d.slice(5).replace("-", " / ")}</span>
+        <span class="fd2">${WDN[new Date(g.d + "T00:00:00Z").getUTCDay()]} · ${ago === 0 ? "今天" : ago + " 天前"} · ${g.items.length} 条</span>
+        <span class="fdl"></span></div>`
+      + g.items.map(e => {
+        const st = EVT[e.t];
+        return `<div class="fev"><span class="fdot" style="background:${st.c}"></span>
+          <div><div class="fmain">${esc(e.cl)}</div>
+            <div class="fmeta"><span class="fk" style="color:${st.c}">${e.t}</span> · ${esc(e.pj)} · ${esc((e.own || "").split(" ")[0])}</div></div>
+          <span class="fam ${e.amt ? "" : "zero"}">${e.amt ? money(e.amt) : "—"}</span></div>`;
+      }).join("");
+  }).join("") + (all.length > feedLimit
+      ? `<div class="feedmore" onclick="feedLimit=Math.min(40,feedLimit+14);renderFeed()">展开更多（还有 ${Math.min(40, all.length) - feedLimit} 条，最多显示 40 条）</div>`
+      : (feedLimit > 14 ? `<div class="feedmore" onclick="feedLimit=14;renderFeed()">收起</div>` : ""))
+    : `<div style="padding:34px;text-align:center;color:var(--muted2);font-size:12.5px">该类型暂无动态</div>`;
+
+  drawStages();
+}
+/* 一次点击同时驱动左侧流水与右侧阶段，两边词汇一致 */
+function pickFeed(t) {
+  feedType = t; feedLimit = 14;
+  stagePick = t === "全部" ? null : (FEED2STAGE[t] || null);
+  renderFeed();
+}
+function stageGroups() {
+  const pool = DATA.map(p => ({ p, k: stageOf(p) })).filter(x => x.k);
+  return STAGE_DEF.map(s => {
+    const ps = pool.filter(x => x.k === s.k).map(x => x.p);
+    return { ...s, ps, amt: sum(ps, p => p.amt) };
+  }).filter(g => g.ps.length);
+}
+function pickStage(k) { stagePick = (stagePick === k) ? null : k; paintStage(); }
+/* 只切 class，不重写 innerHTML —— 换档时分段宽度不会重排 */
+function paintStage() {
+  const bar = document.getElementById("stageBar");
+  bar.classList.toggle("picking", stagePick != null);
+  bar.querySelectorAll("i").forEach(el => el.classList.toggle("on", el.dataset.st === stagePick));
+  document.querySelectorAll("#stageLeg .tli").forEach(el => el.classList.toggle("on", el.dataset.st === stagePick));
+  drawStageCards();
+}
+function drawStageCards() {
+  const groups = stageGroups();
+  const list = stagePick == null ? groups : groups.filter(g => g.k === stagePick);
+  document.getElementById("stageCards").innerHTML = list.length ? list.map((g, gi) => `
+    <div class="sublabel" style="margin:${gi ? "18px" : "0"} 0 4px">
+      <span class="tdot" style="width:9px;height:9px;border-radius:3px;background:${g.c}"></span>${g.n}
+      <span class="ct">${g.ps.length}</span><span class="ln"></span>
+      <span style="font-family:var(--en);font-weight:700;color:var(--muted2)">${money(g.amt)}</span></div>
+    ${g.ps.slice().sort((a, b) => b.amt - a.amt).map(p => `<div class="scard">
+      <div><div class="sn">${esc(p.name)}</div>
+        <div class="sm">${esc(p.client)} · ${esc((p.ae || bdName(p.bd)).split(" ")[0])}${p.due ? ` · 约定回款 ${cn(p.due)}` : ""}</div></div>
+      <span class="sa" style="color:${g.c}">${money(p.amt)}</span></div>`).join("")}`).join("")
+    : `<div style="padding:28px 4px;color:var(--muted2);font-size:12.5px;line-height:1.8">
+        该档位当前没有项目。点上方「全部」可看回全部五档。</div>`;
+}
+function drawStages() {
+  const groups = stageGroups(), tot = sum(groups, g => g.ps.length);
+  if (stagePick != null && !groups.some(g => g.k === stagePick) && FEED2STAGE[feedType]) stagePick = null;
+  document.getElementById("wipnote").textContent = "";
+  document.getElementById("stageBar").innerHTML = groups.map(g => {
+    const p = g.ps.length / tot * 100;
+    return `<i data-w="${p.toFixed(2)}" data-st="${g.k}" style="background:${g.c}"
+      title="${g.n} · ${g.ps.length} 个 · ${money(g.amt)}｜${g.d}" onclick="pickStage('${g.k}')">
+      <span class="seghl" style="background:${g.c}">${p >= 12 ? p.toFixed(0) + "%" : ""}</span></i>`;
+  }).join("");
+  document.getElementById("stageLeg").innerHTML = groups.map(g => `
+    <div class="tli" data-st="${g.k}" onclick="pickStage('${g.k}')" title="${g.d}">
+      <span class="tdot" style="background:${g.c}"></span>
+      <span class="tn">${g.n}</span>
+      <span class="tp" style="color:${g.c}">${g.ps.length} 个</span>
+      <span class="tv">${money(g.amt)}</span></div>`).join("");
+  paintStage();
+  growAll(document.getElementById("stageBar"));
+}
+
+/* =========================================================================
+   设定目标弹窗
+   ========================================================================= */
+let gtab = "company", GD = null;
+function openGoals() { GD = JSON.parse(JSON.stringify(GOALS)); gtab = "company"; drawGoalModal(); }
+function drawGoalModal() {
+  const qn = ["Q1", "Q2", "Q3", "Q4"], mn = ["首月", "次月", "末月"];
+  const bsum = BDS.reduce((a, b) => a + (+GD.bd[b] || 0), 0);
+  const body = gtab === "company" ? `
+    ${GOALDEF.map(d => `<div class="frow"><label>${d.name}年度目标<i>${d.id === "newclients" ? "全年新签约的新客户家数" : "单位：元"}</i></label>
+      <input value="${GD.company[d.id]}" oninput="GD.company['${d.id}']=+this.value||0;drawSplit()"></div>`).join("")}
+    <div class="frow"><label>季度权重<i>合计需为 100%</i></label>
+      <div class="qw">${qn.map((q, i) => `<div><label>${q}</label><input value="${(GD.qw[i] * 100).toFixed(0)}" oninput="GD.qw[${i}]=(+this.value||0)/100;drawSplit()"></div>`).join("")}</div></div>
+    <div class="frow"><label>季内月度权重<i>合计需为 100%</i></label>
+      <div class="qw" style="grid-template-columns:repeat(3,1fr)">${mn.map((m, i) => `<div><label>${m}</label><input value="${(GD.mw[i] * 100).toFixed(0)}" oninput="GD.mw[${i}]=(+this.value||0)/100;drawSplit()"></div>`).join("")}</div></div>
+    <div id="splitprev"></div><div class="hintbox" id="ghint"></div>`
+  : `<div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.8">把年度合同额目标分到人，季度 / 月度按上一页的权重自动拆。</div>
+    ${BDS.map(b => `<div class="assign"><div class="an"><span class="oav" style="background:${avGrad(b)}">${b[0]}</span>${BD[b].full}</div>
+      <input value="${GD.bd[b] || 0}" oninput="GD.bd['${b}']=+this.value||0;drawSplit()">
+      <div class="ap" id="gp-${b}">${pct(GD.bd[b] || 0, GD.company.contract)}</div></div>`).join("")}
+    <div class="assign" style="border-bottom:0;font-weight:600"><div class="an" style="padding-left:35px">合计</div>
+      <div class="ap" id="gbsum" style="text-align:left;padding-left:12px">${money(bsum)}</div>
+      <div class="ap">${pct(bsum, GD.company.contract)}</div></div>
+    <div class="hintbox" id="ghint2"></div>`;
+  document.getElementById("mask").innerHTML = `<div class="maskbg" onclick="if(event.target===this)closeM()"><div class="modal">
+    <div class="mhd2"><h3>设定 ${GD.year} 经营目标</h3><span class="pill p-gray">设年度，自动拆季度与月度</span><button class="x" onclick="closeM()">×</button></div>
+    <div class="mbd"><div class="segctrl" style="width:fit-content;margin-bottom:18px">
+      <button class="${gtab === "company" ? "on" : ""}" onclick="gtab='company';drawGoalModal()">公司目标与拆分</button>
+      <button class="${gtab === "bd" ? "on" : ""}" onclick="gtab='bd';drawGoalModal()">指派到人</button></div>${body}</div>
+    <div class="mft"><span style="flex:1;font-size:11px;color:var(--muted2)">保存后达成情况、团队经营、简报会一起重算</span>
+      <button class="ghostbtn" onclick="closeM()">取消</button>
+      <button class="ghostbtn solid" onclick="saveGoals()">保存目标</button></div></div></div>`;
+  drawSplit();
+}
+function drawSplit() {
+  const qsum = GD.qw.reduce((a, b) => a + b, 0), msum = GD.mw.reduce((a, b) => a + b, 0);
+  if (gtab === "company") {
+    const rows = GOALDEF.filter(d => d.id !== "newclients");
+    document.getElementById("splitprev").innerHTML = `<table class="splitt"><tr><th>自动拆分预览</th>${[1, 2, 3, 4].map(q => `<th>Q${q}</th>`).join("")}<th>Q3 三个月</th></tr>
+      ${rows.map(d => `<tr><td>${d.name}</td>${GD.qw.map(w => `<td>${money(GD.company[d.id] * w)}</td>`).join("")}
+        <td style="color:var(--muted)">${GD.mw.map(m => money(GD.company[d.id] * GD.qw[2] * m, 0)).join(" / ")}</td></tr>`).join("")}
+      <tr><td>新客户数</td>${GD.qw.map(w => `<td>${(GD.company.newclients * w).toFixed(1)} 家</td>`).join("")}<td style="color:var(--muted)">同样权重</td></tr></table>`;
+    const bad = Math.abs(qsum - 1) > .005 || Math.abs(msum - 1) > .005;
+    document.getElementById("ghint").className = "hintbox" + (bad ? " warnbox" : "");
+    document.getElementById("ghint").innerHTML = bad
+      ? `权重没有归一：季度合计 ${(qsum * 100).toFixed(0)}%、月度合计 ${(msum * 100).toFixed(0)}%，都要等于 100%。`
+      : `年度目标一填，季度和月度目标按这组权重自动生成。各板块切到季度 / 月度时直接用拆出来的数。`;
+  } else {
+    const bsum = BDS.reduce((a, b) => a + (+GD.bd[b] || 0), 0), diff = bsum - GD.company.contract;
+    BDS.forEach(b => { const e = document.getElementById("gp-" + b); if (e) e.textContent = pct(GD.bd[b] || 0, GD.company.contract); });
+    document.getElementById("gbsum").textContent = money(bsum);
+    document.getElementById("ghint2").className = "hintbox" + (diff ? " warnbox" : "");
+    document.getElementById("ghint2").innerHTML = diff
+      ? `个人目标合计 ${money(bsum)}，比公司年度目标${diff > 0 ? "多" : "少"} ${money(Math.abs(diff))}。可以保存，但团队表的合计会跟公司目标对不上。`
+      : `个人目标合计与公司年度目标一致。`;
+  }
+}
+function saveGoals() {
+  GOALS = JSON.parse(JSON.stringify(GD)); closeM();
+  renderGoals(); renderTeam(); renderBrief();
+  toast("目标已更新，达成情况 / 团队经营 / 简报已重算", "原型演示，仅本地生效，不会写入实际系统。");
+}
+
+/* =========================================================================
+   层级切换 / 顶部控件 / 启动
+   ========================================================================= */
+function switchLevel(lv) {
+  if (lv === "biz") { location.href = "business_dashboard_redesign.html"; return; }
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.lv === lv));
+  ["mgmt", "exec"].forEach(x => document.getElementById("lv-" + x).classList.toggle("hide", x !== lv));
+  if (lv === "exec" && !document.getElementById("lv-exec").innerHTML) {
+    document.getElementById("lv-exec").innerHTML = `<div class="panel"><div class="emptystate">
+      <div class="eic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/></svg></div>
+      <div class="et2">执行层看板还没有对应的源数据</div>
+      <div class="ed">面向内容与制作团队：这周谁在做什么、哪条片子压在哪个环节、外部团队交付有没有到。<br>
+        当前源表只覆盖线索 / 项目 / 财务三类字段，没有排期与制作环节记录，所以这一层不做数据填充。</div>
+      <div class="soonlist">
+        <div class="sl"><b>本周排期</b><span>按人展开的制作排期，冲突与超载标红。</span></div>
+        <div class="sl"><b>制作进度墙</b><span>Idea → 初稿 → 修改 → 交付验收。</span></div>
+        <div class="sl"><b>外部团队交付</b><span>外采 Brief 的要求完成时间与验收状态。</span></div>
+      </div></div></div>`;
+  }
+}
+/* 简报背景：assets/insight/insight01–05.jpg，每 24 小时换一张。
+   用「当天序号 → 哈希 → 取模」而不是顺序 +1，所以看起来是随机的，
+   但同一天内任何时刻刷新都拿到同一张（不会一刷新就跳图）。 */
+const INSIGHTS = ["insight01", "insight02", "insight03", "insight04", "insight05"];
+(function setBg() {
+  const el = document.getElementById("museBg");
+  const day = Math.floor(new Date(TODAY + "T00:00:00Z") / 864e5);
+  el.src = `assets/insight/${INSIGHTS[hashStr("insight-" + day) % INSIGHTS.length]}.jpg`;
+  INSIGHTS.forEach(n => { const im = new Image(); im.src = `assets/insight/${n}.jpg`; });
+})();
+document.getElementById("meAvatar").style.background = avGrad("曾磊 Nico");
+document.getElementById("cutoff").textContent = TODAY;
+document.getElementById("dqBtn").onclick = showDQ;
+document.getElementById("goalBtn").onclick = openGoals;
+document.getElementById("exportBtn").onclick = () =>
+  toast(`导出范围：管理层看板 · 全公司 · 截至 ${TODAY}`, "原型演示，未生成实际文件。");
+document.getElementById("refreshBtn").onclick = e => {
+  const b = e.currentTarget;
+  b.classList.add("spin"); setTimeout(() => b.classList.remove("spin"), 720);
+  renderBrief(1);
+};
+document.getElementById("teamReset").onclick = () => {
+  teamSort.key = null; teamSort.dir = -1;
+  document.querySelectorAll("#teamTable th.sortable").forEach(x => { x.classList.remove("sorted"); x.querySelector(".sa").textContent = "↕"; });
+  drawTeam(); toast("已恢复源表原始顺序（按签约额降序）");
+};
+bindSort("teamTable", teamSort, drawTeam);
+bindSort("concTable", concSort, renderConc);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeM(); });
+
+renderBrief(); renderGoals(); renderFin(); renderTeam(); renderConc(); renderFunnel(); renderFeed();
+
+</script>
+</body>
+</html>

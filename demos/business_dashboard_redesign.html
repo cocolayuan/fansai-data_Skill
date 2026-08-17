@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数据大盘 · 业务层看板 · Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== V2 设计令牌 ===== */
+:root{
+  --ink:#1b2430; --ink2:#0f3132; --muted:#64748b; --muted2:#94a3b8;
+  --teal:#008aa8; --teal2:#0c7074; --blue:#49B6D8; --green:#8BD98C; --lime:#A7E885;
+  --green-deep:#34A85E; --green-ink:#1F6F4A; --line:#e8efef;
+  --ok:#1A9E4B; --warn:#C77B26; --err:#D6455B; --info:#2563EB;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","Noto Sans SC",sans-serif;
+  --glassshadow:inset 0 1px 0 rgba(255,255,255,.65);   /* V2 玻璃卡：不投影，只保留顶边内高光 */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+/* V2 §2：背景只铺一层，禁止再套一层带圆角投影的外框 */
+body{font-family:var(--cn);font-weight:500;color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh;
+  background:
+   radial-gradient(900px 520px at 12% -6%, rgba(154,220,203,.42), transparent 62%),
+   radial-gradient(760px 480px at 88% 4%, rgba(73,182,216,.30), transparent 60%),
+   radial-gradient(820px 520px at 62% 104%, rgba(0,138,168,.10), transparent 62%),
+   #ECF4F2;
+  background-attachment:fixed}
+.wrap{max-width:1680px;margin:0 auto;padding:26px 36px 52px}
+.tnum{font-variant-numeric:tabular-nums}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.rv{opacity:0;animation:up .5s cubic-bezier(.2,.7,.2,1) forwards}
+/* V2 §1 液态玻璃配方（原样取值）：半透明白渐变 + blur(24) saturate(160%) + 1px 内描白边，不投影 */
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.5));
+  backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+  border:1px solid rgba(255,255,255,.78);box-shadow:var(--glassshadow)}
+/* 「今日」是唯一带卡面的模块，内边距放宽让卡更高一些 */
+.panel.today{padding:30px 26px 32px}
+.panel.today .slist{gap:14px}
+.panel.today .sitem{padding:17px 18px}
+.glass-lite{background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(150%);
+  -webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid rgba(255,255,255,.7)}
+
+/* ===== header 面包屑 ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:16px}
+.bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;
+  border:2px solid #f5fffe;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9ADCCB,#49B6D8);flex:0 0 auto}
+.bmain{font-family:var(--en);font-weight:700;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.bsub{font-family:var(--en);font-weight:300;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.bellbtn{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px -10px rgba(15,49,50,.18);cursor:pointer;transition:.2s}
+.bellbtn:hover{transform:translateY(-1px)}
+.me{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;color:#04312f;font-family:var(--en);
+  font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center}
+.mename{font-family:var(--en);font-weight:500;font-size:18px}
+
+/* ===== tab + 控件同一行（V2 §3：控件不占独立行） ===== */
+.navrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.tabs{display:flex;align-items:center;gap:6px;padding:6px;border-radius:18px;width:fit-content}
+.tab{border:none;background:none;padding:9px 18px;border-radius:13px;font-family:var(--cn);font-weight:500;
+  font-size:14px;color:var(--muted);cursor:pointer;transition:.18s;white-space:nowrap;display:flex;align-items:baseline;gap:7px}
+.tab .ten{font-family:var(--en);font-size:9.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2)}
+.tab.on{background:var(--ink);color:#fff;font-weight:600;box-shadow:0 10px 22px -10px rgba(15,49,50,.4)}
+.tab.on .ten{color:rgba(255,255,255,.62)}
+.tab:not(.on):hover{color:var(--ink);background:rgba(255,255,255,.6)}
+.ctrlrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.datepill{display:flex;align-items:baseline;gap:7px;padding:9px 15px;border-radius:14px;background:rgba(255,255,255,.6);
+  border:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.datepill b{font-family:var(--en);font-weight:600;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+.ghostbtn{display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:14px;font-family:var(--cn);
+  font-size:12.5px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.6);border:1px solid var(--line);cursor:pointer;transition:.16s}
+.ghostbtn svg{width:14px;height:14px}
+.ghostbtn:hover{color:var(--ink);border-color:#cfe0e0;background:#fff}
+.refreshbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.6);
+  color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.25s}
+.refreshbtn:hover{color:var(--ink);border-color:#cfe0e0}
+.refreshbtn.spin svg{animation:spin .7s linear}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== 视角切换 ===== */
+.viewbar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.viewbar h1{font-size:21px;font-weight:700;display:flex;align-items:baseline;gap:9px}
+.viewbar h1 .ven{font-family:var(--en);font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted2)}
+.viewbar .vd{font-size:12.5px;color:var(--muted2);margin-top:5px}
+.bdswitch{display:flex;align-items:center;gap:4px;padding:4px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid var(--line)}
+.bdswitch button{border:none;background:none;padding:8px 14px;border-radius:10px;font-family:var(--cn);font-weight:500;
+  font-size:13px;color:var(--muted);cursor:pointer;transition:.18s;display:flex;align-items:center;gap:7px}
+.bdswitch button .bav{width:20px;height:20px;border-radius:50%;font-family:var(--en);font-size:9.5px;font-weight:700;
+  color:#04312f;display:flex;align-items:center;justify-content:center}
+.bdswitch button.on{background:var(--ink);color:#fff;font-weight:600}
+
+/* ===== section ===== */
+section{margin-bottom:26px}
+.panel{border-radius:24px;padding:24px}
+.sechead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.sechead h2{font-size:18px;font-weight:700;display:flex;align-items:baseline;gap:9px}
+.sechead h2 .sen{font-family:var(--en);font-size:10px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted2)}
+.sechead .sd{font-size:12.5px;color:var(--muted2);margin-top:5px;max-width:820px;line-height:1.6}
+/* 口径说明与主标题同行（不再单独占一行） */
+.sechead h2 .sdi{font-size:12px;font-weight:500;color:var(--muted2);letter-spacing:0;
+  padding-left:14px;margin-left:2px;border-left:1px solid var(--line);line-height:1.5}
+.sublabel{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-bottom:13px}
+.sublabel .ct{font-family:var(--en);font-size:11px;color:var(--muted2);background:rgba(255,255,255,.7);
+  border:1px solid var(--line);border-radius:12px;padding:1px 9px}
+.sublabel .ln{flex:1;height:1px;background:linear-gradient(90deg,rgba(231,239,239,.95),transparent)}
+.segctrl{display:flex;align-items:center;gap:4px;padding:4px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid var(--line)}
+.segctrl button{border:none;background:none;padding:8px 15px;border-radius:10px;font-family:var(--cn);font-weight:500;
+  font-size:13px;color:var(--muted);cursor:pointer;transition:.18s}
+.segctrl button.on{background:var(--ink);color:#fff;font-weight:600}
+/* 周期选择：年度 / 季度 / 月度 三个瓦片下拉（V2 §6：不用原生 select） */
+.pdd{position:relative}
+.pdd .pt{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;border:none;background:none;
+  font-family:var(--cn);font-weight:500;font-size:13px;color:var(--muted);cursor:pointer;transition:.18s;white-space:nowrap}
+.pdd .pt .pv{font-family:var(--en);font-weight:600;font-variant-numeric:tabular-nums}
+.pdd .pt::after{content:'';width:5.5px;height:5.5px;border-right:1.7px solid currentColor;border-bottom:1.7px solid currentColor;
+  transform:rotate(45deg) translateY(-2px);opacity:.5;flex:0 0 auto;transition:.18s}
+.pdd:not(.on) .pt:hover{color:var(--ink);background:rgba(255,255,255,.7)}
+.pdd.on .pt{background:var(--ink);color:#fff;font-weight:600}
+.pdd.open .pt::after{transform:rotate(225deg) translateY(-2px);opacity:.85}
+.pdd .ppop{display:none;position:absolute;right:0;top:calc(100% + 9px);z-index:40;min-width:152px;max-height:236px;
+  overflow-y:auto;border-radius:14px;padding:6px;background:rgba(255,255,255,.96);
+  backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
+  border:1px solid rgba(255,255,255,.9);box-shadow:0 18px 40px -18px rgba(15,50,40,.4)}
+.pdd.open .ppop{display:block}
+.popt{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:10px;font-size:12.5px;font-weight:500;
+  color:var(--ink);border:1px solid transparent;cursor:pointer;transition:.14s;white-space:nowrap}
+.popt:hover{background:rgba(0,138,168,.06)}
+.popt.sel{border-color:var(--blue);background:rgba(73,182,216,.1);font-weight:600}
+.popt .nd{margin-left:auto;font-size:9.5px;font-weight:600;color:var(--muted2);background:#F1F4F4;border-radius:5px;padding:1px 6px}
+/* 该周期源数据缺失时的诚实空态 */
+.kpibody{display:flex;flex-direction:column;min-height:0}
+.kpiempty{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:10px;padding:64px 24px;min-height:290px}
+.kpiempty .eic{width:52px;height:52px;border-radius:16px;background:#EEF4F3;color:var(--muted2);
+  display:flex;align-items:center;justify-content:center}
+.kpiempty .et2{font-size:14px;font-weight:600}
+.kpiempty .ed{font-size:12px;color:var(--muted2);line-height:1.75;max-width:470px}
+.srcnote{margin-top:auto;padding-top:14px;border-top:1px solid rgba(232,239,239,.8);font-size:11.5px;color:var(--muted2);line-height:1.65}
+.demotag{font-size:9px;font-weight:700;color:#C77B26;background:#FDF1E3;border-radius:5px;padding:1px 5px;margin-left:5px;cursor:help}
+
+/* ===== ① 今日：寄语 + AI 策略（合并同一玻璃容器，两栏 stretch 等高） ===== */
+.todaygrid{display:grid;grid-template-columns:352px 1fr;gap:22px;align-items:stretch}
+.museside,.aiside{display:flex;flex-direction:column;min-height:0}
+/* 寄语卡：背景图（每 24h 轮换）+ 遮罩层；渐变作为图片加载失败时的兜底底色 */
+.muse{position:relative;flex:1 1 auto;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;
+  justify-content:space-between;padding:22px 24px 20px;isolation:isolate;
+  background:linear-gradient(150deg,#0B3B3D 0%,#0d5c53 46%,#12796a 100%)}
+.muse .mbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transform:scale(1.02);
+  transition:opacity .32s ease}
+.muse .mbg.fading{opacity:0}
+.muse .mscrim{position:absolute;inset:0;z-index:1;
+  background:linear-gradient(155deg, rgba(6,34,30,.84) 0%, rgba(8,52,45,.68) 46%, rgba(10,74,58,.44) 100%)}
+.muse>.mk,.muse>div:not(.mscrim),.muse>.mfoot{position:relative;z-index:2}
+.muse .mk{display:flex;align-items:center;gap:9px;font-size:11px;font-weight:700;letter-spacing:1.6px;
+  text-transform:uppercase;color:#D6F5E4;margin-bottom:14px}
+.muse .mk .idot{width:7px;height:7px;border-radius:50%;background:#D6F5E4;box-shadow:0 0 0 4px rgba(214,245,228,.2)}
+.muse blockquote{font-size:17.5px;line-height:1.95;color:#fff;font-weight:500;letter-spacing:.4px;
+  text-shadow:0 1px 12px rgba(0,0,0,.28)}
+.muse .mfoot{display:flex;align-items:center;justify-content:space-between;margin-top:18px;gap:12px}
+.muse .mdate{font-family:var(--en);font-size:12px;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:.4px}
+.muse .mbtn{border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.12);color:#fff;border-radius:20px;
+  padding:6px 15px;font-family:var(--cn);font-size:12px;font-weight:500;cursor:pointer;transition:.18s}
+.muse .mbtn:hover{background:rgba(255,255,255,.24)}
+
+.slist{display:flex;flex-direction:column;gap:10px}
+.sitem{display:flex;gap:13px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.55);
+  border:1px solid var(--line);transition:.18s}
+.sitem:hover{background:rgba(255,255,255,.82)}
+.stag{flex:0 0 auto;height:23px;border-radius:11px;padding:0 10px;font-size:11px;font-weight:600;
+  display:inline-flex;align-items:center;gap:5px}
+.stag .sd2{width:5px;height:5px;border-radius:50%}
+.sbody{font-size:13px;line-height:1.75;color:var(--ink)}
+.sbody b{font-weight:600}
+.sbody .amt{font-family:var(--en);font-weight:700;font-variant-numeric:tabular-nums}
+.sbody .why{color:var(--muted2);font-size:12px;line-height:1.7;margin-top:5px}
+
+/* ===== ② KPI：表现分环 + 结构堆叠条 ===== */
+.kpigrid{display:grid;grid-template-columns:246px 1fr;gap:22px;align-items:stretch}
+.ringcard,.barcard{display:flex;flex-direction:column;min-height:0;border-radius:20px;padding:20px;
+  background:rgba(255,255,255,.55);border:1px solid var(--line)}
+.ringcard{align-items:center;justify-content:center;text-align:center;gap:2px}
+.ringwrap{position:relative;width:190px;height:190px;margin-bottom:16px}
+.ringwrap .rv2{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ringwrap .rv2 b{font-family:var(--en);font-weight:700;font-size:42px;line-height:1;font-variant-numeric:tabular-nums}
+.ringwrap .rv2 span{font-size:10.5px;color:var(--muted2);margin-top:9px;line-height:1.55;max-width:124px}
+.ringcard .rlbl{font-size:13px;font-weight:600;color:var(--ink)}
+.knums{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.knum{border-radius:16px;padding:15px 16px 14px;background:#fff;border:1px solid var(--line);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.knum::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc)}
+.knum .kl{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);font-weight:600}
+.knum .kl .kd{width:7px;height:7px;border-radius:2px;background:var(--acc);flex:0 0 auto}
+.knum .kv{display:flex;align-items:baseline;gap:4px;font-family:var(--en);font-weight:700;font-size:27px;
+  line-height:1;margin-top:16px;font-variant-numeric:tabular-nums}
+.knum .kv .un{font-family:var(--cn);font-size:14px;font-weight:700;color:var(--muted)}
+.knum .kc{font-size:11px;color:var(--muted2);margin-top:auto;padding-top:12px}
+.stackwrap{position:relative;margin-top:10px}
+.stack{display:flex;height:34px;border-radius:17px;overflow:hidden;background:#EAF1F1}
+.stack>i{height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--en);
+  font-weight:700;font-size:11.5px;color:#fff;transition:width .7s cubic-bezier(.2,.7,.2,1);min-width:0;overflow:hidden}
+.stack .sgap{background:transparent}
+.tmark{position:absolute;top:-7px;bottom:-7px;width:2px;background:var(--ink);border-radius:2px;transition:left .7s cubic-bezier(.2,.7,.2,1)}
+.tmark span{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-family:var(--en);font-size:10px;
+  font-weight:700;color:var(--ink);white-space:nowrap;background:rgba(255,255,255,.85);border-radius:6px;padding:1px 6px}
+.stackleg{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:22px;font-size:12px;color:var(--muted)}
+.stackleg span{display:flex;align-items:center;gap:7px}
+.stackleg i{width:10px;height:10px;border-radius:3px}
+.knote{margin-top:14px;font-size:12.5px;color:var(--muted);line-height:1.8}
+.knote b{font-family:var(--en);font-weight:700;color:var(--ink)}
+.knote b.bad{color:var(--err)}
+
+/* ===== ③ 线索流程图 ===== */
+.flowbox{border-radius:20px;padding:24px 22px 20px;background:rgba(255,255,255,.55);border:1px solid var(--line)}
+.flow{display:flex;align-items:flex-start}
+.fnode{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:118px;text-align:center}
+.fcircle{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-family:var(--en);font-weight:700;font-size:22px;box-shadow:0 12px 24px -12px rgba(20,60,60,.5)}
+.fcn{font-size:13px;font-weight:600;color:var(--ink)}
+.fen{font-family:var(--en);font-size:9.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2)}
+.famt{font-family:var(--en);font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.famt .cnu{font-family:var(--cn);font-size:11.5px;font-weight:700}
+.farrow{flex:1 1 auto;min-width:24px;height:64px;display:flex;align-items:center;justify-content:center;color:#CBDAD8}
+.farrow svg{width:100%;max-width:54px;height:12px}
+.fdiv{flex:0 0 1px;align-self:stretch;margin:4px 24px 0;
+  background:repeating-linear-gradient(to bottom, var(--line) 0 5px, transparent 5px 10px)}
+.fnode.exception .fcircle{background:none;border:1.5px dashed var(--err);color:var(--err);box-shadow:none}
+.fnode.exception .fcn{color:var(--err)}
+.calnote{display:flex;align-items:flex-start;gap:9px;margin-top:18px;padding:11px 14px;border-radius:14px;
+  background:rgba(0,138,168,.06);border:1px solid rgba(0,138,168,.16);font-size:11.5px;color:var(--teal2);line-height:1.65}
+.calnote svg{width:14px;height:14px;flex:0 0 auto;margin-top:2px}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch;margin-top:20px}
+.minicard{border-radius:20px;padding:19px 20px;background:rgba(255,255,255,.55);border:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0}
+.minicard h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:9px;margin-bottom:4px}
+.minicard h3 .cnt{font-family:var(--en);font-size:11px;font-weight:700;border-radius:11px;padding:2px 9px}
+.minicard .msub{font-size:11.5px;color:var(--muted2);margin-bottom:12px}
+.mrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;
+  border-bottom:1px dashed rgba(232,239,239,.95);font-size:13px}
+.mrow:last-of-type{border-bottom:none}
+.mrow b{font-weight:600}
+.mrow .msec{color:var(--muted2);font-size:11.5px}
+.mrow .rt{flex:0 0 auto;display:flex;align-items:center;gap:9px}
+.mbar{width:74px;height:8px;border-radius:5px;background:#EAF1F1;overflow:hidden}
+.mbar>i{display:block;height:100%;border-radius:5px;background:var(--err)}
+.mdays{font-family:var(--en);font-weight:700;font-size:13px;color:var(--err);min-width:56px;text-align:right;font-variant-numeric:tabular-nums}
+.mwhen{font-family:var(--en);font-weight:700;font-size:12.5px;min-width:74px;text-align:right}
+.mwhen.today{color:var(--warn)}
+.mwhen.later{color:var(--muted2)}
+
+/* ===== ④ 周日历 ===== */
+.callegend{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.callegend span{display:flex;align-items:center;gap:6px}
+.callegend i{width:9px;height:9px;border-radius:3px}
+.cal{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.62)}
+.calhead,.calbody{display:grid;grid-template-columns:58px repeat(7,1fr)}
+.calhead .dh{padding:11px 6px;text-align:center;border-bottom:1px solid var(--line);border-left:1px solid var(--line)}
+.calhead .dh:first-child{border-left:none}
+.calhead .dw{font-size:11px;color:var(--muted2);font-weight:600}
+.calhead .dn{font-family:var(--en);font-size:15px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.calhead .dh.today{background:rgba(0,138,168,.08)}
+.calhead .dh.today .dn{color:var(--teal)}
+.calhead .dh.today .dw{color:var(--teal2)}
+.calbody{position:relative}
+.gutter .gh{height:54px;font-family:var(--en);font-size:10.5px;font-weight:500;color:var(--muted2);
+  text-align:right;padding-right:9px;transform:translateY(-7px)}
+.ccol{position:relative;border-left:1px solid var(--line);cursor:copy}
+.ccol.today{background:rgba(0,138,168,.05)}
+.hline{position:absolute;left:0;right:0;height:1px;background:rgba(232,239,239,.9);pointer-events:none}
+.ev{position:absolute;left:4px;right:4px;border-radius:10px;padding:6px 9px;font-size:11.5px;line-height:1.4;
+  overflow:hidden;cursor:pointer;border-left:3px solid;box-shadow:0 6px 14px -10px rgba(20,60,60,.5)}
+.ev .et{font-family:var(--en);font-weight:700;font-size:10.5px;opacity:.8}
+.ev .en2{font-weight:600;margin-top:1px}
+.ev .ep{opacity:.72;font-size:11px;margin-top:2px}
+
+/* ===== ⑤ 项目推进 ===== */
+.owner{border-radius:20px;padding:19px 20px;background:rgba(255,255,255,.55);border:1px solid var(--line);margin-bottom:16px}
+.owner:last-child{margin-bottom:0}
+.ohead{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+.oav{width:34px;height:34px;border-radius:50%;color:#04312f;font-family:var(--en);font-weight:700;font-size:13px;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ohead b{font-size:14px;font-weight:600}
+.ohead .ometa{font-size:11.5px;color:var(--muted2)}
+.ohead .ometa em{font-style:normal;color:var(--err);font-weight:600}
+.proj{padding:26px 0 12px;border-top:1px solid rgba(232,239,239,.9)}
+.ptop{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
+.ptop .pn{font-size:13.5px;font-weight:600}
+.pbadge{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;height:24px;border-radius:12px;padding:0 11px;
+  font-size:11.5px;font-weight:600}
+.pbadge .pd{width:6px;height:6px;border-radius:50%}
+.rail{display:flex;align-items:center}
+.rstep{display:flex;align-items:center;flex:1}
+.rstep:last-child{flex:0 0 auto}
+.rstep .rp{width:11px;height:11px;border-radius:50%;background:#DCE6E3;flex:0 0 auto}
+.rstep .rl{height:2px;background:#DCE6E3;flex:1}
+.rstep.done .rp{background:var(--teal)}
+.rstep.done .rl{background:var(--teal)}
+.rstep.now .rp{width:14px;height:14px;background:#fff;border:3.5px solid var(--warn);box-shadow:0 0 0 4px rgba(199,123,38,.14)}
+.rstep.late .rp{width:14px;height:14px;background:#fff;border:3.5px solid var(--err);box-shadow:0 0 0 4px rgba(214,69,91,.14)}
+.rlabels{display:flex;justify-content:space-between;gap:6px;margin-top:8px}
+.rlabels span{font-size:10.5px;color:var(--muted2);white-space:nowrap}
+.rlabels span.cur{color:var(--warn);font-weight:600}
+.rlabels span.curLate{color:var(--err);font-weight:600}
+.rlabels span.fin{color:var(--ok);font-weight:600}
+
+/* ===== ⑥ 应收：账龄分段条 + 表格 ===== */
+.agewrap{border-radius:20px;padding:20px;background:rgba(255,255,255,.55);border:1px solid var(--line);
+  display:flex;flex-direction:column;margin-bottom:20px}
+.agetop{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.agetotal{display:flex;align-items:baseline;gap:6px}
+.agetotal .pre{font-family:var(--cn);font-size:13px;font-weight:600;color:var(--muted)}
+.agetotal b{font-family:var(--en);font-weight:700;font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+.agetotal .un{font-size:11.5px;color:var(--muted2);font-weight:600}
+/* 分段条：每段独立圆角 + 间隙（参照系统内「行业分布 / 合同构成」范式） */
+.segbar{display:flex;gap:5px;height:32px}
+.segbar>i{height:100%;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;
+  font-family:var(--en);font-weight:700;font-size:12px;transition:width .7s cubic-bezier(.2,.7,.2,1);overflow:hidden}
+/* 图例：名称 / 百分比 / 金额 紧挨成一组，不被整行拉散 */
+.seglegend{display:flex;flex-wrap:wrap;gap:10px 38px;margin-top:16px}
+.segitem{display:flex;align-items:baseline;gap:8px;font-size:12.5px;color:var(--ink);font-weight:500}
+.segitem .sdot{width:9px;height:9px;border-radius:3px;flex:0 0 auto;align-self:center}
+.segitem .sp{font-family:var(--en);font-weight:700;font-variant-numeric:tabular-nums}
+.segitem .sv{font-family:var(--en);font-weight:500;font-size:12px;color:var(--muted2);font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:11.5px;font-weight:700;color:var(--muted2);letter-spacing:.3px;
+  padding:0 12px 12px;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
+thead th.sortable{cursor:pointer}
+thead th.sortable:hover{color:var(--ink)}
+thead th .sa{display:inline-block;margin-left:4px;opacity:.4;font-size:10px}
+thead th.sorted .sa{opacity:1;color:var(--teal)}
+th.num,td.num{text-align:right}
+tbody tr.datarow{cursor:pointer;transition:.15s}
+tbody tr.datarow.zebra{background:rgba(255,255,255,.5)}
+tbody tr.datarow:hover{background:rgba(0,138,168,.06)}
+tbody tr.datarow.open{background:rgba(0,138,168,.08)}
+tbody td{padding:22px 12px;font-size:13px;border-bottom:1px solid rgba(236,243,243,.85);vertical-align:middle}
+.pname{font-weight:600}
+.pcust{font-size:11.5px;color:var(--muted2);margin-top:3px}
+.amtcell{font-family:var(--en);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.amtcell.pending{color:var(--warn)}
+.amtcell.zero{color:var(--muted2);font-weight:500}
+/* 账龄单元格：色点与上方分段条一一对应，文字用同色的可读版本 */
+.agecell{display:inline-flex;align-items:center;gap:7px;font-family:var(--en);font-weight:700;font-size:13px;
+  font-variant-numeric:tabular-nums}
+.agecell .adot{width:8px;height:8px;border-radius:3px;flex:0 0 auto}
+.agecell .cnu{font-family:var(--cn);font-size:12.5px}
+.stpill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:12px;font-size:11.5px;
+  font-weight:600;white-space:nowrap}
+.stpill .pd{width:6px;height:6px;border-radius:50%}
+.prog{font-size:12.5px;line-height:1.6}
+.prog .psub{display:block;font-size:11px;color:var(--muted2);margin-top:3px}
+.prog .ok{color:var(--ok);font-weight:600}
+.caret{width:26px;text-align:center;color:var(--muted2)}
+.caret svg{transition:transform .2s}
+tr.open .caret{color:var(--teal)}
+tr.open .caret svg{transform:rotate(180deg)}
+tr.detailrow td{padding:0;border-bottom:1px solid rgba(236,243,243,.85)}
+.dwrap{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(.2,.7,.2,1)}
+tr.detailrow.show .dwrap{max-height:200px}
+.dinner{padding:18px 14px 20px 42px;display:flex;gap:26px;align-items:center}
+.dstackwrap{flex:1;min-width:0}
+.dstacklbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted2);margin-bottom:7px;font-weight:600}
+.dstack{height:16px;border-radius:9px;background:#EAF1F1;overflow:hidden;display:flex}
+.dstack>span{height:100%}
+.dstackleg{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.dstackleg span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:600}
+.dstackleg i{width:9px;height:9px;border-radius:3px}
+.dnote{flex:0 0 250px;font-size:11.5px;color:var(--muted2);line-height:1.7;padding-left:22px;border-left:1px solid var(--line)}
+.tfoot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:16px}
+.tfoot .tsum{font-size:12.5px;color:var(--muted)}
+.tfoot .tsum b{font-family:var(--en);font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ===== 空态 ===== */
+.emptystate{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:56px 24px;gap:9px}
+.emptystate .eic{width:52px;height:52px;border-radius:16px;background:#EEF4F3;color:var(--muted2);
+  display:flex;align-items:center;justify-content:center}
+.emptystate .et2{font-size:14px;font-weight:600;color:var(--ink)}
+.emptystate .ed{font-size:12px;color:var(--muted2);line-height:1.7;max-width:460px}
+
+/* ===== 弹层（新建 / 详情），瓦片下拉替代原生 select ===== */
+.pop{position:absolute;z-index:60;width:296px;border-radius:20px;padding:18px;
+  background:linear-gradient(160deg,rgba(255,255,255,.94),rgba(255,255,255,.86));
+  backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%);
+  border:1px solid rgba(255,255,255,.9);box-shadow:0 30px 60px -24px rgba(15,50,40,.36)}
+.pop h5{font-size:13.5px;font-weight:600;margin-bottom:3px}
+.pop .phint{font-size:11px;color:var(--muted2);margin-bottom:12px}
+.pop label{display:block;font-size:11px;color:var(--muted);font-weight:600;margin:11px 0 5px}
+.pop input{width:100%;border:1px solid var(--line);border-radius:12px;padding:9px 11px;font-size:12.5px;
+  font-family:var(--cn);background:#fff;color:var(--ink);outline:none;transition:.16s}
+.pop input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(73,182,216,.16)}
+.pop input.err{border-color:var(--err);animation:shake .32s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.tsel{position:relative}
+.tsel .tt{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);
+  border-radius:12px;padding:9px 11px;background:#fff;font-family:var(--cn);font-size:12.5px;font-weight:500;
+  color:var(--ink);cursor:pointer;transition:.16s}
+.tsel .tt .lft{display:flex;align-items:center;gap:7px}
+.tsel .tt .sd3{width:7px;height:7px;border-radius:50%}
+.tsel .tt::after{content:'';width:6px;height:6px;border-right:1.8px solid var(--muted2);border-bottom:1.8px solid var(--muted2);
+  transform:rotate(45deg) translateY(-2px);flex:0 0 auto}
+.tsel.open .tt{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,138,168,.12)}
+.tpop{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:5;max-height:172px;overflow-y:auto;
+  border-radius:14px;padding:6px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 18px 40px -18px rgba(15,50,40,.4)}
+.tsel.open .tpop{display:block}
+.tsel.up .tpop{top:auto;bottom:calc(100% + 6px)}
+.topt{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;font-size:12.5px;
+  border:1px solid transparent;cursor:pointer;transition:.14s}
+.topt:hover{background:rgba(0,138,168,.06)}
+.topt.sel{border-color:var(--blue);background:rgba(73,182,216,.1);color:var(--ink);font-weight:600}
+.topt .sd3{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.pdline{font-size:12.5px;line-height:1.7;color:var(--ink)}
+.pdline b{font-weight:600}
+.pdprep{margin-top:9px;border-radius:12px;padding:10px 12px;background:rgba(0,138,168,.07);
+  border:1px solid rgba(0,138,168,.16);font-size:12px;color:var(--teal2);line-height:1.7}
+.pdprep::before{content:"要准备：";font-weight:600;color:var(--teal)}
+.popbtns{display:flex;gap:9px;justify-content:flex-end;margin-top:16px}
+.popbtns button{border-radius:11px;padding:8px 15px;font-family:var(--cn);font-size:12.5px;font-weight:600;
+  cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--muted);transition:.16s}
+.popbtns button:hover{color:var(--ink);border-color:#cfe0e0}
+.popbtns button.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.popbtns button.danger{color:var(--err);border-color:#F3CDD4}
+
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(22px);background:var(--ink);
+  color:#fff;padding:12px 20px;border-radius:15px;font-size:12.5px;font-weight:500;line-height:1.6;max-width:520px;
+  box-shadow:0 20px 40px -14px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.28s;z-index:80}
+.toast .tdis{display:block;font-size:11px;color:rgba(255,255,255,.62);margin-top:3px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:1360px){
+  .todaygrid{grid-template-columns:1fr}
+  .kpigrid{grid-template-columns:1fr}
+  .knums{grid-template-columns:repeat(2,1fr)}
+  .seglegend{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:900px){
+  .wrap{padding:22px 18px 44px}
+  .twocol{grid-template-columns:1fr}
+  .flow{flex-wrap:wrap;gap:18px}
+  .fdiv{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== header ===== -->
+  <header class="topbar rv">
+    <div class="bcrumb">
+      <span class="bdot"></span>
+      <span class="bmain">Data_Board</span>
+      <span class="bsub">/ 业务层看板</span>
+    </div>
+    <div class="tb-right">
+      <button class="bellbtn" title="消息通知">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9z"/><path d="M10.3 20a2 2 0 003.4 0"/></svg>
+      </button>
+      <div class="me">
+        <div class="avatar" id="meAvatar">曾</div>
+        <span class="mename">Nico</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:#94a3b8"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== tab + 控件同一行 ===== -->
+  <nav class="navrow rv" style="animation-delay:.02s">
+    <div class="tabs glass-lite">
+      <button class="tab" data-tab="mgmt">管理层<span class="ten">Overview</span></button>
+      <button class="tab on" data-tab="biz">业务层<span class="ten">Lead to Cash</span></button>
+      <button class="tab" data-tab="exec">执行层<span class="ten">Schedule</span></button>
+    </div>
+    <div class="ctrlrow">
+      <div class="datepill">数据截至 <b>2026-08-07</b></div>
+      <button class="ghostbtn" id="exportBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+        导出
+      </button>
+      <button class="refreshbtn" id="refreshBtn" title="刷新数据">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== 视角切换 ===== -->
+  <div class="viewbar rv" style="animation-delay:.04s">
+    <div>
+      <h1>业务层看板<span class="ven">Business Layer</span></h1>
+      <div class="vd">每条线索、每个项目当下卡在谁手上、下一步是什么</div>
+    </div>
+    <div class="bdswitch" id="bdSwitch"></div>
+  </div>
+
+  <div id="bizRoot">
+
+  <!-- ===== ① 今日：寄语 + AI 策略 ===== -->
+  <section class="rv" style="animation-delay:.06s">
+    <div class="panel glass today">
+      <div class="sechead">
+        <div>
+          <h2>今日<span class="sen">Today</span></h2>
+          <div class="sd">基于线索池 28 条记录与在执行项目状态生成 · 每日 9:00 更新</div>
+        </div>
+      </div>
+      <div class="todaygrid">
+        <div class="museside">
+          <div class="muse">
+            <img class="mbg" id="museBg" alt="" onerror="this.style.display='none'">
+            <div class="mscrim"></div>
+            <div>
+              <div class="mk"><span class="idot"></span>开工前 · 读一句</div>
+              <blockquote id="museQuote">树不必追赶每一阵风。长好了，风自然会来。</blockquote>
+            </div>
+            <div class="mfoot">
+              <span class="mdate">2026 / 08 / 07 · FRI</span>
+              <button class="mbtn" id="museRefresh">换一句</button>
+            </div>
+          </div>
+        </div>
+        <div class="aiside">
+          <div class="sublabel">AI 今日策略<span class="ct" id="stratCt">3</span><span class="ln"></span></div>
+          <div class="slist" id="stratList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ② 我的日程 ===== -->
+  <section class="rv" style="animation-delay:.08s">
+    <div class="panel">
+      <div class="sechead">
+        <div>
+          <h2>我的日程<span class="sen">2026-08-03 → 08-09</span></h2>
+          <div class="sd">见面、交报价、交付节点自动同步自客户资料与项目管理模块 · 点击空白时段新建，点击日程看要准备什么</div>
+        </div>
+        <div class="callegend">
+          <span><i style="background:#008AA8"></i>见客户</span>
+          <span><i style="background:#C77B26"></i>交报价</span>
+          <span><i style="background:#2563EB"></i>交付节点</span>
+          <span><i style="background:#94A3B8"></i>内部</span>
+        </div>
+      </div>
+      <div class="cal">
+        <div class="calhead" id="calHead"></div>
+        <div class="calbody" id="calBody"></div>
+      </div>
+      <div class="srcnote">本地新增/删除的日程仅在本页生效，不会写入实际系统。</div>
+    </div>
+  </section>
+
+  <!-- ===== ③ 目标 KPI ===== -->
+  <section class="rv" style="animation-delay:.10s">
+    <div class="panel">
+      <div class="sechead">
+        <div>
+          <h2>目标 KPI 与实现情况<span class="sdi">口径：已回款 + 已签待回 + 在谈线索预计金额（按阶段加权 40%），对照期内目标</span></h2>
+        </div>
+        <div class="segctrl" id="periodPicker"></div>
+      </div>
+      <div class="kpibody" id="kpiBody">
+      <div class="kpiempty" id="kpiEmpty" style="display:none">
+        <div class="eic">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 5-6 4 4"/><rect x="3" y="4" width="18" height="16" rx="2.5"/></svg>
+        </div>
+        <div class="et2" id="kpiEmptyTitle"></div>
+        <div class="ed">源文件仅给出 <b>2026 年度</b>、<b>2026 Q3</b>、<b>2026 年 8 月</b> 三个周期的目标与实现数据。其余周期的目标额与回款/签约明细未提供，按数据诚实原则留空，不做推算填充。</div>
+      </div>
+      <div class="kpigrid" id="kpiGrid">
+        <div class="ringcard">
+          <div class="ringwrap" id="ringWrap"></div>
+          <div class="rlbl">已落定达成率</div>
+        </div>
+        <div class="barcard">
+          <div class="knums" id="kNums"></div>
+          <div class="sublabel">目标结构拆解<span class="ln"></span></div>
+          <div class="stackwrap">
+            <div class="stack" id="kStack"></div>
+            <div class="tmark" id="kMark"><span id="kMarkTxt"></span></div>
+          </div>
+          <div class="stackleg">
+            <span><i style="background:#1A9E4B"></i>已回款</span>
+            <span><i style="background:#008AA8"></i>已签待回</span>
+            <span><i style="background:repeating-linear-gradient(45deg,#EBA33F 0 5px,#F7D9A8 5px 10px)"></i>在谈加权（未落定）</span>
+            <span><i style="background:#EAF1F1"></i>缺口</span>
+          </div>
+          <div class="knote" id="kNote"></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ④ 线索与客户 ===== -->
+  <section class="rv" style="animation-delay:.12s">
+    <div class="panel">
+      <div class="sechead">
+        <div>
+          <h2>我的线索与客户<span class="sen">Pipeline</span></h2>
+          <div class="sd">按阶段分组的线索池 · 超期未跟进提醒 · 下一步安排 · 数据来自客户资料模块</div>
+        </div>
+      </div>
+      <div class="flowbox">
+        <div class="flow" id="pipeFlow"></div>
+        <div class="calnote">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+          <span>口径说明：主链路四节点按<b>线索条数</b>统计，金额为源表「预计 / 合同」金额；右侧「超期未跟进」是横跨各阶段的风险标记，与主链路数量不互斥，故以虚线节点挂在链路外侧。</span>
+        </div>
+      </div>
+      <div class="twocol">
+        <div class="minicard">
+          <h3>超期未跟进<span class="cnt" style="background:#FDE9EC;color:#D6455B">3 条</span></h3>
+          <div class="msub">按源表「最后更新」字段计算，未做行业基准换算</div>
+          <div id="staleList"></div>
+          <div class="srcnote">进度条以 87 天（当前最长未更新）为标尺。</div>
+        </div>
+        <div class="minicard">
+          <h3>下一步安排<span class="cnt" style="background:#EAF6EE;color:#1A9E4B">已排 4 条</span></h3>
+          <div class="msub">与下方「我的日程」同源，日程内新增会先落在日历</div>
+          <div id="nextList"></div>
+          <div class="srcnote">未排期的线索不在此列，源表未提供计划时间的一律不补。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ⑤ 项目推进与卡点 ===== -->
+  <section class="rv" style="animation-delay:.14s">
+    <div class="panel">
+      <div class="sechead">
+        <div>
+          <h2>项目推进与卡点<span class="sen">Production</span></h2>
+          <div class="sd">在执行项目的制作进度 · 逾期节点 · 待确认交付 · 按负责人聚合 · 数据来自项目管理模块</div>
+        </div>
+      </div>
+      <div id="ownerList"></div>
+      <div class="srcnote">阶段轨道六节点（故事创意 → 成片）取自项目管理模块的固定制作流程；仅当前节点着色，已完成节点走 teal，未开始保持中性灰。</div>
+    </div>
+  </section>
+
+  <!-- ===== ⑥ 开票与回款 ===== -->
+  <section class="rv" style="animation-delay:.16s">
+    <div class="panel">
+      <div class="sechead">
+        <div>
+          <h2>我的开票与回款<span class="sen">Receivables</span></h2>
+          <div class="sd">本人负责项目的应收明细 · 账龄 · 催收记录与审批进度 · 数据来自财务结算模块 · 点击行展开金额结构</div>
+        </div>
+      </div>
+      <div class="agewrap">
+        <div class="agetop">
+          <div class="agetotal"><span class="pre">剩余应收合计 ¥</span><b id="arTotal">0</b><span class="un">7 个项目</span></div>
+        </div>
+        <div class="segbar" id="ageBar"></div>
+        <div class="seglegend" id="ageLegend"></div>
+      </div>
+      <table id="arTable">
+        <thead>
+          <tr>
+            <th>项目 / 客户</th>
+            <th class="num sortable" data-sort="rest">剩余应收<span class="sa">↕</span></th>
+            <th class="sortable" data-sort="age">开票账龄<span class="sa">↕</span></th>
+            <th>状态</th>
+            <th>催收 / 审批进度</th>
+            <th style="width:26px"></th>
+          </tr>
+        </thead>
+        <tbody id="arBody"></tbody>
+      </table>
+      <div class="tfoot">
+        <div class="tsum">剩余应收合计 <b>¥373,380</b> · 其中逾期 60 天以上 <b>¥164,040</b></div>
+        <button class="ghostbtn" id="arReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg>
+          重置排序
+        </button>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /bizRoot -->
+
+  <!-- 非业务层 tab / 非 Nico 视角的诚实空态 -->
+  <section class="rv" id="emptyRoot" style="display:none">
+    <div class="panel" style="display:flex;flex-direction:column;min-height:420px">
+      <div class="emptystate">
+        <div class="eic">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 14h5"/></svg>
+        </div>
+        <div class="et2" id="emptyTitle">暂无可展示数据</div>
+        <div class="ed" id="emptyDesc"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   数据说明：本页所有数值均取自源页面「数据大盘-业务层看板_Demo」，
+   未新增字段、未补齐缺失值；源表没有的一律留 — 。
+   ============================================================ */
+
+/* ---------- 语义色注册表（跨页面逐字复用） ---------- */
+const STATUS_STYLE = {
+  '待办':        {bg:'#FDF1E3', fg:'#C77B26'},
+  '已通过':      {bg:'#E4EEFB', fg:'#2563EB'},
+  '进行中':      {bg:'#E0F4F8', fg:'#008AA8'},
+  '完成':        {bg:'#EAF6EE', fg:'#1A9E4B'},
+  '终止':        {bg:'#F1F4F4', fg:'#94A3B8'},
+  '异常':        {bg:'#FDE9EC', fg:'#D6455B'}
+};
+const AV_PALETTE = [
+  'linear-gradient(140deg,#A7E885,#008aa8)',
+  'linear-gradient(140deg,#9ADCCB,#49B6D8)',
+  'linear-gradient(140deg,#BFE9A8,#34A85E)',
+  'linear-gradient(140deg,#8FD8E8,#0c7074)',
+  'linear-gradient(140deg,#D7F0A8,#1F6F4A)'
+];
+function hashStr(s){let h=0;s=String(s);for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;}
+function avGrad(name){ return AV_PALETTE[hashStr(name)%AV_PALETTE.length]; }
+function fmtMoney(n){ return n.toLocaleString('en-US'); }
+
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function toast(msg, disclose){
+  toastEl.innerHTML = msg + (disclose ? `<span class="tdis">${disclose}</span>` : '');
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toastEl.classList.remove('show'), 3600);
+}
+
+/* ---------- BD 视角 ---------- */
+const BDS = [
+  {id:'Nico', cn:'曾磊', en:'Nico', has:true},
+  {id:'Rebecca', cn:'刘喻薇', en:'Rebecca', has:false},
+  {id:'Tori', cn:'季涵玥', en:'Tori', has:false},
+  {id:'ZZ', cn:'张泽', en:'ZZ', has:false}
+];
+let curBD = 'Nico', curTab = 'biz';
+const bdWrap = document.getElementById('bdSwitch');
+BDS.forEach(b=>{
+  const el = document.createElement('button');
+  if(b.id===curBD) el.classList.add('on');
+  el.dataset.bd = b.id;
+  el.innerHTML = `<span class="bav" style="background:${avGrad(b.cn)}">${b.cn[0]}</span>${b.cn} ${b.en}`;
+  bdWrap.appendChild(el);
+});
+document.getElementById('meAvatar').style.background = avGrad('曾磊');
+bdWrap.addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  curBD = btn.dataset.bd;
+  bdWrap.querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===btn));
+  const bd = BDS.find(x=>x.id===curBD);
+  document.getElementById('meAvatar').textContent = bd.cn[0];
+  document.getElementById('meAvatar').style.background = avGrad(bd.cn);
+  document.querySelector('.mename').textContent = bd.en;
+  syncView();
+});
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    curTab = t.dataset.tab;
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x===t));
+    syncView();
+  });
+});
+function syncView(){
+  const bd = BDS.find(x=>x.id===curBD);
+  const ok = curTab==='biz' && bd.has;
+  document.getElementById('bizRoot').style.display = ok ? '' : 'none';
+  document.getElementById('emptyRoot').style.display = ok ? 'none' : '';
+  if(!ok){
+    if(curTab!=='biz'){
+      document.getElementById('emptyTitle').textContent = '该层看板本次未提供数据';
+      document.getElementById('emptyDesc').textContent = '源文件仅包含「业务层」一页的字段与数值。管理层 / 执行层的口径未在源数据中给出，此处不做编造展示 —— 请切回「业务层」查看。';
+    }else{
+      document.getElementById('emptyTitle').textContent = `${bd.cn} ${bd.en} 的明细未在源数据中提供`;
+      document.getElementById('emptyDesc').textContent = '源文件的线索、项目、应收明细均只覆盖 曾磊 Nico 一人。其余 BD 的对应记录缺失，按数据诚实原则留空而不复制填充。';
+    }
+  }
+}
+
+/* ---------- ① 今日寄语 ---------- */
+/* 背景图每 24h 轮换一张；DEMO_BG 只是把「今天」对齐到 demo 指定的那张（第 5 张 · 泡泡），
+   轮换本身是真实的：明天会自动切到下一张。上线时把 DEMO_BG 置为 null 即可纯按天序号取模。 */
+const MUSE_BGS = ['assets/muse/bg1.jpg','assets/muse/bg2.jpg','assets/muse/bg3.jpg','assets/muse/bg4.jpg','assets/muse/bg5.jpg'];
+const DEMO_BG = 4;
+const DAY_NO = Math.floor(Date.now()/864e5);
+const BG_OFFSET = DEMO_BG==null ? 0 : ((DEMO_BG - DAY_NO) % MUSE_BGS.length + MUSE_BGS.length) % MUSE_BGS.length;
+const museBgEl = document.getElementById('museBg');
+let bgi = (DAY_NO + BG_OFFSET) % MUSE_BGS.length;
+function setMuseBg(i, fade){
+  if(!fade){ museBgEl.src = MUSE_BGS[i]; return; }
+  museBgEl.classList.add('fading');
+  setTimeout(()=>{ museBgEl.src = MUSE_BGS[i]; museBgEl.classList.remove('fading'); }, 260);
+}
+setMuseBg(bgi, false);
+// 预加载其余背景，切换时不闪白
+MUSE_BGS.forEach(src=>{ const im = new Image(); im.src = src; });
+
+const QUOTES = [
+  "树不必追赶每一阵风。长好了，风自然会来。",
+  "慢慢来，反而比较快。",
+  "所有真诚的等待，都会以某种方式抵达。",
+  "把眼前的事做完整，好运会循着秩序找上门。",
+  "潮水有自己的时刻表，你只管把船修好。",
+  "认真对待过的每一件小事，都会在某天回来照亮你。"
+];
+let qi = 0;
+// 换一句：句子与背景图一起换（背景共 5 张，与句子各自循环，组合不重复）
+document.getElementById('museRefresh').addEventListener('click', ()=>{
+  qi  = (qi + 1) % QUOTES.length;
+  bgi = (bgi + 1) % MUSE_BGS.length;
+  document.getElementById('museQuote').textContent = QUOTES[qi];
+  setMuseBg(bgi, true);
+});
+
+/* ---------- ① AI 策略 ---------- */
+const STRATS = [
+  {tag:'建议推进', tone:'待办',
+   body:'<b>奇正藏药 · 短剧&TVC 竞标</b>（<span class="amt">¥55</span> 万）文档准备中，预计本月开标。',
+   why:'依据：这是你当前金额最大的在谈单；建议本周内完成竞标文档内审，给修改留出缓冲。'},
+  {tag:'老客户机会', tone:'已通过',
+   body:'<b>名创优品</b> 今年已合作 <span class="amt">6</span> 个项目（Fifa / 蒙奇奇 / 世界杯 / YOYO×2 / Hello Kitty），全部按单签。',
+   why:'依据：合作频次已达框架合同门槛 → 可在 Hello Kitty 交付后提 Q4 IP 联名年框，锁定长期额度。'},
+  {tag:'提前布局', tone:'完成',
+   body:'<b>汇美集团 · IP 孵化</b>（<span class="amt">¥45</span> 万）月底提案。',
+   why:'依据：金额第二大的在谈单、且是新客户首单 → 建议提案前先与对接人对齐框架，避免一次性汇报带来的方向风险。'}
+];
+document.getElementById('stratList').innerHTML = STRATS.map(s=>{
+  const c = STATUS_STYLE[s.tone];
+  return `<div class="sitem">
+    <span class="stag" style="background:${c.bg};color:${c.fg}"><span class="sd2" style="background:${c.fg}"></span>${s.tag}</span>
+    <div class="sbody">${s.body}<div class="why">${s.why}</div></div>
+  </div>`;
+}).join('');
+document.getElementById('stratCt').textContent = STRATS.length;
+
+/* ---------- ② KPI（源：02-Project WIP / 03-Financials / 1.5-Client Pipeline） ---------- */
+/* 只有这三个周期在源数据里有值；其余周期一律走空态，不推算填充（V2 §0） */
+const KPI = {
+  'y-2026'   :{lbl:'2026 年度目标',   target:400, paid:85.5, signed:68.2, pipe:103.8, raw:259.5},
+  'q-2026-Q3':{lbl:'2026 Q3 目标',    target:120, paid:13.7, signed:25.3, pipe:88.2,  raw:220.5},
+  'm-2026-08':{lbl:'2026 年 8 月目标', target:40,  paid:0,    signed:16.1, pipe:30.9,  raw:77.3}
+};
+
+/* 周期选择器：年度 / 季度 / 月度 各一个下拉，最近的排最上面。
+   季度、月度只列到「数据截至日」所在的期间，不列还没发生的期间。 */
+const ASOF = {y:2026, m:8};                       // 数据截至 2026-08-07
+const CUR_Q = Math.ceil(ASOF.m/3);
+const PERIODS = {
+  y:{name:'年度', items:[2026,2025,2024].map(y=>({key:`y-${y}`, opt:`${y} 年`, txt:`${y}`}))},
+  q:{name:'季度', items:[]},
+  m:{name:'月度', items:[]}
+};
+for(let q=CUR_Q; q>=1; q--) PERIODS.q.items.push({key:`q-${ASOF.y}-Q${q}`, opt:`${ASOF.y} Q${q}`, txt:`Q${q}`});
+for(let m=ASOF.m; m>=1; m--) PERIODS.m.items.push({key:`m-${ASOF.y}-${String(m).padStart(2,'0')}`, opt:`${m} 月`, txt:`${m}月`});
+
+let gran = 'y', openG = null;
+const picked = {y:'y-2026', q:`q-${ASOF.y}-Q${CUR_Q}`, m:`m-${ASOF.y}-${String(ASOF.m).padStart(2,'0')}`};
+const pickerWrap = document.getElementById('periodPicker');
+
+function renderPicker(){
+  pickerWrap.innerHTML = ['y','q','m'].map(g=>{
+    const grp = PERIODS[g];
+    const cur = grp.items.find(i=>i.key===picked[g]) || grp.items[0];
+    return `<div class="pdd ${g===gran?'on':''} ${g===openG?'open':''}" data-g="${g}">
+      <button class="pt">${grp.name} <span class="pv">${cur.txt}</span></button>
+      <div class="ppop">${grp.items.map(i=>
+        `<div class="popt ${i.key===picked[g]?'sel':''}" data-k="${i.key}">${i.opt}${KPI[i.key]?'':'<span class="nd">无数据</span>'}</div>`
+      ).join('')}</div>
+    </div>`;
+  }).join('');
+  pickerWrap.querySelectorAll('.pdd').forEach(dd=>{
+    const g = dd.dataset.g;
+    dd.querySelector('.pt').addEventListener('click', e=>{
+      e.stopPropagation();
+      // 点非激活项：直接切换粒度并顺带展开；点激活项：开合下拉
+      if(g !== gran){ gran = g; openG = g; applyPeriod(); }
+      else { openG = (openG === g) ? null : g; renderPicker(); }
+    });
+    dd.querySelectorAll('.popt').forEach(op=>{
+      op.addEventListener('click', e=>{
+        e.stopPropagation();
+        gran = g; picked[g] = op.dataset.k; openG = null;
+        applyPeriod();
+      });
+    });
+  });
+}
+document.addEventListener('click', ()=>{ if(openG !== null){ openG = null; renderPicker(); } });
+
+function applyPeriod(){
+  const key = picked[gran];
+  const cur = PERIODS[gran].items.find(i=>i.key===key);
+  const has = !!KPI[key];
+  document.getElementById('kpiGrid').style.display  = has ? '' : 'none';
+  document.getElementById('kpiEmpty').style.display = has ? 'none' : '';
+  if(has) renderKPI(key);
+  else document.getElementById('kpiEmptyTitle').textContent = `${cur.opt}的源数据未提供`;
+  renderPicker();
+}
+const RING_SIZE=190, RING_SW=15;
+function ringColor(v){ return v>=85?'#3FB36A' : v>=70?'#49B6D8' : '#FF9F6E'; }
+function ringSVG(pct, color, size, sw){
+  const r=(size-sw)/2, c=2*Math.PI*r, off=c*(1-Math.max(0,Math.min(1,pct)));
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#E6EEEE" stroke-width="${sw}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
+      stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}"
+      transform="rotate(-90 ${size/2} ${size/2})"/></svg>`;
+}
+const r1 = v => Math.round(v*10)/10;
+function renderKPI(key){
+  const d = KPI[key];
+  const locked = r1(d.paid + d.signed);
+  const all = r1(locked + d.pipe);
+  const gap = r1(d.target - all);
+  const rate = locked / d.target;
+  const rc = ringColor(rate*100);
+
+  document.getElementById('ringWrap').innerHTML =
+    ringSVG(rate, rc, RING_SIZE, RING_SW) +
+    `<div class="rv2"><b style="color:${rc}">${(rate*100).toFixed(1)}<span style="font-size:22px">%</span></b><span>已落定 ${locked} 万 / 目标 ${d.target} 万</span></div>`;
+
+  const NUMS = [
+    {l:d.lbl, v:d.target, un:'万', acc:'#1b2430', cap:'期内目标额'},
+    {l:'已回款', v:d.paid, un:'万', acc:'#1A9E4B', cap:'财务确认到账'},
+    {l:'已签待回', v:d.signed, un:'万', acc:'#008AA8', cap:'合同已签未回款'},
+    {l:'预计线索金额（加权）', v:d.pipe, un:'万', acc:'#EBA33F', cap:`未加权在谈共 ${d.raw} 万`}
+  ];
+  document.getElementById('kNums').innerHTML = NUMS.map(n=>`
+    <div class="knum" style="--acc:${n.acc}">
+      <div class="kl"><span class="kd"></span>${n.l}</div>
+      <div class="kv">${n.v}<span class="un">${n.un}</span></div>
+      <div class="kc">${n.cap}</div>
+    </div>`).join('');
+
+  const denom = Math.max(d.target, all) || 1;
+  const p = v => (v/denom*100);
+  document.getElementById('kStack').innerHTML = `
+    <i style="width:0;background:#1A9E4B" data-w="${p(d.paid).toFixed(2)}">${p(d.paid)>=8?d.paid:''}</i>
+    <i style="width:0;background:#008AA8" data-w="${p(d.signed).toFixed(2)}">${p(d.signed)>=8?d.signed:''}</i>
+    <i style="width:0;background:repeating-linear-gradient(45deg,#EBA33F 0 6px,#F7D9A8 6px 12px)" data-w="${p(d.pipe).toFixed(2)}">${p(d.pipe)>=8?d.pipe:''}</i>`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    document.querySelectorAll('#kStack > i').forEach(i=>{ i.style.width = i.dataset.w + '%'; });
+  }));
+  const mark = document.getElementById('kMark');
+  mark.style.left = (d.target/denom*100) + '%';
+  document.getElementById('kMarkTxt').textContent = '目标 ' + d.target + ' 万';
+
+  document.getElementById('kNote').innerHTML = gap > 0
+    ? `已落定（回款 + 已签）<b>${locked} 万</b>，占目标 ${(locked/d.target*100).toFixed(0)}%；在谈未加权共 ${d.raw} 万，按加权口径即使全部转化仍差 <b class="bad">${gap} 万</b> —— 需要新增线索补足。`
+    : `已落定（回款 + 已签）<b>${locked} 万</b>，占目标 ${(locked/d.target*100).toFixed(0)}%；在谈线索（未加权 ${d.raw} 万）按加权转化可覆盖目标并超出 <b>${r1(-gap)} 万</b>。`;
+}
+applyPeriod();
+
+/* ---------- ③ 线索流程图 ---------- */
+const PIPE = [
+  {n:1, cn:'在谈线索',   en:'Negotiating', amt:'预计 ¥1',  un:'万', extra:'', color:'#94A3B8'},
+  {n:1, cn:'审批中',     en:'In Review',   amt:'预计 ¥10', un:'万', extra:'', color:'#EBA33F'},
+  {n:1, cn:'已立项待签', en:'Approved',    amt:'预计 ¥20', un:'万', extra:'', color:'#2563EB'},
+  {n:1, cn:'年内已签约', en:'Signed YTD',  amt:'合同 ¥20', un:'万', extra:'', color:'#1A9E4B'}
+];
+const ARROW = `<svg viewBox="0 0 60 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h52"/><path d="M49 2l5 4-5 4"/></svg>`;
+document.getElementById('pipeFlow').innerHTML =
+  PIPE.map((s,i)=>`
+    <div class="fnode">
+      <div class="fcircle" style="background:${s.color}">${s.n}</div>
+      <div class="fcn">${s.cn}</div>
+      <div class="fen">${s.en}</div>
+      <div class="famt">${s.amt}<span class="cnu">${s.un}</span></div>
+      ${s.extra?`<div class="fen" style="text-transform:none;letter-spacing:0;font-family:var(--cn);font-size:10.5px">${s.extra}</div>`:''}
+    </div>` + (i<PIPE.length-1 ? `<div class="farrow">${ARROW}</div>` : '')
+  ).join('') +
+  `<div class="fdiv"></div>
+   <div class="fnode exception">
+     <div class="fcircle">3</div>
+     <div class="fcn">超期未跟进</div>
+     <div class="fen">Stalled</div>
+     <div class="famt" style="color:#D6455B">最长 87<span class="cnu">天</span></div>
+   </div>`;
+
+const STALE = [
+  {n:'维他柠檬茶', s:'待招标', d:87},
+  {n:'中海地产（珠海）', s:'在谈', d:84},
+  {n:'喜茶', s:'等待组织 workshop', d:74}
+];
+const staleMax = 87;
+document.getElementById('staleList').innerHTML = STALE.map(x=>`
+  <div class="mrow">
+    <span><b>${x.n}</b><span class="msec"> · ${x.s}</span></span>
+    <span class="rt">
+      <span class="mbar"><i style="width:${(x.d/staleMax*100).toFixed(0)}%"></i></span>
+      <span class="mdays">${x.d} 天</span>
+    </span>
+  </div>`).join('');
+
+const NEXT = [
+  {n:'奇正藏药', s:'竞标文档内审', w:'今天 16:30', tone:'today'},
+  {n:'汇美集团', s:'提案框架对齐', w:'今天 14:00', tone:'today'},
+  {n:'Boopin Dubai', s:'智能手表 TVC 报价', w:'08-10', tone:'later'},
+  {n:'香港马会 Demo 片', s:'脚本确认跟进', w:'08-12', tone:'later'}
+];
+document.getElementById('nextList').innerHTML = NEXT.map(x=>`
+  <div class="mrow">
+    <span><b>${x.n}</b><span class="msec"> · ${x.s}</span></span>
+    <span class="mwhen ${x.tone}">${x.w}</span>
+  </div>`).join('');
+
+/* ---------- ④ 周日历 ---------- */
+const HOUR_START = 9, HOUR_END = 19, HOUR_PX = 54, TODAY = 4;
+const DAYS = [
+  {dw:'周一', dn:'8/3'}, {dw:'周二', dn:'8/4'}, {dw:'周三', dn:'8/5'},
+  {dw:'周四', dn:'8/6'}, {dw:'周五', dn:'8/7'}, {dw:'周六', dn:'8/8'}, {dw:'周日', dn:'8/9'}
+];
+const EV_TYPE = {
+  meet:    {name:'见客户',   fg:'#008AA8', bg:'#E0F4F8', tx:'#0c7074'},
+  quote:   {name:'交报价',   fg:'#C77B26', bg:'#FDF1E3', tx:'#8a5a17'},
+  deliver: {name:'交付节点', fg:'#2563EB', bg:'#E4EEFB', tx:'#1e4fa8'},
+  internal:{name:'内部',     fg:'#94A3B8', bg:'#F1F4F4', tx:'#64748b'}
+};
+let events = [
+  {d:0, t:10,   dur:1,   type:'internal', title:'项目周会', prep:'过一遍思菲其 Bcopy 修改状态'},
+  {d:1, t:16,   dur:1,   type:'deliver',  title:'思菲其 · Bcopy 内审', prep:'确认三条修改意见是否闭环'},
+  {d:2, t:15,   dur:1.5, type:'meet',     title:'致美斋 · 董事长会面', prep:'短剧案例集 + 报价区间（20 万口径）'},
+  {d:3, t:11,   dur:1,   type:'meet',     title:'喜茶 · workshop 时间沟通', prep:'准备 2 个备选日期与议程草案'},
+  {d:4, t:10,   dur:0.5, type:'internal', title:'BD 周会', prep:''},
+  {d:4, t:14,   dur:1.5, type:'meet',     title:'汇美集团 · 提案框架对齐', prep:'IP 孵化提案大纲 v1'},
+  {d:4, t:16.5, dur:1,   type:'quote',    title:'奇正藏药 · 竞标文档内审', prep:'55 万报价拆分表 + 竞标资质清单'},
+  {d:6, t:18,   dur:0.5, type:'deliver',  title:'名创 YOYO 生日会 · 交付确认截止', prep:'成片已传，跟进客户书面确认'}
+];
+const calHead = document.getElementById('calHead');
+const calBody = document.getElementById('calBody');
+let pop = null;
+function fmtT(t){ const h=Math.floor(t), m=Math.round((t-h)*60); return `${h}:${m===0?'00':m}`; }
+function renderCal(){
+  closePop();
+  calHead.innerHTML = '<div class="dh"></div>' + DAYS.map((d,i)=>`
+    <div class="dh ${i===TODAY?'today':''}"><div class="dw">${d.dw}${i===TODAY?' · 今天':''}</div><div class="dn">${d.dn}</div></div>`).join('');
+  const hours = [];
+  for(let h=HOUR_START; h<HOUR_END; h++) hours.push(h);
+  let html = '<div class="gutter">' + hours.map(h=>`<div class="gh">${h}:00</div>`).join('') + '</div>';
+  for(let d=0; d<7; d++){
+    let col = `<div class="ccol ${d===TODAY?'today':''}" data-d="${d}" style="height:${hours.length*HOUR_PX}px">`;
+    hours.forEach((h,idx)=>{ if(idx>0) col += `<div class="hline" style="top:${idx*HOUR_PX}px"></div>`; });
+    events.forEach((e,ei)=>{
+      if(e.d!==d) return;
+      const tp = EV_TYPE[e.type];
+      const top = (e.t-HOUR_START)*HOUR_PX, hgt = e.dur*HOUR_PX-4;
+      col += `<div class="ev" data-ei="${ei}" style="top:${top}px;height:${hgt}px;background:${tp.bg};border-color:${tp.fg};color:${tp.tx}">
+        <div class="et">${fmtT(e.t)}</div>
+        <div class="en2">${e.title}</div>
+        ${e.prep && hgt>66 ? `<div class="ep">备：${e.prep}</div>` : ''}
+      </div>`;
+    });
+    col += '</div>';
+    html += col;
+  }
+  calBody.innerHTML = html;
+  calBody.querySelectorAll('.ccol').forEach(colEl=>{
+    colEl.addEventListener('click', ev=>{
+      if(ev.target.closest('.ev')) return;
+      const rect = colEl.getBoundingClientRect();
+      const t = HOUR_START + Math.floor((ev.clientY-rect.top)/HOUR_PX*2)/2;
+      openAddPop(+colEl.dataset.d, t, ev.pageX, ev.pageY);
+    });
+  });
+  calBody.querySelectorAll('.ev').forEach(evEl=>{
+    evEl.addEventListener('click', ev=>{ ev.stopPropagation(); openDetailPop(+evEl.dataset.ei, ev.pageX, ev.pageY); });
+  });
+}
+function closePop(){ if(pop){ pop.remove(); pop=null; } }
+function placePop(x,y){
+  document.body.appendChild(pop);
+  const w = 296, margin = 12;
+  const left = Math.min(x, document.documentElement.clientWidth + window.scrollX - w - margin);
+  pop.style.left = Math.max(margin, left) + 'px';
+  pop.style.top  = (y + 8) + 'px';
+}
+/* 自定义瓦片下拉（替代原生 select） */
+function tileSelect(key, opts, value){
+  const cur = opts.find(o=>o.v===value) || opts[0];
+  return `<div class="tsel" data-key="${key}" data-value="${cur.v}">
+    <div class="tt"><span class="lft">${cur.c?`<span class="sd3" style="background:${cur.c}"></span>`:''}${cur.l}</span></div>
+    <div class="tpop">${opts.map(o=>`<div class="topt ${o.v===cur.v?'sel':''}" data-v="${o.v}">${o.c?`<span class="sd3" style="background:${o.c}"></span>`:''}${o.l}</div>`).join('')}</div>
+  </div>`;
+}
+function bindTileSelects(root){
+  root.querySelectorAll('.tsel').forEach(ts=>{
+    ts.querySelector('.tt').addEventListener('click', e=>{
+      e.stopPropagation();
+      root.querySelectorAll('.tsel').forEach(o=>{ if(o!==ts) o.classList.remove('open'); });
+      ts.classList.toggle('open');
+      const box = ts.getBoundingClientRect();
+      ts.classList.toggle('up', window.innerHeight - box.bottom < 200);
+    });
+    ts.querySelectorAll('.topt').forEach(op=>{
+      op.addEventListener('click', e=>{
+        e.stopPropagation();
+        ts.dataset.value = op.dataset.v;
+        ts.querySelectorAll('.topt').forEach(o=>o.classList.toggle('sel', o===op));
+        ts.querySelector('.tt .lft').innerHTML = op.innerHTML;
+        ts.classList.remove('open');
+      });
+    });
+  });
+}
+function tselValue(root, key){ return root.querySelector(`.tsel[data-key="${key}"]`).dataset.value; }
+function timeOpts(sel){
+  const o = [];
+  for(let t=HOUR_START; t<HOUR_END; t+=0.5) o.push({v:String(t), l:fmtT(t)});
+  return o;
+}
+function openAddPop(d, t, x, y){
+  closePop();
+  pop = document.createElement('div');
+  pop.className = 'pop';
+  pop.innerHTML = `
+    <h5>新建日程 · ${DAYS[d].dw} ${DAYS[d].dn}</h5>
+    <div class="phint">原型演示 · 仅本地生效</div>
+    <label>标题</label><input id="npTitle" placeholder="如：见 XX 客户 / 交 XX 报价" autocomplete="off">
+    <label>类型</label>
+    ${tileSelect('type', Object.keys(EV_TYPE).map(k=>({v:k, l:EV_TYPE[k].name, c:EV_TYPE[k].fg})), 'meet')}
+    <div style="display:flex;gap:9px">
+      <div style="flex:1"><label>开始</label>${tileSelect('time', timeOpts(), String(t))}</div>
+      <div style="flex:1"><label>时长</label>${tileSelect('dur', [{v:'0.5',l:'30 分钟'},{v:'1',l:'1 小时'},{v:'1.5',l:'1.5 小时'},{v:'2',l:'2 小时'}], '1')}</div>
+    </div>
+    <label>要准备什么（选填）</label><input id="npPrep" placeholder="如：带案例集、报价拆分表" autocomplete="off">
+    <div class="popbtns"><button id="npCancel">取消</button><button class="primary" id="npSave">添加</button></div>`;
+  placePop(x,y);
+  bindTileSelects(pop);
+  pop.querySelector('#npTitle').focus();
+  pop.querySelector('#npTitle').addEventListener('input', e=>e.target.classList.remove('err'));
+  pop.querySelector('#npCancel').addEventListener('click', closePop);
+  pop.querySelector('#npSave').addEventListener('click', ()=>{
+    const ti = pop.querySelector('#npTitle');
+    const title = ti.value.trim();
+    if(!title){ ti.classList.add('err'); ti.focus(); return; }
+    const type = tselValue(pop,'type');
+    const st = +tselValue(pop,'time'), dur = +tselValue(pop,'dur');
+    events.push({d, title, type, t:st, dur, prep: pop.querySelector('#npPrep').value.trim()});
+    renderCal();
+    toast(`已添加「${title}」· ${DAYS[d].dw} ${fmtT(st)}–${fmtT(st+dur)} · ${EV_TYPE[type].name}`,
+          '原型演示，仅本页本地生效，不会写入实际系统。');
+  });
+}
+function openDetailPop(ei, x, y){
+  closePop();
+  const e = events[ei], tp = EV_TYPE[e.type];
+  pop = document.createElement('div');
+  pop.className = 'pop';
+  pop.innerHTML = `
+    <h5>${e.title}</h5>
+    <div class="phint"><span class="sd3" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${tp.fg};margin-right:5px"></span>${tp.name}</div>
+    <div class="pdline"><b>${DAYS[e.d].dw} ${DAYS[e.d].dn}</b> · ${fmtT(e.t)} – ${fmtT(e.t+e.dur)}</div>
+    ${e.prep ? `<div class="pdprep">${e.prep}</div>` : `<div class="pdline" style="color:#94a3b8;margin-top:8px">源数据未提供准备事项 —</div>`}
+    <div class="popbtns"><button class="danger" id="dpDel">删除</button><button id="dpClose">关闭</button></div>`;
+  placePop(x,y);
+  pop.querySelector('#dpClose').addEventListener('click', closePop);
+  pop.querySelector('#dpDel').addEventListener('click', ()=>{
+    const t = events[ei].title;
+    events.splice(ei,1); renderCal();
+    toast(`已从本页日历移除「${t}」`, '原型演示，仅本页本地生效，不会删除实际系统数据。');
+  });
+}
+document.addEventListener('click', ev=>{
+  if(pop && !pop.contains(ev.target) && !ev.target.closest('.cal')) closePop();
+});
+renderCal();
+
+/* ---------- ⑤ 项目推进 ---------- */
+const RAIL = ['故事创意','文字脚本','分镜','Acopy','Bcopy','成片'];
+const OWNERS = [
+  {name:'陈采姿', meta:'4 个在执行 · <em>1 个节点逾期</em> · 1 个待确认交付', projects:[
+    {n:'思菲其 30s TVC', badge:'Bcopy 逾期 7 天（排期至 7/31）', tone:'异常', cur:4, state:'late'},
+    {n:'名创优品 YOYO 生日会', badge:'成片已传 · 待客户确认交付', tone:'已通过', cur:6, state:'fin'},
+    {n:'名创优品 × Hello Kitty 传统动画', badge:'按排期 · 交付 9/4', tone:'进行中', cur:2, state:'now'},
+    {n:'TPC2026 Impact Week', badge:'按排期 · 交付 9/4', tone:'进行中', cur:1, state:'now'}
+  ]},
+  {name:'王雨涵 Norah', meta:'1 个在执行', projects:[
+    {n:'MINISO × YOYO', badge:'按排期', tone:'进行中', cur:4, state:'now'}
+  ]}
+];
+document.getElementById('ownerList').innerHTML = OWNERS.map(o=>`
+  <div class="owner">
+    <div class="ohead">
+      <div class="oav" style="background:${avGrad(o.name)}">${o.name[0]}</div>
+      <b>${o.name}</b><span class="ometa">${o.meta}</span>
+    </div>
+    ${o.projects.map(p=>{
+      const c = STATUS_STYLE[p.tone];
+      const rail = RAIL.map((_,i)=>{
+        let cls = '';
+        if(i < p.cur) cls = 'done';
+        else if(i === p.cur) cls = (p.state==='late' ? 'late' : 'now');
+        return `<div class="rstep ${cls}"><div class="rp"></div>${i<RAIL.length-1?'<div class="rl"></div>':''}</div>`;
+      }).join('');
+      const labels = RAIL.map((l,i)=>{
+        let cls = '';
+        if(p.state==='fin' && i===RAIL.length-1) cls='fin';
+        else if(i===p.cur) cls = (p.state==='late' ? 'curLate' : 'cur');
+        return `<span class="${cls}">${l}</span>`;
+      }).join('');
+      return `<div class="proj">
+        <div class="ptop">
+          <div><div class="pn">${p.n}</div></div>
+          <span class="pbadge" style="background:${c.bg};color:${c.fg}"><span class="pd" style="background:${c.fg}"></span>${p.badge}</span>
+        </div>
+        <div class="rail">${rail}</div>
+        <div class="rlabels">${labels}</div>
+      </div>`;
+    }).join('')}
+  </div>`).join('');
+
+/* ---------- ⑥ 开票与回款 ---------- */
+const AR = [
+  {p:'TCL × 米兰冬奥品牌 TVC', rest:98040, ageTxt:'逾期 74 天', days:74,
+   st:'已开票待回款', stTone:'已通过', note:'约定 5/25 · 已催 3 次', sub:'已升级至 Jessie 协调 · 下次催收 8/10', split:null},
+  {p:'MINISO × YOYO', rest:66000, ageTxt:'70 天', days:70,
+   st:'已开票部分回款', stTone:'进行中', note:'6/18 已回 <span class="ok">¥44,000</span> · 尾款待项目交付确认', sub:'',
+   split:{base:'已开票金额 ¥110,000', segs:[['已回款',44000,'#3FB36A'],['已开票未回款',66000,'#EFAE49']],
+          note:'源表提供了首笔回款与剩余应收，合同总额未给出，故以已开票金额为基数拆解。'}},
+  {p:'MINISO × 世界杯 TVC', rest:50000, ageTxt:'逾期 23 天', days:23,
+   st:'已开票待回款', stTone:'已通过', note:'约定 7/15 · 8/4 已催，对方称走 OA 中', sub:'下次催收 8/12', split:null},
+  {p:'科沃斯 TVC 转绘', rest:36040, ageTxt:'逾期 23 天', days:23,
+   st:'已开票待回款', stTone:'已通过', note:'约定 7/15 · 与世界杯项目合并催收', sub:'', split:null},
+  {p:'百利猫粮 AI 动画', rest:57300, ageTxt:'42 天', days:42,
+   st:'已开票部分回款', stTone:'进行中', note:'7/2 已回 <span class="ok">¥38,200</span> · 尾款随交付节点', sub:'',
+   split:{base:'已开票金额 ¥95,500', segs:[['已回款',38200,'#3FB36A'],['已开票未回款',57300,'#EFAE49']],
+          note:'同上：源表未给合同总额，以已开票金额为基数。'}},
+  {p:'思菲其 30s TVC', rest:66000, ageTxt:'未开票', days:null,
+   st:'尾款开票审批中', stTone:'待办', note:'财务 <span class="ok">Eva ✓</span> → 会计 小婷 开具中', sub:'首款 ¥99,000 已于 7/16 回款',
+   split:{base:'已确认金额 ¥165,000', segs:[['首款已回',99000,'#3FB36A'],['尾款未开票',66000,'#C2CFCA']],
+          note:'首款已回 + 待开票尾款，两段互斥；合同总额源表未提供。'}},
+  {p:'名创优品 × 蒙奇奇', rest:0, ageTxt:'已结清', days:null,
+   st:'5/21 全额到账', stTone:'完成', note:'发票已核销 · 已关联回款记录', sub:'', split:null}
+];
+/* 账龄分段：c = 条上填充色（取自系统分布条配色），t = 表格里同义的可读文字色。
+   分段条与表格「开票账龄」列共用这一套色，靠色点一一对应。 */
+const AGE_BUCKETS = [
+  {k:'uninv', l:'未开票（审批中）', v:66000,  c:'#C2CFCA', t:'#8A9A95', lt:1},
+  {k:'d30',   l:'≤ 30 天',        v:86040,  c:'#49B6D8', t:'#2D8FAE'},
+  {k:'d60',   l:'31 – 60 天',     v:57300,  c:'#F2C94C', t:'#B8891A', lt:1},
+  {k:'d61',   l:'≥ 61 天',        v:164040, c:'#E23A4E', t:'#E23A4E'}
+];
+const AGE_SETTLED = {c:'#1A9E4B', t:'#1A9E4B'};   // 已结清：不参与账龄分档
+function ageBucket(r){
+  if(r.days == null) return r.rest === 0 ? AGE_SETTLED : AGE_BUCKETS[0];
+  if(r.days >= 61) return AGE_BUCKETS[3];
+  if(r.days >= 31) return AGE_BUCKETS[2];
+  return AGE_BUCKETS[1];
+}
+const AGE_TOTAL = AGE_BUCKETS.reduce((s,x)=>s+x.v, 0);
+document.getElementById('arTotal').textContent = fmtMoney(AGE_TOTAL);
+document.getElementById('ageBar').innerHTML = AGE_BUCKETS.map(b=>{
+  const p = b.v/AGE_TOTAL*100;
+  // 浅色分段（灰 / 黄）上的白字对比不足 → 改用墨色标签
+  return `<i style="width:calc(${p.toFixed(2)}% - 4px);background:${b.c}${b.lt?';color:#5A6B66':''}">${p>=10?p.toFixed(0)+'%':''}</i>`;
+}).join('');
+document.getElementById('ageLegend').innerHTML = AGE_BUCKETS.map(b=>{
+  const p = (b.v/AGE_TOTAL*100).toFixed(1);
+  return `<div class="segitem"><span class="sdot" style="background:${b.c}"></span>${b.l}
+    <span class="sp" style="color:${b.t}">${p}%</span><span class="sv">¥${fmtMoney(b.v)}</span></div>`;
+}).join('');
+
+let sortKey = null, sortDir = 1;
+function arRows(){
+  const rows = AR.slice();
+  if(sortKey === 'rest') rows.sort((a,b)=>(a.rest-b.rest)*sortDir);
+  if(sortKey === 'age')  rows.sort((a,b)=>{
+    if(a.days==null && b.days==null) return 0;
+    if(a.days==null) return 1;          // 无天数（未开票/已结清）排末尾
+    if(b.days==null) return -1;
+    return (a.days-b.days)*sortDir;
+  });
+  return rows;
+}
+function renderAR(){
+  const body = document.getElementById('arBody');
+  body.innerHTML = arRows().map((r,i)=>{
+    const c = STATUS_STYLE[r.stTone];
+    const amtCls = r.rest === 0 ? 'zero' : 'pending';
+    const det = r.split
+      ? `<div class="dinner">
+           <div class="dstackwrap">
+             <div class="dstacklbl"><span>金额结构 · ${r.split.base}</span><span>三段互斥，不重复计入</span></div>
+             <div class="dstack">${(()=>{const t=r.split.segs.reduce((s,x)=>s+x[1],0);
+                return r.split.segs.map(([,v,col])=>`<span style="width:${(v/t*100).toFixed(2)}%;background:${col}"></span>`).join('');})()}</div>
+             <div class="dstackleg">${r.split.segs.map(([l,v,col])=>`<span><i style="background:${col}"></i>${l} ¥${fmtMoney(v)}</span>`).join('')}</div>
+           </div>
+           <div class="dnote">${r.split.note}</div>
+         </div>`
+      : `<div class="dinner"><div class="dstackwrap" style="font-size:12.5px;color:#94a3b8;line-height:1.7">
+           源表仅提供「剩余应收」一项，未给出合同额 / 已开票额 / 已回款额的拆分 —— 此处不做结构还原，保留 <b style="font-family:var(--en)">—</b>。
+         </div></div>`;
+    return `<tr class="datarow ${i%2?'zebra':''}" data-i="${i}">
+        <td><div class="pname">${r.p}</div><div class="pcust">${r.c}</div></td>
+        <td class="num"><span class="amtcell ${amtCls}">¥${fmtMoney(r.rest)}</span></td>
+        <td><span class="agecell" style="color:${ageBucket(r).t}"><span class="adot" style="background:${ageBucket(r).c}"></span>${r.days!=null?r.ageTxt.replace(/(\d+)\s*天/,'$1<span class="cnu"> 天</span>'):`<span class="cnu">${r.ageTxt}</span>`}</span></td>
+        <td><span class="stpill" style="background:${c.bg};color:${c.fg}"><span class="pd" style="background:${c.fg}"></span>${r.st}</span></td>
+        <td><div class="prog">${r.note}${r.sub?`<span class="psub">${r.sub}</span>`:''}</div></td>
+        <td class="caret">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </td>
+      </tr>
+      <tr class="detailrow ${i%2?'zebra':''}"><td colspan="6"><div class="dwrap">${det}</div></td></tr>`;
+  }).join('');
+  body.querySelectorAll('tr.datarow').forEach(tr=>{
+    tr.addEventListener('click', ()=>{
+      const dr = tr.nextElementSibling;
+      const on = tr.classList.toggle('open');
+      dr.classList.toggle('show', on);
+    });
+  });
+}
+document.querySelectorAll('#arTable th.sortable').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const k = th.dataset.sort;
+    sortDir = (sortKey === k) ? -sortDir : 1;
+    sortKey = k;
+    document.querySelectorAll('#arTable th.sortable').forEach(x=>x.classList.toggle('sorted', x===th));
+    th.querySelector('.sa').textContent = sortDir === 1 ? '↑' : '↓';
+    renderAR();
+  });
+});
+document.getElementById('arReset').addEventListener('click', ()=>{
+  sortKey = null; sortDir = 1;
+  document.querySelectorAll('#arTable th.sortable').forEach(x=>{ x.classList.remove('sorted'); x.querySelector('.sa').textContent='↕'; });
+  renderAR();
+  toast('已恢复源表原始顺序');
+});
+renderAR();
+
+/* ---------- 顶部控件 ---------- */
+document.getElementById('refreshBtn').addEventListener('click', e=>{
+  const b = e.currentTarget;
+  b.classList.add('spin'); setTimeout(()=>b.classList.remove('spin'), 720);
+  toast('已按当前数据重新渲染（数据截至 2026-08-07）', '原型演示，未连接后端，不会拉取新数据。');
+});
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  toast('导出范围：业务层看板 · 曾磊 Nico · 截至 2026-08-07', '原型演示，未生成实际文件。');
+});
+syncView();
+</script>
+</body>
+</html>
