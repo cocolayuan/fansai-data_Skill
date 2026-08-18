@@ -4,19 +4,26 @@ FansAI 数据中台页面系统 Skill —— 薄荷液态玻璃 clean-SaaS 风�
 
 > [下载可独立导入的 V2 Skill 包](fansai-data-system_Skill_V2.skill) · [查看 V2 主规范](fansai-data-system_Skill_V2/SKILL.md)
 
-## 🧪 Testing Demo Preview
+## 🆕 New Demo Preview
 
-以下链接由 GitHub Pages 提供，可直接在浏览器中打开；源码与本地图片资源见 [`demos/`](demos/)。
+以下为当前持续更新的新版本，可通过独立的 GitHub Pages 链接直接预览。
 
 | Demo | 在线预览 | 简单说明 |
 |---|---|---|
-| 数据看板 · 管理层看板 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/management_dashboard_redesign.html) | 全公司经营目标、团队推进、线索转化、客户与现金流洞察 |
+| 数据看板 · 管理层看板 | [打开管理层看板](https://cocolayuan.github.io/fansai-data_Skill/demos/management_dashboard_redesign.html) | 全公司经营目标、团队推进、线索转化、客户与现金流洞察 |
+| 客户资料 | [打开客户资料](https://cocolayuan.github.io/fansai-data_Skill/demos/customer_profile_redesign.html) | 客户库与线索池、节奏与表格双视图、独立时间轴及统一业务弹窗 |
+
+## 🗃️ Archived Demo Preview
+
+以下为历史归档 Demo。链接仍由 GitHub Pages 提供，可直接在浏览器中打开；源码与本地图片资源见 [`demos/`](demos/)。
+
+| Demo | 在线预览 | 简单说明 |
+|---|---|---|
 | 数据看板 · 业务层看板 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/business_dashboard_redesign.html) | 个人目标、线索客户、项目推进、开票回款与日程联动 |
 | 数据看板 · 执行层看板 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/execution_dashboard_redesign.html) | 团队排期、负载预警、交付节点与外部团队验收状态 |
 | 项目管理 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/project_management_redesign.html) | 状态筛选、表头排序、撕页日期与三段式操作列 |
 | 创作者列表 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/creator_list_redesign.html) | 三栏卡片列表、作品视觉优先、长文本截断与真实图片槽位 |
 | 供应商列表 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/vendor_list_redesign.html) | 自定义瓦片筛选、列表排序、组织首标与负责人头像 |
-| 客户资料 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/customer_profile_redesign.html) | KPI 与合同构成合并；客户搜索、筛选和排序 |
 | 流程配置 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/workflow_configuration_redesign.html) | 左目录 + 右详情等高双栏，支持主题切换、搜索、排序与启停 |
 | 生成任务 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/task_generation_redesign.html) | 搜索与多维筛选、完整日期及数据诚实表格 |
 | 账号中心 | [打开 Demo](https://cocolayuan.github.io/fansai-data_Skill/demos/account_center_redesign.html) | 面包屑 header、资料表单、默认头像库与确定性头像分配 |
