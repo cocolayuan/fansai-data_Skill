@@ -66,22 +66,4 @@ V2.1 在 V2 基线上收纳全系统工作台与复合数据页规则，并附�
 | [`agents/openai.yaml`](fansai-data-system_Skill_V2.1/agents/openai.yaml) | V2.1 Skill 列表显示名称、简介与默认调用提示 |
 | [`fansai-data-system_Skill_V2.1.skill`](fansai-data-system_Skill_V2.1.skill) | V2.1 自包含打包版，可直接下载导入 |
 
-## Skill 明细（V2）
-
-V2 已把 V1.3 完整主规范、表单、header、参考页面和头像资源收进同一个目录，可独立安装，不依赖旧版本目录。若新旧规则冲突，仅以 V2 主规范中明确标注的「V2 修订 / 覆盖」为准。
-
-| 文件 | 说明 |
-|---|---|
-| [`SKILL.md`](fansai-data-system_Skill_V2/SKILL.md) | V2 主规范：设计决策、页面结构、数据诚实、列表、图表、交互与交付自检 |
-| [`references/v1.3-baseline.md`](fansai-data-system_Skill_V2/references/v1.3-baseline.md) | V1.3 完整主规范基线；保留 V2 未重述的全部细节 |
-| [`references/v1.3-numbers-and-charts.md`](fansai-data-system_Skill_V2/references/v1.3-numbers-and-charts.md) | V1.3 原版数字与图表配方；供完整继承和历史对照 |
-| [`references/numbers-and-charts.md`](fansai-data-system_Skill_V2/references/numbers-and-charts.md) | 数字 6 模式 + 图表选型决策表 + 9 类图表配方 |
-| [`references/list-pages.md`](fansai-data-system_Skill_V2/references/list-pages.md) | 表格式 / 卡片式 / 主从双栏列表与操作列、行内组件配方 |
-| [`references/charts_components_reference.html`](fansai-data-system_Skill_V2/references/charts_components_reference.html) | 可交互的 V2 图表组件总览与代码示例 |
-| [`references/forms-and-modals.md`](fansai-data-system_Skill_V2/references/forms-and-modals.md) | 从 V1.3 继承的表单、弹窗与瓦片下拉配方 |
-| [`references/`](fansai-data-system_Skill_V2/references/) | header、客户跟踪、内容资产弹窗等高保真参考页 |
-| [`assets/avatars/`](fansai-data-system_Skill_V2/assets/avatars/) | 默认头像库（5 个抽象渐变头像） |
-| [`agents/openai.yaml`](fansai-data-system_Skill_V2/agents/openai.yaml) | Skill 列表显示名称、简介与默认调用提示 |
-| [`fansai-data-system_Skill_V2.skill`](fansai-data-system_Skill_V2.skill) | 自包含打包版，可直接下载导入 |
-
 历史版本仍保留在 [`fansai-data-system_Skill_V1.3/`](fansai-data-system_Skill_V1.3/)。
