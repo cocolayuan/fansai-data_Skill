@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>客户跟踪 · Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b2430; --ink2:#0f3132; --muted:#64748b; --muted2:#94a3b8; --muted3:#727272;
+  --teal:#008aa8; --teal2:#0c7074; --dark:#1b2430; --blue:#49B6D8; --green:#8BD98C;
+  --line:#e8efef; --card:#ffffff;
+  --cn:"PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","PingFang SC",sans-serif;
+  --sh:0 1px 2px rgba(20,50,55,.05);
+  --glass:0 24px 54px -28px rgba(20,60,60,.26),inset 0 1px 0 rgba(255,255,255,.65);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--cn);color:var(--ink);-webkit-font-smoothing:antialiased;background:#DCE7E6;display:flex;justify-content:center;padding:18px}
+.tnum{font-variant-numeric:tabular-nums}
+.shell{width:1920px;position:relative;border-radius:24px;overflow:hidden;box-shadow:0 40px 90px -40px rgba(20,55,55,.45);
+  background:
+   radial-gradient(1200px 720px at 92% -8%, rgba(73,182,216,.17), transparent 58%),
+   radial-gradient(1000px 700px at -2% 6%, rgba(139,217,140,.17), transparent 55%),
+   radial-gradient(900px 560px at 60% 104%, rgba(0,138,168,.10), transparent 60%),
+   #ECF4F2}
+.wrap{padding:30px 44px 44px}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.rv{opacity:0;animation:up .55s cubic-bezier(.2,.7,.2,1) forwards}
+
+/* glass helpers */
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.5));backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.78);box-shadow:var(--glass)}
+.glass-lite{background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid rgba(255,255,255,.7)}
+
+/* header */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.topbar h1{font-size:24px;font-weight:700;letter-spacing:.3px}
+.acct{display:flex;align-items:center;gap:11px;cursor:pointer}
+.acct .av{width:44px;height:44px;border-radius:50%;background:linear-gradient(140deg,#A7E885,#008aa8);display:flex;align-items:center;justify-content:center;color:#04312f;font-weight:700;font-size:18px;font-family:var(--en);box-shadow:0 8px 18px -6px rgba(0,138,168,.55)}
+.acct b{font-family:var(--en);font-weight:500;font-size:19px}
+.acct .cv{color:var(--muted2);font-size:12px}
+
+/* top KPI */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-bottom:26px}
+.kpi{border-radius:24px;padding:22px 24px;display:flex;justify-content:space-between;align-items:flex-start;min-height:128px}
+.kpi .lbl{font-size:15px;color:var(--muted);font-weight:500}
+.kpi .num{font-family:var(--en);font-weight:700;font-size:42px;line-height:1.05;margin:8px 0 7px}
+.kpi .cap{font-size:12.5px;color:var(--muted2)}
+.kchip{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.kchip svg{width:22px;height:22px}
+.kring{position:relative;width:66px;height:66px;flex:0 0 auto}
+.kring .kv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--en);font-weight:700;font-size:16px}
+
+/* layout */
+.main{display:grid;grid-template-columns:430px 1fr;gap:24px;align-items:start}
+
+/* queue */
+.queue{border-radius:24px;padding:18px}
+.qsearch{display:flex;align-items:center;gap:10px;border-radius:26px;padding:12px 16px;margin-bottom:16px;background:rgba(255,255,255,.6);border:1px solid var(--line)}
+.qsearch input{border:0;outline:0;flex:1;background:transparent;font-family:var(--cn);font-size:14px}
+.qsearch input::placeholder{color:var(--muted2)}
+.qhead h3{font-size:17px;font-weight:700}
+.qhead p{font-size:12.5px;color:var(--muted2);margin:4px 0 14px}
+.qcard{display:flex;gap:12px;padding:14px;border-radius:18px;border:1px solid transparent;cursor:pointer;transition:.18s;margin-bottom:8px}
+.qcard:hover{background:rgba(255,255,255,.5)}
+.qcard.on{background:rgba(0,138,168,.06);border-color:rgba(0,138,168,.4)}
+.qthumb{width:46px;height:46px;border-radius:13px;flex:0 0 auto}
+.qbody{flex:1;min-width:0}
+.qtop{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.qname{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qrisk{font-size:11px;font-weight:600;border-radius:14px;padding:2px 9px;white-space:nowrap;flex:0 0 auto}
+.qnext{font-size:12px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:7px}
+.qbud{display:flex;align-items:center;gap:8px}
+.qbud .bl{font-size:11px;color:var(--muted3)}
+.qbud .bv{font-family:var(--en);font-weight:600;font-size:12.5px;margin-left:auto}
+.qbar{flex:1;height:6px;border-radius:4px;background:#EAF1F1;overflow:hidden;max-width:120px}
+.qbar>i{display:block;height:100%;border-radius:4px}
+.qback{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;padding:13px;border-radius:24px;background:rgba(255,255,255,.6);border:1px solid var(--line);font-size:14px;font-weight:600;color:var(--ink);cursor:pointer}
+.qback svg{width:15px;height:15px;color:var(--muted)}
+
+/* detail */
+.detail{display:flex;flex-direction:column;gap:24px}
+/* hero */
+.hero{border-radius:24px;padding:18px;display:flex;gap:24px}
+.hero .img{width:320px;height:236px;border-radius:18px;flex:0 0 auto;position:relative;overflow:hidden;background:linear-gradient(150deg,#3a1518,#7a2a22)}
+.hero .img img{width:100%;height:100%;object-fit:cover}
+.hinfo{flex:1;min-width:0;display:flex;flex-direction:column}
+.tags{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tag{font-size:12.5px;font-weight:600;border-radius:8px;padding:5px 11px}
+.tag.contract{background:#FCEEE3;color:#C2691F}
+.tag.cat{background:#EAF3F2;color:#3E806C}
+.tag.status{color:var(--muted);font-weight:500;padding:5px 0}
+.hname{font-size:28px;font-weight:700;margin-bottom:9px}
+.hdesc{font-size:14px;color:var(--muted);line-height:1.55;max-width:620px}
+.hmeta{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:auto;padding-top:18px}
+.hmeta .k{font-size:12px;color:var(--muted2);margin-bottom:5px}
+.hmeta .v{font-size:14.5px;font-weight:600;font-family:var(--en)}
+.hupd{position:relative}
+.hupd .box{border-radius:14px;padding:12px 16px;background:rgba(255,255,255,.5);border:1px solid var(--line)}
+.hupd .k{font-size:11.5px;color:var(--muted2)}
+.hupd .v{font-size:13.5px;font-weight:600;font-family:var(--en);margin-top:2px}
+
+/* status cards */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.stat{border-radius:22px;padding:20px 22px;display:flex;justify-content:space-between;align-items:flex-start;min-height:120px}
+.stat .lbl{font-size:14px;color:var(--muted);font-weight:500}
+.stat .big{font-size:30px;font-weight:700;font-family:var(--en);margin:9px 0 7px}
+.stat .big.cn{font-family:var(--cn)}
+.stat .cap{font-size:12px;color:var(--muted2);line-height:1.4}
+.schip{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.schip svg{width:20px;height:20px}
+
+/* two-col rows */
+.row2{display:grid;gap:24px}
+.panel{border-radius:24px;padding:24px}
+.ptitle{font-size:18px;font-weight:700;margin-bottom:16px}
+
+/* this-week */
+.nextbox{position:relative;display:flex;align-items:center;gap:16px;border-radius:18px;padding:18px 22px 18px 26px;margin-bottom:22px;background:linear-gradient(120deg,rgba(0,138,168,.10),rgba(73,182,216,.04) 55%,rgba(255,255,255,.35));border:1px solid rgba(0,138,168,.18);overflow:hidden}
+.nextbox::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:linear-gradient(180deg,#5CC0DE,#008aa8)}
+.nextbox .nb-main{flex:1;min-width:0}
+.nextbox .nb-k{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--teal);letter-spacing:.4px;margin-bottom:8px}
+.nextbox .nb-k svg{width:14px;height:14px}
+.nextbox .nb-v{font-size:19px;font-weight:700;color:var(--ink);line-height:1.3}
+.nextbox .nb-tag{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:#fff;background:linear-gradient(135deg,#00A6C2,#007E9A);border-radius:20px;padding:8px 15px;box-shadow:0 8px 18px -8px rgba(0,138,168,.6)}
+.nextbox .nb-tag .pd{width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.3)}
+.sublabel{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-bottom:13px}
+.sublabel .ct{font-family:var(--en);font-size:11px;color:var(--muted2);background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:12px;padding:1px 9px}
+.sublabel .ln{flex:1;height:1px;background:linear-gradient(90deg,rgba(231,239,239,.95),transparent)}
+.signals{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.sig{border-radius:16px;padding:16px;background:rgba(255,255,255,.55);border:1px solid var(--line);transition:.2s}
+.sig:hover{background:rgba(255,255,255,.78);box-shadow:0 12px 26px -18px rgba(20,60,60,.32)}
+.sig .st{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.sig .si{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.sig .si svg{width:16px;height:16px}
+.sig .sl{font-size:13px;color:var(--muted);font-weight:600}
+.sig .scap{font-size:11.5px;color:var(--muted2);margin-bottom:5px}
+.sig .sv{display:flex;align-items:center;gap:4px;font-family:var(--en);font-weight:700;font-size:22px;color:var(--ink);line-height:1.1}
+.sig .sv .ua{width:13px;height:13px}
+.tasks{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.task{display:flex;align-items:center;gap:11px;border-radius:14px;padding:14px 15px;background:rgba(255,255,255,.55);border:1px solid var(--line);font-size:13px;color:var(--ink);line-height:1.4;transition:.2s}
+.task:hover{background:rgba(255,255,255,.78)}
+.task .ck{width:24px;height:24px;border-radius:8px;background:rgba(0,138,168,.1);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.task .ck svg{width:14px;height:14px;color:var(--teal)}
+
+/* stage progress */
+.mile{padding:14px 0;border-bottom:1px solid rgba(236,243,243,.8)}
+.mile:last-child{border-bottom:0;padding-bottom:0}
+.mile:first-child{padding-top:0}
+.mtop{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+.mtop .n{font-size:15px;font-weight:600}
+.mbadge{font-size:11px;font-weight:600;border-radius:14px;padding:3px 11px;margin-left:auto}
+.msub{font-size:12px;color:var(--muted2);margin-bottom:9px}
+.mbarwrap{display:flex;align-items:center;gap:12px}
+.mbar{flex:1;height:7px;border-radius:5px;background:#EAF1F1;overflow:hidden}
+.mbar>i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#5CC0DE,#2563EB)}
+.mpct{font-family:var(--en);font-weight:600;font-size:13px;color:var(--muted);min-width:40px;text-align:right}
+
+/* channels */
+.chan{margin-bottom:22px}
+.chan:last-child{margin-bottom:0}
+.ctop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+.cname{font-size:15px;font-weight:600}
+.cfeat{font-size:12.5px;font-weight:600;color:var(--teal)}
+.csub{font-size:12px;color:var(--muted2);margin-bottom:9px}
+.cbarwrap{display:flex;align-items:center;gap:12px}
+.cbar{flex:1;height:9px;border-radius:5px;background:#EAF1F1;overflow:hidden}
+.cbar>i{display:block;height:100%;border-radius:5px}
+.cpct{font-family:var(--en);font-weight:700;font-size:14px;min-width:42px;text-align:right}
+
+/* core KPI tiles */
+.ktiles{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ktile{border-radius:18px;padding:18px 18px 16px;background:rgba(255,255,255,.55);border:1px solid var(--line);transition:.2s}
+.ktile:hover{background:rgba(255,255,255,.78);box-shadow:0 14px 30px -20px rgba(20,60,60,.32)}
+.ktile .kt{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.ktile .kl{font-size:13px;color:var(--muted);font-weight:600}
+.ktile .ki{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ktile .ki svg{width:17px;height:17px}
+.ktile .kn{display:flex;align-items:baseline;gap:5px;font-family:var(--en);font-weight:700;font-size:30px;line-height:1;color:var(--ink)}
+.ktile .kn .pre{font-family:var(--cn);font-size:14px;font-weight:600;color:var(--muted)}
+.ktile .kn .un{font-family:var(--cn);font-size:16px;font-weight:700}
+.ktile .kbar{height:7px;border-radius:5px;background:#EAF1F1;overflow:hidden;margin-top:13px}
+.ktile .kbar>i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#49B6D8,#008aa8)}
+.ktile .kmeta{display:flex;align-items:center;gap:8px;margin-top:11px}
+.ktile .kbadge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;border-radius:12px;padding:3px 10px}
+.ktile .kc{font-size:11.5px;color:var(--muted2)}
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="wrap">
+
+  <header class="topbar rv">
+    <h1>客户跟踪</h1>
+    <div class="acct"><div class="av">K</div><b>Kora</b><span class="cv">▾</span></div>
+  </header>
+
+  <!-- top KPI -->
+  <section class="kpis" id="kpis"></section>
+
+  <div class="main">
+    <!-- queue -->
+    <aside class="queue glass rv" style="animation-delay:.06s">
+      <div class="qsearch"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input placeholder="搜索客户、负责人、团队或下一步动作"></div>
+      <div class="qhead"><h3>客户项目队列</h3><p>按健康度、风险和下一步动作跟进</p></div>
+      <div id="queue"></div>
+      <div class="qback">返回客户案例 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </aside>
+
+    <!-- detail -->
+    <div class="detail">
+      <!-- hero -->
+      <div class="hero glass rv" style="animation-delay:.1s">
+        <div class="img"><img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=720&h=520&fit=crop&q=70" onerror="this.remove()" alt=""></div>
+        <div class="hinfo">
+          <div class="tags">
+            <span class="tag contract">年度合约</span>
+            <span class="tag cat">美妆 / 国际品牌</span>
+            <span class="tag status">执行中 · 数据表现优异</span>
+          </div>
+          <div class="hname">植村秀 (Shu Uemura)</div>
+          <div class="hdesc">围绕琥珀洁颜油与小方瓶底妆建立长线内容资产，用抖音爆发和小红书种草承接全年节点。</div>
+          <div class="hmeta">
+            <div><div class="k">负责人</div><div class="v">Zhang Wei</div></div>
+            <div><div class="k">执行团队</div><div class="v">FansAI Content Team B</div></div>
+            <div><div class="k">合作周期</div><div class="v">2026-01-01 至 2026-12-31</div></div>
+          </div>
+        </div>
+        <div class="hupd">
+          <div class="box" style="margin-bottom:10px"><div class="k">最后更新</div><div class="v">2026-05-26 18:20</div></div>
+          <div class="box"><div class="k">下次例会</div><div class="v">2026-06-03</div></div>
+        </div>
+      </div>
+
+      <!-- status cards -->
+      <section class="stats" id="stats"></section>
+
+      <!-- row: this-week + stage -->
+      <div class="row2" style="grid-template-columns:1.32fr 1fr">
+        <div class="panel glass rv" style="animation-delay:.16s">
+          <div class="ptitle">本周跟进动作</div>
+          <div class="nextbox">
+            <div class="nb-main">
+              <div class="nb-k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4M4 5h11l-2 3 2 3H4"/></svg>下一步动作</div>
+              <div class="nb-v">补齐 618 转化素材与直播间切片</div>
+            </div>
+            <span class="nb-tag"><span class="pd"></span>进行中</span>
+          </div>
+          <div class="sublabel">关键信号<span class="ln"></span></div>
+          <div class="signals" id="signals"></div>
+          <div class="sublabel">本周清单<span class="ct">3 项</span><span class="ln"></span></div>
+          <div class="tasks" id="tasks"></div>
+        </div>
+        <div class="panel glass rv" style="animation-delay:.2s">
+          <div class="ptitle">阶段进展</div>
+          <div id="miles"></div>
+        </div>
+      </div>
+
+      <!-- row: channels + core KPI -->
+      <div class="row2" style="grid-template-columns:1fr 1fr">
+        <div class="panel glass rv" style="animation-delay:.24s">
+          <div class="ptitle">渠道执行状态</div>
+          <div id="chans"></div>
+        </div>
+        <div class="panel glass rv" style="animation-delay:.28s">
+          <div class="ptitle">核心 KPI 细分</div>
+          <div class="ktiles" id="ktiles"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+function ring(pct,color,size,sw){const r=(size-sw)/2,c=2*Math.PI*r,off=c*(1-pct);
+ return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#E6EEEE" stroke-width="${sw}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 ${size/2} ${size/2})"/></svg>`;}
+
+/* top KPI */
+const KPI=[
+ {lbl:'在跑客户',num:'12',cap:'全部项目均处于执行或启动状态',chip:'#E4F1F4',cc:'#2E7E96',icon:'<path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/>'},
+ {lbl:'A级健康项目',num:'9',cap:'本周无高风险阻塞',chip:'#EAF6EE',cc:'#1A9E4B',icon:'<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>',green:true},
+ {lbl:'待本周跟进',num:'12',cap:'均已配置下一步动作',chip:'#EEF0FB',cc:'#5C5CD6',icon:'<rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/><path d="M9 14l2 2 4-4"/>'},
+ {lbl:'预算平均进度',num:'66%',cap:'按合同周期归一化',ring:0.66,rcolor:'#2BA6CE'},
+];
+const kw=document.getElementById('kpis');
+KPI.forEach((k,i)=>{const el=document.createElement('div');el.className='kpi glass rv';el.style.animationDelay=(0.04*i)+'s';
+ let right=k.ring!=null?`<div class="kring">${ring(k.ring,k.rcolor,66,8)}<div class="kv">${k.num}</div></div>`
+   :`<div class="kchip" style="background:${k.chip};color:${k.cc}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${k.icon}</svg></div>`;
+ el.innerHTML=`<div><div class="lbl">${k.lbl}</div><div class="num"${k.green?' style="color:#1A9E4B"':''}>${k.num}</div><div class="cap">${k.cap}</div></div>${right}`;
+ kw.appendChild(el);});
+
+/* queue */
+const RISK={'低':['#E6F7EC','#1A9E4B'],'中低':['#FBF3DE','#B5841F'],'中':['#FDF1E3','#C77B26'],'高':['#FDE9EC','#D6455B']};
+const QUEUE=[
+ ['植村秀 (Shu Uemura)','低',85,'补齐 618 转化素材与直播间切片','#F2994A','linear-gradient(150deg,#5a2420,#a0463a)',true],
+ ['欧莱雅 Pro 系列','低',74,'上线发质分层私域内容','#A78BFA','linear-gradient(150deg,#5b4a8a,#8b7bd0)'],
+ ['YSL圣罗兰美妆','低',81,'618 承接素材按人群拆分','#F2994A','linear-gradient(150deg,#7a1f2a,#b03a48)'],
+ ['兰蔻 (Lancôme)','低',78,'复购权益长图和短视频','#F472B6','linear-gradient(150deg,#7a2150,#c44d8a)'],
+ ['雅诗兰黛科学护肤','中',63,'补充知乎和微信测评','#EF6B6B','linear-gradient(150deg,#7a3a30,#c06a4a)'],
+ ['花西子东方彩妆','中低',69,'扩充控油粉饼达人脚本','#EF6B6B','linear-gradient(150deg,#7a2530,#c0455a)'],
+ ['薇诺娜防晒修护','中',58,'按华南高紫外线城市投放','#49B6D8','linear-gradient(150deg,#1f5a6a,#3a9bb0)'],
+ ['参半口腔护理','中低',71,'上线 30 天使用证言','#34C5A0','linear-gradient(150deg,#1f6a5a,#3ab08e)'],
+ ['碧欧泉男士','中',42,'父亲节礼盒素材集','#475569','linear-gradient(150deg,#2a3340,#4a5566)'],
+ ['观夏香氛','中低',67,'线下活动内容二次剪辑','#F2C94C','linear-gradient(150deg,#7a5a1f,#c09a3a)'],
+ ['红色小象母婴护理','低',76,'夏季洗护专题进入排期','#7DD957','linear-gradient(150deg,#3a6a1f,#6ab03a)'],
+ ['Keep运动个护','中',38,'完成直播首场脚本','#22D3EE','linear-gradient(150deg,#1f5a6a,#3ab0c0)'],
+];
+const qw=document.getElementById('queue');
+QUEUE.forEach((q,i)=>{const[name,risk,bud,next,bc,grad,on]=q;const[rbg,rfg]=RISK[risk];
+ const el=document.createElement('div');el.className='qcard rv'+(on?' on':'');el.style.animationDelay=(0.06+0.015*i)+'s';
+ el.innerHTML=`<div class="qthumb" style="background:${grad}"></div>
+  <div class="qbody"><div class="qtop"><span class="qname">${name}</span><span class="qrisk" style="background:${rbg};color:${rfg}">风险 ${risk}</span></div>
+  <div class="qnext">${next}</div>
+  <div class="qbud"><span class="bl">预算</span><span class="qbar"><i style="width:${bud}%;background:${bc}"></i></span><span class="bv">${bud}%</span></div></div>`;
+ qw.appendChild(el);});
+document.querySelectorAll('.qcard').forEach(c=>c.onclick=()=>{document.querySelectorAll('.qcard').forEach(x=>x.classList.remove('on'));c.classList.add('on');});
+
+/* status cards */
+const STATS=[
+ {lbl:'项目健康度',big:'A级',cn:true,cap:'执行中 · 数据表现优异',chip:'#EAF6EE',cc:'#1A9E4B',color:'#1A9E4B',icon:'<path d="M12 20v-6M6 20v-4M18 20v-9"/><circle cx="12" cy="6" r="2"/>'},
+ {lbl:'预算执行进度',big:'85%',cap:'按合同周期和投放节奏计算',chip:'#E4EEFB',cc:'#2563EB',icon:'<path d="M3 17l6-6 4 4 7-7"/><path d="M17 8h4v4"/>'},
+ {lbl:'内容节奏',big:'176 / 220',cap:'已发布 / 计划内容量',chip:'#E4F1F4',cc:'#2E7E96',icon:'<rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/>'},
+ {lbl:'风险等级',big:'低',cn:true,cap:'补齐 618 转化素材与直播间切片',chip:'#EAF6EE',cc:'#1A9E4B',color:'#1A9E4B',icon:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>'},
+];
+const sw=document.getElementById('stats');
+STATS.forEach((s,i)=>{const el=document.createElement('div');el.className='stat glass rv';el.style.animationDelay=(0.12+0.03*i)+'s';
+ el.innerHTML=`<div><div class="lbl">${s.lbl}</div><div class="big ${s.cn?'cn':''}"${s.color?` style="color:${s.color}"`:''}>${s.big}</div><div class="cap">${s.cap}</div></div>
+  <div class="schip" style="background:${s.chip};color:${s.cc}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${s.icon}</svg></div>`;
+ sw.appendChild(el);});
+
+/* tasks */
+const SIGNALS=[
+ {chip:'#E0F4F8',cc:'#008aa8',icon:'<path d="M3 17l6-6 4 4 7-7"/><path d="M17 8h4v4"/>',label:'转化信号',cap:'复购人群点击率',val:'+18%',up:true},
+ {chip:'#E4F1FA',cc:'#2E8BB8',icon:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',label:'SOV',cap:'声量份额',val:'0.54%'},
+ {chip:'#EEF0FB',cc:'#5b5bd0',icon:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',label:'例会',cap:'下次会议',val:'2026-06-03'},
+];
+const sgw=document.getElementById('signals');
+SIGNALS.forEach(s=>{const el=document.createElement('div');el.className='sig';
+ const up=s.up?'<svg class="ua" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5l7 9H5z"/></svg>':'';
+ el.innerHTML=`<div class="st"><span class="si" style="background:${s.chip};color:${s.cc}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${s.icon}</svg></span><span class="sl">${s.label}</span></div>
+  <div class="scap">${s.cap}</div>
+  <div class="sv"${s.up?' style="color:#1A9E4B"':''}>${up}${s.val}</div>`;
+ sgw.appendChild(el);});
+
+const TASKS=['618 直播脚本定稿','小红书油皮人群评论抽样','抖音 DPA 人群包复盘'];
+const tw=document.getElementById('tasks');
+TASKS.forEach(t=>{const el=document.createElement('div');el.className='task';
+ el.innerHTML=`<span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><span>${t}</span>`;
+ tw.appendChild(el);});
+
+/* milestones */
+const MBADGE={'已完成':['#2563EB','#fff'],'复盘中':['#E4EEFB','#2563EB'],'执行中':['#E4EEFB','#2563EB'],'排期中':['#EEF2F5','#64748b']};
+const MILES=[
+ ['Q1 内容资产重建','已完成','内容策略 · 2026-03-31',100],
+ ['520 节点爆发','复盘中','投放运营 · 2026-05-20',92],
+ ['618 转化承接','执行中','增长团队 · 2026-06-18',68],
+ ['双11 全域联动','排期中','项目负责人 · 2026-11-11',24],
+];
+const mw=document.getElementById('miles');
+MILES.forEach(([n,st,sub,pct])=>{const[bg,fg]=MBADGE[st];const el=document.createElement('div');el.className='mile';
+ el.innerHTML=`<div class="mtop"><span class="n">${n}</span><span class="mbadge" style="background:${bg};color:${fg}">${st}</span></div>
+  <div class="msub">${sub}</div>
+  <div class="mbarwrap"><span class="mbar"><i style="width:${pct}%"></i></span><span class="mpct">${pct}%</span></div>`;
+ mw.appendChild(el);});
+
+/* channels */
+const CHANS=[
+ ['抖音','430万 · 92条','CPA -15%',55,'#1b2430'],
+ ['小红书','196万 · 146篇','收藏率 8.7%',25,'#FF4D6D'],
+ ['微博','94万 · 38条','话题阅读 1.1亿',12,'#FB7AA0'],
+ ['线下/OOH','63万 · 8组','到店核销 +9%',8,'#3B82F6'],
+];
+const cw=document.getElementById('chans');
+CHANS.forEach(([n,sub,feat,pct,col])=>{const el=document.createElement('div');el.className='chan';
+ el.innerHTML=`<div class="ctop"><span class="cname">${n}</span><span class="cfeat">${feat}</span></div>
+  <div class="csub">${sub}</div>
+  <div class="cbarwrap"><span class="cbar"><i style="width:${pct}%;background:${col}"></i></span><span class="cpct">${pct}%</span></div>`;
+ cw.appendChild(el);});
+
+/* core KPI tiles */
+const KT=[
+ {kl:'社媒投放预算',chip:'#E4F1F4',cc:'#2E7E96',icon:'<path d="M19 7V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2"/><path d="M20 9h-4a2 2 0 0 0 0 6h4a1 1 0 0 0 1-1V10a1 1 0 0 0-1-1z"/>',pre:'同比',main:'+12%',mc:'#1A9E4B',bar:85,cap:'预算执行进度 85%'},
+ {kl:'内容声量占比',chip:'#E4EEFB',cc:'#2563EB',icon:'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M16 8.5a4 4 0 0 1 0 7"/>',main:'0.54%',badge:{t:'彩妆品牌 · 第 63 位',bg:'#EEF0FB',fg:'#5b5bd0'}},
+ {kl:'卸妆油热度',chip:'#FDF1E3',cc:'#C77B26',icon:'<path d="M12 3s4 3.5 4 8a4 4 0 0 1-8 0c0-1.6 1-3 1-3s.4 1.8 2 1.8C11 7.5 10 5.5 12 3z"/>',main:'8,965',un:'万',mc:'#E8854A',badge:{t:'品类热度 TOP 3',bg:'#FDF1E3',fg:'#C77B26',up:true}},
+ {kl:'粉底液实测播放',chip:'#EAF6EE',cc:'#1A9E4B',icon:'<circle cx="12" cy="12" r="9"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/>',main:'3.2',un:'亿+',mc:'#1A9E4B',cap:'全渠道累计播放量'},
+];
+const ktw=document.getElementById('ktiles');
+KT.forEach(k=>{const el=document.createElement('div');el.className='ktile';
+ const val=`${k.pre?`<span class="pre">${k.pre}</span>`:''}<span${k.mc?` style="color:${k.mc}"`:''}>${k.main}</span>${k.un?`<span class="un"${k.mc?` style="color:${k.mc}"`:''}>${k.un}</span>`:''}`;
+ let meta='';
+ if(k.bar!=null) meta=`<div class="kbar"><i style="width:${k.bar}%"></i></div><div class="kc" style="margin-top:9px">${k.cap}</div>`;
+ else if(k.badge){const up=k.badge.up?'<svg viewBox="0 0 24 24" fill="currentColor" style="width:9px;height:9px"><path d="M12 5l7 9H5z"/></svg>':'';meta=`<div class="kmeta"><span class="kbadge" style="background:${k.badge.bg};color:${k.badge.fg}">${up}${k.badge.t}</span></div>`;}
+ else if(k.cap) meta=`<div class="kmeta"><span class="kc">${k.cap}</span></div>`;
+ el.innerHTML=`<div class="kt"><span class="kl">${k.kl}</span><span class="ki" style="background:${k.chip};color:${k.cc}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${k.icon}</svg></span></div><div class="kn">${val}</div>${meta}`;
+ ktw.appendChild(el);});
+</script>
+</body>
+</html>
