@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>采购类目 | FansAI 数据中台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b2430;--ink2:#0f3132;--muted:#64748b;--muted2:#94a3b8;--line:#e8efef;
+  --teal:#008aa8;--teal2:#0c7074;--blue:#49b6d8;--ok:#1a9e4b;--warn:#c77b26;--err:#d6455b;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","Noto Sans SC",sans-serif;
+  --glass-shadow:0 24px 54px -28px rgba(20,60,60,.26),inset 0 1px 0 rgba(255,255,255,.65)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{min-height:100vh;color:var(--ink);font-family:var(--cn);font-weight:500;-webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(980px 600px at 7% -5%,rgba(154,220,203,.40),transparent 61%),
+    radial-gradient(840px 530px at 92% 2%,rgba(73,182,216,.27),transparent 60%),
+    radial-gradient(780px 520px at 54% 108%,rgba(0,138,168,.09),transparent 62%),
+    #edf5f3;background-attachment:fixed}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.tnum{font-family:var(--en);font-variant-numeric:tabular-nums}
+.wrap{max-width:1680px;margin:0 auto;padding:26px 36px 52px}
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.76),rgba(255,255,255,.53));border:1px solid rgba(255,255,255,.82);box-shadow:var(--glass-shadow);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%)}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{animation:rise .48s cubic-bezier(.2,.7,.2,1) both}
+
+/* header */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+.bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;border:2px solid #f5fffe;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;flex:0 0 auto;border-radius:50%;background:linear-gradient(140deg,#9adccb,#49b6d8)}
+.bmain,.bsub{font-family:var(--en);font-size:18px;letter-spacing:1.08px;line-height:24px}.bmain{font-weight:700}.bsub{font-weight:300}
+.tb-right{display:flex;align-items:center;gap:12px}.bellbtn{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);box-shadow:0 6px 18px -10px rgba(15,49,50,.18);transition:.18s}.bellbtn:hover{transform:translateY(-1px)}.bellbtn svg{width:19px;height:19px}
+.me{display:flex;align-items:center;gap:8px;border:0;background:transparent}.avatar{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;border:2px solid #f5fffe;background:linear-gradient(140deg,#b5e9c2,#58bdd7);color:#04312f;font-family:var(--en);font-size:16px;font-weight:700}.mename{font-family:var(--en);font-size:18px;font-weight:500}.me>svg{width:14px;height:14px;color:var(--muted2)}
+
+/* master-detail */
+.catalog-grid{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:stretch;min-height:calc(100vh - 118px)}
+.sidepanel,.detailpanel{display:flex;flex-direction:column;min-height:0;border-radius:24px}
+.sidepanel{padding:22px 14px 14px}.panel-label{padding:0 10px 15px}.panel-label h2{font-size:15px;font-weight:600;color:var(--ink2)}.panel-label p{margin-top:5px;font-size:11.5px;color:var(--muted2)}
+.category-list{display:flex;flex-direction:column;gap:6px;flex:1 1 auto;min-height:0;overflow-y:auto;padding:0 1px 12px;scrollbar-width:thin;scrollbar-color:#cadbd8 transparent}
+.category-row{width:100%;min-height:50px;display:flex;align-items:center;gap:5px;padding:5px 7px 5px 12px;border-radius:14px;background:transparent;color:var(--ink);transition:.16s}
+.category-row:hover{background:rgba(0,138,168,.06)}.category-row.on{background:var(--ink);color:#fff;box-shadow:0 13px 25px -14px rgba(15,49,50,.58)}
+.category-select{min-width:0;flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 4px;border:0;background:transparent;color:inherit;text-align:left}
+.category-name{min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.category-count{flex:0 0 auto;min-width:26px;padding:3px 8px;border-radius:10px;background:rgba(148,163,184,.14);color:var(--muted);font-family:var(--en);font-size:11px;font-weight:700;text-align:center}.category-row.on .category-count{background:rgba(255,255,255,.20);color:#fff}
+.category-actions{flex:0 0 auto;display:flex;align-items:center;gap:3px;opacity:0;visibility:hidden;pointer-events:none;transform:translateX(4px);transition:opacity .15s,visibility .15s,transform .15s}.category-row.on .category-actions,.category-row:hover .category-actions,.category-row:focus-within .category-actions{opacity:1;visibility:visible;pointer-events:auto;transform:none}
+.category-action{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:9px;background:transparent;color:var(--muted2);transition:.14s}.category-action svg{width:14px;height:14px}.category-action:hover{background:#fff;color:var(--teal2);box-shadow:0 8px 18px -13px rgba(15,49,50,.6)}.category-action.danger:hover{color:var(--err)}.category-row.on .category-action{color:rgba(255,255,255,.66)}.category-row.on .category-action:hover{background:rgba(255,255,255,.16);color:#fff;box-shadow:none}
+.sidefoot{margin-top:auto;padding:14px 8px 0;border-top:1px solid rgba(232,239,239,.9)}
+.add-primary{width:100%;height:42px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.64);color:var(--ink2);font-size:12.5px;font-weight:700;transition:.16s}.add-primary:hover{background:#fff;border-color:#cbdedb;transform:translateY(-1px)}.add-primary svg{width:15px;height:15px}
+.side-note{margin-top:10px;padding:0 4px;color:var(--muted2);font-size:10.5px;line-height:1.55}
+
+.detailpanel{padding:24px 26px 18px;overflow:hidden}.detail-head{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px}.detail-title h1{font-size:20px;font-weight:700;color:var(--ink2);line-height:1.35}.detail-title p{margin-top:5px;color:var(--muted2);font-size:12px}
+.detail-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.searchbox{width:290px;height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.65);transition:.16s}.searchbox:focus-within{border-color:var(--blue);background:#fff;box-shadow:0 0 0 4px rgba(73,182,216,.14)}.searchbox svg{width:16px;height:16px;flex:0 0 auto;color:var(--muted2)}.searchbox input{width:100%;border:0;outline:0;background:transparent;font-size:12.5px}.searchbox input::placeholder{color:var(--muted2)}
+.primary{height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border:1px solid var(--ink2);border-radius:14px;background:var(--ink2);color:#fff;font-size:12.5px;font-weight:700;box-shadow:0 14px 28px -15px rgba(15,49,50,.62);transition:.18s;white-space:nowrap}.primary:hover{transform:translateY(-1px);background:#123d3a}.primary svg{width:15px;height:15px}
+
+/* table */
+.table-shell{flex:1 1 auto;min-height:0;overflow:auto;border:1px solid rgba(226,236,234,.86);border-radius:18px;background:rgba(255,255,255,.38);scrollbar-width:thin;scrollbar-color:#c8dbd8 transparent}
+table{width:100%;min-width:1180px;border-collapse:separate;border-spacing:0}
+thead th{position:sticky;top:0;z-index:3;height:54px;padding:0 14px;background:#f5faf9;border-bottom:1px solid var(--line);color:var(--muted2);font-size:11px;font-weight:700;letter-spacing:.25px;text-align:left;white-space:nowrap}
+tbody tr{--row-bg:#f9fcfb;background:var(--row-bg);transition:.15s}tbody tr:nth-child(even){--row-bg:#fff}tbody tr:hover{--row-bg:#f1f8f6}
+tbody td{height:78px;padding:18px 14px;border-bottom:1px solid rgba(226,236,234,.80);background:var(--row-bg);font-size:12.5px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}.code{font-family:var(--en);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap}.cat-name{min-width:188px;font-size:13px;font-weight:700;color:var(--ink2);line-height:1.5}.copy{max-width:220px;color:var(--muted);line-height:1.55}.na{color:var(--muted2)}.creator{white-space:nowrap;color:var(--muted)}.date{font-family:var(--en);font-size:11.5px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}.local-tag{display:inline-flex;margin-top:5px;padding:2px 6px;border-radius:7px;background:#fdf1e3;color:var(--warn);font-size:9px;font-weight:700}
+thead th:last-child,tbody td:last-child{position:sticky;right:0;z-index:2;text-align:right;background:#f5faf9;box-shadow:-12px 0 18px -20px rgba(15,49,50,.45)}tbody td:last-child{background:var(--row-bg)}
+.opgroup{display:inline-flex;align-items:center;justify-content:flex-end;gap:7px}.opicon{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.72);color:var(--muted);position:relative;transition:.16s}.opicon svg{width:15px;height:15px}.opicon:hover{color:var(--teal2);border-color:rgba(0,138,168,.34);background:#fff;transform:translateY(-1px);box-shadow:0 10px 20px -13px rgba(0,138,168,.45)}.opicon.danger:hover{color:var(--err);border-color:rgba(214,69,91,.34);box-shadow:0 10px 20px -13px rgba(214,69,91,.34)}.otip{position:absolute;right:0;bottom:calc(100% + 7px);padding:5px 8px;border-radius:8px;background:var(--ink);color:#fff;font-size:10px;white-space:nowrap;opacity:0;pointer-events:none;transition:.14s}.opicon:hover .otip{opacity:1}
+.empty{flex:1 1 auto;min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--muted2)}.empty-icon{width:52px;height:52px;display:grid;place-items:center;margin-bottom:13px;border:1px solid rgba(0,138,168,.10);border-radius:17px;background:rgba(0,138,168,.06);color:var(--teal2)}.empty-icon svg{width:24px;height:24px}.empty strong{color:var(--muted);font-size:13px;font-weight:600}.empty span{max-width:440px;margin-top:6px;font-size:11px;line-height:1.65}
+.detail-foot{margin-top:auto;padding-top:14px;color:var(--muted2);font-size:10.5px;line-height:1.6}
+
+/* modal */
+.scrim{display:none;position:fixed;inset:0;z-index:80;padding:24px;align-items:center;justify-content:center;background:rgba(31,71,69,.32);backdrop-filter:blur(12px) saturate(115%);-webkit-backdrop-filter:blur(12px) saturate(115%)}.scrim.show{display:flex;animation:fade .18s ease both}@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{width:min(720px,calc(100vw - 36px));max-height:calc(100vh - 48px);display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:linear-gradient(155deg,rgba(255,255,255,.98),rgba(248,252,251,.95));border:1px solid rgba(255,255,255,.96);box-shadow:0 36px 100px -28px rgba(13,47,46,.54);animation:modalin .25s cubic-bezier(.2,.8,.2,1) both}.modal.compact{width:min(500px,calc(100vw - 36px))}@keyframes modalin{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:26px 32px 20px;border-bottom:1px solid rgba(15,49,50,.08)}.modal-head h2{font-size:20px;font-weight:700;color:var(--ink2)}.modal-head p{margin-top:6px;color:var(--muted2);font-size:11.5px;line-height:1.55}.xbtn{width:36px;height:36px;display:grid;place-items:center;flex:0 0 auto;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.72);color:var(--muted)}.xbtn:hover{background:#fff;color:var(--ink2)}.xbtn svg{width:16px;height:16px}
+.modal-body{flex:1;overflow-y:auto;padding:22px 32px 26px}.field{margin-bottom:18px}.field:last-child{margin-bottom:0}.label{display:flex;align-items:center;gap:7px;margin-bottom:8px;color:var(--muted);font-size:11.5px;font-weight:600}.req{color:var(--err)}.helper{margin-top:6px;color:var(--muted2);font-size:10.5px;line-height:1.55}.input,.textarea,.select-trigger{width:100%;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.72);outline:0;color:var(--ink2);font-size:13px;transition:.18s}.input{height:48px;padding:0 14px}.textarea{min-height:82px;padding:12px 14px;resize:vertical;line-height:1.6}.input::placeholder,.textarea::placeholder{color:var(--muted2)}.input:focus,.textarea:focus,.select.open .select-trigger{border-color:var(--blue);background:#fff;box-shadow:0 0 0 4px rgba(73,182,216,.14)}.field:focus-within .label{color:var(--teal2)}
+.select{position:relative}.select-trigger{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;text-align:left}.chev{width:7px;height:7px;margin:0 4px 4px 12px;border-right:1.8px solid var(--muted2);border-bottom:1.8px solid var(--muted2);transform:rotate(45deg);transition:.18s}.select.open .chev{transform:rotate(225deg);margin-bottom:-3px}.select-pop{display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:30;padding:9px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 22px 50px -24px rgba(15,49,50,.44)}.select.open .select-pop{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;animation:rise .16s ease both}.select-option{min-height:40px;padding:0 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--muted);font-size:11.5px;text-align:left}.select-option:hover{border-color:#c5dcda;color:var(--ink2)}.select-option.on{border-color:var(--blue);background:rgba(73,182,216,.10);color:var(--ink2);font-weight:700}
+.input.err,.textarea.err,.select.err .select-trigger{border-color:var(--err);box-shadow:0 0 0 4px rgba(214,69,91,.13);background:#fff}.error{display:none;margin-top:6px;color:var(--err);font-size:10.5px}.error.show{display:block}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}.shake{animation:shake .3s}
+.modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:11px;padding:17px 32px;border-top:1px solid rgba(15,49,50,.08);background:rgba(255,255,255,.52)}.cancel,.save{height:42px;padding:0 20px;border-radius:13px;font-size:12px;font-weight:700}.cancel{border:1px solid var(--line);background:rgba(255,255,255,.72)}.cancel:hover{background:#fff}.save{border:0;background:var(--ink2);color:#fff;box-shadow:0 13px 25px -14px rgba(15,49,50,.68)}.save:hover{transform:translateY(-1px)}.save.danger{background:var(--err);box-shadow:0 13px 25px -14px rgba(214,69,91,.55)}
+.delete-summary{padding:16px 17px;border:1px solid rgba(214,69,91,.16);border-radius:16px;background:rgba(214,69,91,.055);color:var(--muted);font-size:12px;line-height:1.7}.delete-summary strong{display:block;margin-bottom:5px;color:var(--ink2);font-size:13px}.delete-summary b{color:var(--err)}
+.toast{position:fixed;left:50%;bottom:26px;z-index:100;max-width:min(660px,calc(100vw - 32px));padding:11px 18px;border-radius:14px;background:var(--ink2);color:#fff;box-shadow:0 20px 42px -16px rgba(0,0,0,.42);font-size:12px;line-height:1.55;text-align:center;opacity:0;pointer-events:none;transform:translateX(-50%) translateY(18px);transition:.26s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:1200px){.wrap{padding-left:24px;padding-right:24px}.catalog-grid{grid-template-columns:246px minmax(0,1fr)}.detail-tools{width:100%}.searchbox{flex:1;width:auto}}
+@media(max-width:900px){.catalog-grid{grid-template-columns:1fr;min-height:auto}.sidepanel{min-height:390px}.detailpanel{min-height:680px}.detail-head{align-items:flex-start}}
+@media(max-width:620px){.wrap{padding:18px 14px 40px}.bsub,.mename{display:none}.detailpanel{padding:20px 16px}.detail-tools,.searchbox{width:100%}.primary{width:100%;justify-content:center}.modal{max-height:calc(100vh - 20px)}.scrim{padding:10px}.modal-head,.modal-body,.modal-foot{padding-left:20px;padding-right:20px}.select.open .select-pop{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="topbar reveal">
+    <div class="bcrumb"><span class="bdot"></span><span class="bmain">Procurement_Management</span><span class="bsub">/ 采购类目</span></div>
+    <div class="tb-right">
+      <button class="bellbtn" id="bellBtn" aria-label="消息通知" title="消息通知"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9z"/><path d="M10.3 20a2 2 0 003.4 0"/></svg></button>
+      <button class="me" id="userBtn" type="button"><span class="avatar">K</span><span class="mename">Kora</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+    </div>
+  </header>
+
+  <section class="catalog-grid">
+    <aside class="sidepanel glass reveal" style="animation-delay:.03s">
+      <div class="panel-label"><h2>一级类目</h2><p>共 <span class="tnum" id="primaryCount">8</span> 个</p></div>
+      <div class="category-list" id="categoryList"></div>
+      <footer class="sidefoot">
+        <button class="add-primary" id="addPrimaryBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>新增一级类目</button>
+        <p class="side-note">选择类目查看明细；移入左侧类目可进行编辑或删除。</p>
+      </footer>
+    </aside>
+
+    <section class="detailpanel glass reveal" id="detailPanel" style="animation-delay:.06s">
+      <header class="detail-head">
+        <div class="detail-title"><h1 id="detailTitle">产品与项目成本</h1><p id="detailSubtitle">共 6 个二级类目</p></div>
+        <div class="detail-tools">
+          <label class="searchbox" for="searchInput"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg><input id="searchInput" placeholder="搜索类目编码 / 二级类目…" autocomplete="off"></label>
+          <button class="primary" id="addSecondaryBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>新增二级类目</button>
+        </div>
+      </header>
+      <div id="detailContent"></div>
+      <p class="detail-foot" id="detailFoot"></p>
+    </section>
+  </section>
+</main>
+
+<div class="scrim" id="scrim" aria-hidden="true">
+  <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <header class="modal-head"><div><h2 id="modalTitle">新增二级类目</h2><p id="modalSubtitle">补充编码、归属与类目判断口径。</p></div><button class="xbtn" id="closeModalBtn" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <div class="modal-body">
+      <div class="field"><label class="label" for="categoryCode">类目编码 <span class="req">*</span></label><input class="input tnum" id="categoryCode" placeholder="如 03-09" autocomplete="off"><p class="helper">全局唯一，不能与已有类目（含一级）重复</p><p class="error" id="codeError">请填写唯一的类目编码</p></div>
+      <div class="field"><span class="label">一级类目 <span class="req">*</span></span><div class="select" id="primarySelect"><button class="select-trigger" type="button"><span id="primaryValue">产品与项目成本</span><i class="chev"></i></button><div class="select-pop" id="primaryOptions"></div></div><p class="error" id="primaryError">请选择一级类目</p></div>
+      <div class="field"><label class="label" for="secondaryName">二级类目 <span class="req">*</span></label><input class="input" id="secondaryName" placeholder="如 境内-线上投放" autocomplete="off"><p class="error" id="nameError">请填写二级类目</p></div>
+      <div class="field"><label class="label" for="definition">定义和判断口径</label><textarea class="textarea" id="definition" placeholder="这个类目包含什么、什么情况下归到这里"></textarea></div>
+      <div class="field"><label class="label" for="examples">典型实例</label><textarea class="textarea" id="examples" placeholder="举 1–2 个真实发生过的采购例子"></textarea></div>
+    </div>
+    <footer class="modal-foot"><button class="cancel" id="cancelBtn">取消</button><button class="save" id="saveBtn">保存</button></footer>
+  </section>
+</div>
+<div class="scrim" id="primaryScrim" aria-hidden="true">
+  <section class="modal compact" role="dialog" aria-modal="true" aria-labelledby="primaryModalTitle">
+    <header class="modal-head"><div><h2 id="primaryModalTitle">编辑一级类目</h2><p id="primaryModalSubtitle">修改后将同步更新左侧列表、右侧标题与归属选项。</p></div><button class="xbtn" id="closePrimaryBtn" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <div class="modal-body">
+      <div id="primaryEditBody"><div class="field"><label class="label" for="primaryNameInput">一级类目名称 <span class="req">*</span></label><input class="input" id="primaryNameInput" autocomplete="off"><p class="helper">名称需保持唯一，修改后原有二级类目将继续归属此类目。</p><p class="error" id="primaryNameError">请填写唯一的一级类目名称</p></div></div>
+      <div class="delete-summary" id="primaryDeleteBody" hidden><strong>确认删除“<span id="deletePrimaryName"></span>”吗？</strong>该类目下的 <b id="deletePrimaryCount">0</b> 个二级类目会同时从当前页面移除，此操作仅在本地原型中生效。</div>
+    </div>
+    <footer class="modal-foot"><button class="cancel" id="cancelPrimaryBtn">取消</button><button class="save" id="savePrimaryBtn">保存修改</button></footer>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const CATEGORIES=[
+ {key:'产品与项目成本',count:6},
+ {key:'技术与云服务',count:5},
+ {key:'市场推广费',count:8},
+ {key:'人力相关费用',count:5},
+ {key:'办公及行政',count:8},
+ {key:'专业服务费',count:5},
+ {key:'固定资产及长期…',count:3},
+ {key:'财务及其他',count:4}
+];
+const ITEMS={
+ '产品与项目成本':[
+  {id:1,code:'01-01',name:'客户项目-创意策划',definition:'',examples:'',creator:'系统预置',created:'2026/08/20 18:37',updated:'2026/08/20 18:37'},
+  {id:2,code:'01-02',name:'客户项目-视频/内容制作',definition:'',examples:'',creator:'系统预置',created:'2026/08/20 18:37',updated:'2026/08/20 18:37'},
+  {id:3,code:'01-03',name:'客户项目-其他外部采购',definition:'',examples:'',creator:'系统预置',created:'2026/08/20 18:37',updated:'2026/08/20 18:37'},
+  {id:4,code:'01-04',name:'自研产品-外包开发',definition:'',examples:'',creator:'系统预置',created:'2026/08/20 18:37',updated:'2026/08/20 18:37'},
+  {id:5,code:'01-05',name:'自研产品-设计服务',definition:'',examples:'',creator:'系统预置',created:'2026/08/20 18:37',updated:'2026/08/20 18:37'},
+  {id:6,code:'01-06',name:'自研产品-内容/版权采购',definition:'',examples:'',creator:'系统预置',created:'2026/08/20 18:37',updated:'2026/08/20 18:37'}
+ ]
+};
+CATEGORIES.forEach(c=>ITEMS[c.key]??=[]);
+const countDelta=Object.fromEntries(CATEGORIES.map(c=>[c.key,0]));
+const state={active:'产品与项目成本',search:'',editing:null,selectedPrimary:'产品与项目成本'};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const categoryCount=key=>CATEGORIES.find(c=>c.key===key).count+countDelta[key];
+const nowText=()=>new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).replaceAll('-','/');
+let toastTimer;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000)}
+
+const categoryList=document.getElementById('categoryList');
+const detailContent=document.getElementById('detailContent');
+const detailTitle=document.getElementById('detailTitle');
+const detailSubtitle=document.getElementById('detailSubtitle');
+const detailFoot=document.getElementById('detailFoot');
+const searchInput=document.getElementById('searchInput');
+
+function renderCategories(){
+ document.getElementById('primaryCount').textContent=CATEGORIES.length;
+ categoryList.innerHTML=CATEGORIES.map(c=>`<div class="category-row ${c.key===state.active?'on':''}">
+   <button class="category-select" data-category="${esc(c.key)}" title="${esc(c.key)}"><span class="category-name">${esc(c.key)}</span><span class="category-count">${categoryCount(c.key)}</span></button>
+   <span class="category-actions"><button class="category-action" data-primary-edit="${esc(c.key)}" aria-label="编辑 ${esc(c.key)}" title="编辑">${editIcon()}</button><button class="category-action danger" data-primary-delete="${esc(c.key)}" aria-label="删除 ${esc(c.key)}" title="删除">${trashIcon()}</button></span>
+  </div>`).join('');
+ categoryList.querySelectorAll('[data-category]').forEach(btn=>btn.onclick=()=>{state.active=btn.dataset.category;state.search='';searchInput.value='';renderCategories();renderDetail()});
+ categoryList.querySelectorAll('[data-primary-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openPrimaryDialog(btn.dataset.primaryEdit,'edit')});
+ categoryList.querySelectorAll('[data-primary-delete]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openPrimaryDialog(btn.dataset.primaryDelete,'delete')});
+}
+function availableRows(){const q=state.search.toLowerCase();return ITEMS[state.active].filter(x=>!q||`${x.code} ${x.name}`.toLowerCase().includes(q))}
+function editIcon(){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4.2-1 10-10a2.1 2.1 0 00-3-3l-10 10L4 20z"/><path d="M13.8 7.2l3 3"/></svg>'}
+function trashIcon(){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>'}
+const primaryScrim=document.getElementById('primaryScrim');
+const primaryNameInput=document.getElementById('primaryNameInput');
+const primaryNameError=document.getElementById('primaryNameError');
+const primaryEditBody=document.getElementById('primaryEditBody');
+const primaryDeleteBody=document.getElementById('primaryDeleteBody');
+const primarySaveBtn=document.getElementById('savePrimaryBtn');
+let primaryDialog={key:null,mode:'edit'};
+function openPrimaryDialog(key,mode){
+ const cat=CATEGORIES.find(c=>c.key===key);if(!cat)return;
+ primaryDialog={key,mode};const deleting=mode==='delete';
+ document.getElementById('primaryModalTitle').textContent=deleting?'删除一级类目':'编辑一级类目';
+ document.getElementById('primaryModalSubtitle').textContent=deleting?'删除前请确认该类目下的二级类目数量。':'修改后将同步更新左侧列表、右侧标题与归属选项。';
+ primaryEditBody.hidden=deleting;primaryDeleteBody.hidden=!deleting;
+ primarySaveBtn.textContent=deleting?'确认删除':'保存修改';primarySaveBtn.classList.toggle('danger',deleting);
+ primaryNameInput.value=key;primaryNameInput.classList.remove('err');primaryNameError.classList.remove('show');
+ document.getElementById('deletePrimaryName').textContent=key;document.getElementById('deletePrimaryCount').textContent=categoryCount(key);
+ primaryScrim.classList.add('show');primaryScrim.setAttribute('aria-hidden','false');if(!deleting)setTimeout(()=>{primaryNameInput.focus();primaryNameInput.select()},80);
+}
+function closePrimaryDialog(){primaryScrim.classList.remove('show');primaryScrim.setAttribute('aria-hidden','true')}
+function savePrimaryDialog(){
+ const key=primaryDialog.key,index=CATEGORIES.findIndex(c=>c.key===key);if(index<0)return closePrimaryDialog();
+ if(primaryDialog.mode==='delete'){
+  if(CATEGORIES.length<=1){toast('至少需要保留一个一级类目。');return}
+  const removedCount=categoryCount(key);CATEGORIES.splice(index,1);delete ITEMS[key];delete countDelta[key];
+  if(state.active===key)state.active=CATEGORIES[Math.min(index,CATEGORIES.length-1)].key;
+  if(state.selectedPrimary===key)state.selectedPrimary=state.active;
+  state.search='';searchInput.value='';closePrimaryDialog();renderCategories();renderDetail();renderPrimaryOptions();toast(`已从当前页面删除「${key}」及其 ${removedCount} 个二级类目。`);return;
+ }
+ const next=primaryNameInput.value.trim(),duplicate=CATEGORIES.some(c=>c.key===next&&c.key!==key);
+ if(!next||duplicate){primaryNameInput.classList.add('err','shake');primaryNameError.textContent=duplicate?'一级类目名称已存在，请使用其他名称':'请填写一级类目名称';primaryNameError.classList.add('show');setTimeout(()=>primaryNameInput.classList.remove('shake'),330);return}
+ if(next!==key){CATEGORIES[index].key=next;ITEMS[next]=ITEMS[key];delete ITEMS[key];countDelta[next]=countDelta[key];delete countDelta[key];if(state.active===key)state.active=next;if(state.selectedPrimary===key)state.selectedPrimary=next}
+ closePrimaryDialog();renderCategories();renderDetail();renderPrimaryOptions();toast(`已将一级类目「${key}」更新为「${next}」。`);
+}
+document.getElementById('closePrimaryBtn').onclick=closePrimaryDialog;document.getElementById('cancelPrimaryBtn').onclick=closePrimaryDialog;primarySaveBtn.onclick=savePrimaryDialog;
+primaryNameInput.oninput=()=>{primaryNameInput.classList.remove('err');primaryNameError.classList.remove('show')};
+primaryScrim.onclick=e=>{if(e.target===primaryScrim)closePrimaryDialog()};
+function renderDetail(){
+ const total=categoryCount(state.active),all=ITEMS[state.active],rows=availableRows();
+ detailTitle.textContent=state.active;detailSubtitle.textContent=`共 ${total} 个二级类目${all.length<total?' · 当前明细未完整展示':''}`;
+ if(!all.length){
+  detailContent.innerHTML=`<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h5"/></svg></div><strong>源截图未提供此类目的明细行</strong><span>已保留一级类目名称与数量，不为不可见的 ${total} 条二级类目编造名称、编码或时间。</span></div>`;
+  detailFoot.textContent=`源页面标注「${state.active}」共 ${total} 个二级类目，本次仅可读取数量。`;
+  return;
+ }
+ const body=rows.length?rows.map(x=>`<tr data-id="${x.id}"><td><span class="code">${esc(x.code)}</span>${x.local?'<br><span class="local-tag">本地演示</span>':''}</td><td><div class="cat-name">${esc(x.name)}</div></td><td><div class="copy ${x.definition?'':'na'}">${x.definition?esc(x.definition):'—'}</div></td><td><div class="copy ${x.examples?'':'na'}">${x.examples?esc(x.examples):'—'}</div></td><td><span class="creator">${esc(x.creator)}</span></td><td><span class="date">${esc(x.created)}</span></td><td><span class="date">${esc(x.updated)}</span></td><td><span class="opgroup"><button class="opicon" data-edit="${x.id}" aria-label="编辑">${editIcon()}<span class="otip">编辑</span></button><button class="opicon danger" data-delete="${x.id}" aria-label="删除">${trashIcon()}<span class="otip">删除</span></button></span></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty" style="min-height:260px"><strong>没有符合搜索条件的类目</strong><span>清空搜索词后可恢复全部可读取记录。</span></div></td></tr>`;
+ detailContent.innerHTML=`<div class="table-shell"><table><thead><tr><th>类目编码</th><th>二级类目</th><th>定义和判断口径</th><th>典型实例</th><th>创建人</th><th>创建时间</th><th>更新时间</th><th>操作</th></tr></thead><tbody>${body}</tbody></table></div>`;
+ detailContent.querySelectorAll('[data-edit]').forEach(btn=>btn.onclick=()=>openModal(Number(btn.dataset.edit)));
+ detailContent.querySelectorAll('[data-delete]').forEach(btn=>btn.onclick=()=>{const item=ITEMS[state.active].find(x=>x.id===Number(btn.dataset.delete));toast(`删除「${item.name}」需要二次确认。原型演示，不会真正删除数据。`)});
+ detailFoot.textContent=all.length===total?`源截图可完整读取 ${total} 条记录；空字段按规范保留为「—」。`:`源页面标注共 ${total} 条，当前仅呈现可读取或本地演示的 ${all.length} 条。`;
+}
+
+searchInput.oninput=e=>{state.search=e.target.value.trim();renderDetail()};
+document.getElementById('addPrimaryBtn').onclick=()=>toast('源截图未提供“新增一级类目”表单字段，不做编造展示。');
+document.getElementById('addSecondaryBtn').onclick=()=>openModal(null);
+document.getElementById('bellBtn').onclick=()=>toast('当前截图未提供消息内容，不做编造展示。');
+document.getElementById('userBtn').onclick=()=>toast('当前账号：Kora');
+
+const scrim=document.getElementById('scrim');
+const modalTitle=document.getElementById('modalTitle');
+const modalSubtitle=document.getElementById('modalSubtitle');
+const codeInput=document.getElementById('categoryCode');
+const nameInput=document.getElementById('secondaryName');
+const definitionInput=document.getElementById('definition');
+const examplesInput=document.getElementById('examples');
+const primarySelect=document.getElementById('primarySelect');
+const primaryValue=document.getElementById('primaryValue');
+const primaryOptions=document.getElementById('primaryOptions');
+
+function renderPrimaryOptions(){
+ primaryValue.textContent=state.selectedPrimary;
+ primaryOptions.innerHTML=CATEGORIES.map(c=>`<button class="select-option ${c.key===state.selectedPrimary?'on':''}" type="button" data-primary="${esc(c.key)}" title="${esc(c.key)}">${esc(c.key)}</button>`).join('');
+ primaryOptions.querySelectorAll('[data-primary]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();state.selectedPrimary=btn.dataset.primary;primarySelect.classList.remove('open','err');document.getElementById('primaryError').classList.remove('show');renderPrimaryOptions()});
+}
+primarySelect.querySelector('.select-trigger').onclick=e=>{e.stopPropagation();primarySelect.classList.toggle('open')};
+function allItems(){return Object.values(ITEMS).flat()}
+function openModal(id){
+ const item=id==null?null:ITEMS[state.active].find(x=>x.id===id);state.editing=item?{id:item.id,originalCategory:state.active}:null;state.selectedPrimary=item?state.active:state.active;
+ modalTitle.textContent=item?'编辑二级类目':'新增二级类目';modalSubtitle.textContent=item?'更新类目归属、定义与典型实例。':'补充编码、归属与类目判断口径。';
+ codeInput.value=item?.code||'';nameInput.value=item?.name||'';definitionInput.value=item?.definition||'';examplesInput.value=item?.examples||'';clearErrors();renderPrimaryOptions();scrim.classList.add('show');scrim.setAttribute('aria-hidden','false');setTimeout(()=>codeInput.focus(),80);
+}
+function closeModal(){scrim.classList.remove('show');scrim.setAttribute('aria-hidden','true');primarySelect.classList.remove('open')}
+function clearErrors(){document.querySelectorAll('.err').forEach(x=>x.classList.remove('err','shake'));document.querySelectorAll('.error.show').forEach(x=>x.classList.remove('show'))}
+function markError(input,errorId){input.classList.add('err','shake');document.getElementById(errorId).classList.add('show');setTimeout(()=>input.classList.remove('shake'),330)}
+function saveModal(){
+ clearErrors();const code=codeInput.value.trim(),name=nameInput.value.trim();let bad=false;
+ const duplicate=allItems().some(x=>x.code===code&&x.id!==state.editing?.id);
+ if(!code||duplicate){markError(codeInput,'codeError');document.getElementById('codeError').textContent=duplicate?'类目编码已存在，请使用全局唯一编码':'请填写唯一的类目编码';bad=true}
+ if(!state.selectedPrimary){primarySelect.classList.add('err','shake');document.getElementById('primaryError').classList.add('show');bad=true}
+ if(!name){markError(nameInput,'nameError');bad=true}
+ if(bad)return;
+ const timestamp=nowText();
+ if(state.editing){
+  const oldKey=state.editing.originalCategory;const oldIndex=ITEMS[oldKey].findIndex(x=>x.id===state.editing.id);const item=ITEMS[oldKey][oldIndex];
+  Object.assign(item,{code,name,definition:definitionInput.value.trim(),examples:examplesInput.value.trim(),updated:timestamp,local:true});
+  if(oldKey!==state.selectedPrimary){ITEMS[oldKey].splice(oldIndex,1);ITEMS[state.selectedPrimary].push(item);countDelta[oldKey]--;countDelta[state.selectedPrimary]++}
+  state.active=state.selectedPrimary;toast(`已在当前页面更新「${name}」。原型演示，仅本地生效，不会写入实际系统。`);
+ }else{
+  const item={id:Date.now(),code,name,definition:definitionInput.value.trim(),examples:examplesInput.value.trim(),creator:'Kora',created:timestamp,updated:timestamp,local:true};ITEMS[state.selectedPrimary].push(item);countDelta[state.selectedPrimary]++;state.active=state.selectedPrimary;toast(`已在当前页面新增「${name}」。原型演示，仅本地生效，不会写入实际系统。`);
+ }
+ state.search='';searchInput.value='';closeModal();renderCategories();renderDetail();
+}
+document.getElementById('closeModalBtn').onclick=closeModal;document.getElementById('cancelBtn').onclick=closeModal;document.getElementById('saveBtn').onclick=saveModal;
+[codeInput,nameInput].forEach(input=>input.oninput=()=>{input.classList.remove('err');input.parentElement.querySelector('.error')?.classList.remove('show')});
+scrim.onclick=e=>{if(e.target===scrim)closeModal()};
+document.addEventListener('click',e=>{if(!e.target.closest('.select'))primarySelect.classList.remove('open')});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(primaryScrim.classList.contains('show'))closePrimaryDialog();else if(scrim.classList.contains('show'))closeModal()});
+
+renderCategories();renderDetail();
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>操作日志 | FansAI 数据中台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1b2430;--ink2:#0f3132;--muted:#64748b;--muted2:#94a3b8;--line:#e8efef;--teal:#008aa8;--teal2:#0c7074;--blue:#49b6d8;--ok:#1a9e4b;--err:#d6455b;--cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;--en:"Outfit","Noto Sans SC",sans-serif;--shadow:0 24px 54px -28px rgba(20,60,60,.26),inset 0 1px 0 rgba(255,255,255,.65)}
+*{box-sizing:border-box;margin:0;padding:0}button,input{font:inherit;color:inherit}button{cursor:pointer}body{min-height:100vh;color:var(--ink);font-family:var(--cn);font-weight:500;-webkit-font-smoothing:antialiased;background:radial-gradient(940px 560px at 9% -6%,rgba(154,220,203,.41),transparent 62%),radial-gradient(820px 500px at 91% 1%,rgba(73,182,216,.28),transparent 61%),radial-gradient(760px 500px at 52% 108%,rgba(0,138,168,.08),transparent 62%),#edf5f3;background-attachment:fixed}.wrap{max-width:1680px;margin:0 auto;padding:26px 36px}.glass{background:linear-gradient(160deg,rgba(255,255,255,.76),rgba(255,255,255,.53));border:1px solid rgba(255,255,255,.82);box-shadow:var(--shadow);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.reveal{animation:rise .45s cubic-bezier(.2,.7,.2,1) both}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}.bcrumb{display:flex;align-items:center;gap:9px;padding:9px 17px;border:2px solid #f5fffe;border-radius:22px;background:#fff;box-shadow:0 7px 18px -11px rgba(15,49,50,.2)}.bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9adccb,#49b6d8)}.bmain{font-size:18px;font-weight:600;letter-spacing:.3px}.tb-right{display:flex;align-items:center;gap:12px}.bell,.user{border:0;background:transparent}.bell{width:42px;height:42px;display:grid;place-items:center;border:2px solid #f5fffe;border-radius:50%;background:#fff;box-shadow:0 7px 18px -11px rgba(15,49,50,.2)}.bell svg{width:18px;height:18px}.user{display:flex;align-items:center;gap:8px}.avatar{width:42px;height:42px;display:grid;place-items:center;border:2px solid #f5fffe;border-radius:50%;background:linear-gradient(140deg,#b5e9c2,#58bdd7);color:#073b3c;font-family:var(--en);font-weight:700}.user strong{font-family:var(--en);font-size:18px;font-weight:500}.user>svg{width:13px;color:var(--muted2)}
+.toolbar{display:flex;align-items:center;justify-content:flex-start;gap:10px;min-height:48px;margin-bottom:16px;position:relative;z-index:20}.select{position:relative}.select-trigger{height:46px;min-width:172px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 15px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.72);font-size:12.5px;font-weight:600;transition:.16s}.select-trigger:hover,.select.open .select-trigger{background:#fff;border-color:rgba(73,182,216,.62);box-shadow:0 0 0 4px rgba(73,182,216,.11)}.chev{width:7px;height:7px;border-right:1.8px solid var(--muted);border-bottom:1.8px solid var(--muted);transform:rotate(45deg);transition:.16s}.select.open .chev{transform:rotate(225deg)}.select-pop{display:none;position:absolute;left:0;top:calc(100% + 8px);z-index:45;width:210px;padding:8px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 22px 50px -22px rgba(15,49,50,.38)}.select.open .select-pop{display:block;animation:rise .15s ease both}.select-opt{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 11px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:12px;text-align:left}.select-opt:hover{background:#f1f7f6;color:var(--ink2)}.select-opt.on{background:#e8f4f1;color:var(--teal2);font-weight:700}.select-opt i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.date-wrap{position:relative}.date-tabs{height:46px;display:flex;align-items:center;gap:4px;padding:4px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.72)}.date-btn{height:36px;padding:0 14px;border:0;border-radius:11px;background:transparent;color:var(--muted2);font-size:12px;font-weight:600;white-space:nowrap;transition:.16s}.date-btn:hover{color:var(--teal2);background:#f2f8f7}.date-btn.on{background:#2c3b47;color:#fff;box-shadow:0 8px 18px -12px rgba(27,36,48,.6)}.date-btn.custom{display:flex;align-items:center;gap:7px}.date-btn svg{width:14px;height:14px}.range-pop{display:none;position:absolute;left:0;top:calc(100% + 8px);z-index:45;width:350px;padding:16px;border:1px solid var(--line);border-radius:17px;background:#fff;box-shadow:0 24px 56px -24px rgba(15,49,50,.4)}.range-pop.open{display:block;animation:rise .15s ease both}.range-title{margin-bottom:12px;font-size:12.5px;font-weight:600;color:var(--ink2)}.range-fields{display:grid;grid-template-columns:1fr 18px 1fr;align-items:center;gap:8px}.range-fields span{text-align:center;color:var(--muted2)}.range-input{height:40px;width:100%;padding:0 11px;border:1px solid var(--line);border-radius:11px;background:#f9fbfb;outline:0;font-family:var(--en);font-size:12px}.range-input:focus{background:#fff;border-color:var(--blue);box-shadow:0 0 0 3px rgba(73,182,216,.12)}.range-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.small-btn{height:34px;padding:0 14px;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:11.5px}.small-btn.primary{border-color:var(--teal2);background:var(--teal2);color:#fff}
+.export{height:46px;display:flex;align-items:center;gap:8px;padding:0 17px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.72);font-size:12.5px;font-weight:600;transition:.16s}.export:hover{background:#fff;border-color:rgba(0,138,168,.32);color:var(--teal2);transform:translateY(-1px)}.export svg{width:16px;height:16px}
+.log-card{height:calc(100vh - 176px);min-height:570px;display:flex;flex-direction:column;overflow:hidden;border-radius:24px}.table-wrap{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#c8d9d7 transparent}.log-table{width:100%;min-width:1200px;table-layout:fixed;border-collapse:separate;border-spacing:0}.log-table th{position:sticky;top:0;z-index:4;height:52px;padding:0 18px;border-bottom:1px solid var(--line);background:#f5faf9;color:var(--muted2);font-size:11px;font-weight:600;text-align:left;white-space:nowrap}.log-table th:nth-child(1){width:170px}.log-table th:nth-child(2){width:140px}.log-table th:nth-child(3){width:120px}.log-table th:nth-child(4){width:120px}.log-table th:nth-child(6){width:135px}.log-table th:nth-child(7){width:110px}.log-table th:nth-child(8){width:68px}.log-table tbody tr{--row:#f9fcfb;background:var(--row)}.log-table tbody tr:nth-child(even){--row:#fff}.log-table tbody tr:hover{--row:#f1f8f6}.log-table td{height:72px;padding:18px;background:var(--row);border-bottom:1px solid rgba(226,236,234,.84);font-size:12.5px;vertical-align:middle}.log-table tbody tr:last-child td{border-bottom:0}.log-table th:last-child,.log-table td:last-child{position:sticky;right:0;z-index:3;text-align:center;background:var(--row);box-shadow:-13px 0 20px -22px rgba(15,49,50,.5)}.log-table th:last-child{z-index:6;background:#f5faf9}.time,.ip,.method,.path{font-family:var(--en);font-variant-numeric:tabular-nums}.time{font-weight:600;white-space:nowrap}.actor strong{display:block;color:var(--ink2);font-weight:600}.actor small{display:block;margin-top:3px;color:var(--muted);font-size:10.5px}.module,.action{font-weight:600;color:#33414b}.request{display:flex;align-items:center;gap:7px;min-width:0}.api-tag{flex:0 0 auto;padding:3px 7px;border:1px solid #dfe9e9;border-radius:9px;background:#fff;color:#52616c;font-size:10px}.method{flex:0 0 auto;color:#74879a;font-size:11.5px;font-weight:600}.path{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#71859d;font-size:11.5px}.ip{white-space:nowrap;color:#344653;font-size:11.5px}.status{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:12px;background:#eaf6ee;color:var(--ok);font-size:10.5px;font-weight:700}.status i{width:6px;height:6px;border-radius:50%;background:currentColor}.view-btn{width:34px;height:34px;display:grid;place-items:center;margin:auto;border:1px solid transparent;border-radius:11px;background:transparent;color:#425462;transition:.16s}.view-btn:hover{border-color:rgba(0,138,168,.2);background:#fff;color:var(--teal2);box-shadow:0 9px 18px -13px rgba(0,138,168,.45)}.view-btn svg{width:17px;height:17px}.empty{height:330px!important;text-align:center;color:var(--muted2)}
+.card-foot{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 20px;border-top:1px solid rgba(232,239,239,.88);background:rgba(249,252,251,.68)}.source-note{max-width:580px;color:var(--muted2);font-size:10.5px;line-height:1.55}.pager{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap}.pager-summary{margin-right:8px}.page-btn{min-width:34px;height:34px;padding:0 9px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-family:var(--en);font-weight:600}.page-btn:hover{background:#edf5f3;color:var(--teal2)}.page-btn.on{background:#fff;color:var(--ink);box-shadow:0 7px 18px -12px rgba(15,49,50,.32)}.page-btn.nav{display:flex;align-items:center;gap:5px;font-family:var(--cn)}.page-btn:disabled{opacity:.35;cursor:not-allowed}.per-page{height:36px;padding:0 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:#425462;font-size:11.5px}
+.log-card{height:calc(100vh - 184px)}
+.view-btn{border-color:var(--line);background:rgba(255,255,255,.76);box-shadow:0 6px 14px -12px rgba(15,49,50,.28)}
+.toast{position:fixed;left:50%;bottom:26px;z-index:100;max-width:min(680px,calc(100vw - 32px));padding:11px 18px;border-radius:14px;background:var(--ink2);color:#fff;box-shadow:0 20px 42px -16px rgba(0,0,0,.42);font-size:12px;line-height:1.55;text-align:center;opacity:0;pointer-events:none;transform:translateX(-50%) translateY(18px);transition:.25s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:1050px){.toolbar{flex-wrap:wrap}.log-card{height:calc(100vh - 226px)}.card-foot{align-items:flex-start;flex-direction:column}.pager{width:100%;overflow-x:auto;padding-bottom:3px}}@media(max-width:680px){.wrap{padding:18px 14px}.user strong{display:none}.toolbar{gap:8px}.select,.select-trigger{width:100%}.date-wrap,.date-tabs{width:100%}.date-tabs{overflow-x:auto}.export{flex:1;justify-content:center}.log-card{height:calc(100vh - 290px);min-height:520px}.source-note{display:none}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="topbar reveal">
+    <div class="bcrumb"><span class="bdot"></span><span class="bmain">操作日志</span></div>
+    <div class="tb-right">
+      <button class="bell" type="button" aria-label="消息通知"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M38 31H10c3-4 4-8 4-14a10 10 0 0 1 20 0c0 6 1 10 4 14Z"/><path d="M20 38h8"/></svg></button>
+      <button class="user" type="button"><span class="avatar">K</span><strong>Kora</strong><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+    </div>
+  </header>
+
+  <section class="toolbar reveal" style="animation-delay:.03s">
+    <div class="select" id="operatorSelect">
+      <button class="select-trigger" id="operatorTrigger" type="button"><span id="operatorValue">全部操作人</span><i class="chev"></i></button>
+      <div class="select-pop" id="operatorPop"></div>
+    </div>
+    <div class="date-wrap">
+      <div class="date-tabs" id="dateTabs">
+        <button class="date-btn" data-range="today">今天</button>
+        <button class="date-btn" data-range="7d">近7天</button>
+        <button class="date-btn" data-range="30d">近30天</button>
+        <button class="date-btn on" data-range="all">全部时间</button>
+        <button class="date-btn custom" data-range="custom"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="10" width="34" height="31" rx="4"/><path d="M15 6v8m18-8v8M7 19h34M15 26h5m5 0h5m-15 7h5m5 0h5"/></svg>自定义</button>
+      </div>
+      <div class="range-pop" id="rangePop">
+        <div class="range-title">自定义操作时间</div>
+        <div class="range-fields"><input class="range-input" id="dateStart" value="2026-08-24" aria-label="开始日期"><span>—</span><input class="range-input" id="dateEnd" value="2026-08-24" aria-label="结束日期"></div>
+        <div class="range-actions"><button class="small-btn" id="rangeCancel">取消</button><button class="small-btn primary" id="rangeApply">应用</button></div>
+      </div>
+    </div>
+    <button class="export" id="exportBtn" type="button"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6v25m-9-9 9 9 9-9M8 35v7h32v-7"/></svg>导出</button>
+  </section>
+
+  <section class="log-card glass reveal" style="animation-delay:.06s">
+    <div class="table-wrap">
+      <table class="log-table">
+        <thead><tr><th>操作时间</th><th>操作人</th><th>模块</th><th>动作</th><th>请求地址</th><th>IP</th><th>执行结果</th><th>操作</th></tr></thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+    <footer class="card-foot">
+      <p class="source-note" id="sourceNote">源页面共 3798 条、190 页；当前原型呈现截图中可完整读取的 10 条日志，不补造其余记录。</p>
+      <nav class="pager" aria-label="日志分页">
+        <span class="pager-summary">共 <b class="tnum">3798</b> 条，<b class="tnum">190</b> 页</span>
+        <button class="page-btn nav" disabled>‹ 上一页</button><button class="page-btn on">1</button><button class="page-btn" data-page="2">2</button><span>…</span><button class="page-btn" data-page="190">190</button><button class="page-btn nav" data-page="2">下一页 ›</button><button class="per-page" type="button">20 条/页⌄</button>
+      </nav>
+    </footer>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const LOGS=[
+ {time:'2026-08-24 17:51:02',actor:'Kora',dept:'技术部',module:'组织管理',action:'获取组织选项',method:'GET',path:'/api/admin/organization/options',ip:'141.11.43.132',result:'成功'},
+ {time:'2026-08-24 17:51:02',actor:'Kora',dept:'技术部',module:'角色权限',action:'查看角色',method:'GET',path:'/api/admin/organization/roles',ip:'141.11.43.132',result:'成功'},
+ {time:'2026-08-24 17:51:01',actor:'Kora',dept:'技术部',module:'权限',action:'访问',method:'GET',path:'/api/admin/rbac/my-permissions',ip:'141.11.43.132',result:'成功'},
+ {time:'2026-08-24 17:51:01',actor:'Kora',dept:'技术部',module:'部门管理',action:'查看部门',method:'GET',path:'/api/admin/organization/depart…',ip:'141.11.43.132',result:'成功'},
+ {time:'2026-08-24 17:50:59',actor:'Kora',dept:'技术部',module:'用户管理',action:'查看用户',method:'GET',path:'/api/admin/organization/users',ip:'141.11.43.132',result:'成功'},
+ {time:'2026-08-24 17:50:59',actor:'Kora',dept:'技术部',module:'组织管理',action:'获取组织选项',method:'GET',path:'/api/admin/organization/options',ip:'141.11.43.132',result:'成功'},
+ {time:'2026-08-24 17:50:59',actor:'Kora',dept:'技术部',module:'权限',action:'访问',method:'GET',path:'/api/admin/rbac/my-permissions',ip:'141.11.43.132',result:'成功'},
+ {time:'2026-08-24 17:50:59',actor:'Kora',dept:'技术部',module:'bd',action:'访问',method:'GET',path:'/api/admin/bd/notifications',ip:'141.11.43.132',result:'成功'},
+ {time:'2026-08-24 17:48:28',actor:'FansAI Admin',dept:'FansAI',module:'bd',action:'访问',method:'GET',path:'/api/admin/bd/dashboard/brief',ip:'156.146.34.72',result:'成功'},
+ {time:'2026-08-24 17:48:25',actor:'FansAI Admin',dept:'FansAI',module:'bd',action:'访问',method:'GET',path:'/api/admin/bd/dashboard/brief',ip:'156.146.34.72',result:'成功'}
+];
+const state={operator:'全部操作人',range:'all',start:'2026-08-24',end:'2026-08-24'};
+const $=s=>document.querySelector(s), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eye='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 24s7-11 19-11 19 11 19 11-7 11-19 11S5 24 5 24Z"/><circle cx="24" cy="24" r="5"/></svg>';
+let toastTimer;
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800)}
+function dateOnly(time){return time.slice(0,10)}
+function filteredLogs(){return LOGS.filter(row=>{if(state.operator!=='全部操作人'&&row.actor!==state.operator)return false;if(state.range==='custom')return dateOnly(row.time)>=state.start&&dateOnly(row.time)<=state.end;return true})}
+function renderRows(){const rows=filteredLogs(),body=$('#logBody');if(!rows.length){body.innerHTML='<tr><td class="empty" colspan="8">当前筛选范围内没有可读取的操作日志</td></tr>'}else{body.innerHTML=rows.map((r,i)=>`<tr><td class="time">${esc(r.time)}</td><td class="actor"><strong>${esc(r.actor)}</strong><small>${esc(r.dept)}</small></td><td class="module">${esc(r.module)}</td><td class="action">${esc(r.action)}</td><td><div class="request" title="${esc(r.method+' '+r.path)}"><span class="api-tag">接口</span><span class="method">${esc(r.method)}</span><span class="path">${esc(r.path)}</span></div></td><td class="ip">${esc(r.ip)}</td><td><span class="status"><i></i>${esc(r.result)}</span></td><td><button class="view-btn" data-view="${LOGS.indexOf(r)}" aria-label="查看日志">${eye}</button></td></tr>`).join('')}$('#sourceNote').textContent=`源页面共 3798 条、190 页；当前显示截图中可完整读取的 ${rows.length} / ${LOGS.length} 条日志，不补造其余记录。`;document.querySelectorAll('[data-view]').forEach(btn=>btn.onclick=()=>{const r=LOGS[+btn.dataset.view];toast(`${r.time} · ${r.actor} · ${r.method} ${r.path}；源截图未提供更多详情字段。`)})}
+function renderOperator(){const opts=['全部操作人','Kora','FansAI Admin'];$('#operatorPop').innerHTML=opts.map(v=>`<button class="select-opt ${v===state.operator?'on':''}" data-operator="${esc(v)}">${esc(v)}${v===state.operator?'<i></i>':''}</button>`).join('');$('#operatorValue').textContent=state.operator;document.querySelectorAll('[data-operator]').forEach(btn=>btn.onclick=()=>{state.operator=btn.dataset.operator;$('#operatorSelect').classList.remove('open');renderOperator();renderRows()})}
+function setRange(range){state.range=range;document.querySelectorAll('.date-btn').forEach(b=>b.classList.toggle('on',b.dataset.range===range));if(range!=='custom')$('#rangePop').classList.remove('open');renderRows()}
+$('#operatorTrigger').onclick=e=>{e.stopPropagation();$('#operatorSelect').classList.toggle('open');$('#rangePop').classList.remove('open')};
+document.querySelectorAll('.date-btn').forEach(btn=>btn.onclick=e=>{e.stopPropagation();if(btn.dataset.range==='custom'){$('#operatorSelect').classList.remove('open');$('#rangePop').classList.toggle('open')}else setRange(btn.dataset.range)});
+$('#rangeCancel').onclick=()=>$('#rangePop').classList.remove('open');
+$('#rangeApply').onclick=()=>{const start=$('#dateStart').value.trim(),end=$('#dateEnd').value.trim();if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end))return toast('请输入 YYYY-MM-DD 格式的日期');if(start>end)return toast('开始日期不能晚于结束日期');state.start=start;state.end=end;setRange('custom');$('#rangePop').classList.remove('open')};
+$('#exportBtn').onclick=()=>{const rows=filteredLogs();if(!rows.length)return toast('当前筛选无可导出的日志');const head=['操作时间','操作人','部门','模块','动作','请求方法','请求地址','IP','执行结果'],csv='\ufeff'+[head,...rows.map(r=>[r.time,r.actor,r.dept,r.module,r.action,r.method,r.path,r.ip,r.result])].map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='操作日志_可读取记录.csv';a.click();URL.revokeObjectURL(url);toast(`已导出当前可读取的 ${rows.length} 条日志`)};
+document.querySelectorAll('[data-page]').forEach(btn=>btn.onclick=()=>toast(`源截图未提供第 ${btn.dataset.page} 页的日志内容，不做编造展示。`));
+$('.per-page').onclick=()=>toast('源页面当前口径为 20 条/页；截图中可完整读取 10 条。');
+document.addEventListener('click',e=>{if(!e.target.closest('.select'))$('#operatorSelect').classList.remove('open');if(!e.target.closest('.date-wrap'))$('#rangePop').classList.remove('open')});
+renderOperator();renderRows();
+</script>
+</body>
+</html>

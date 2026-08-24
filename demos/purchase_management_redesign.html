@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>采购管理 | FansAI 数据中台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* —— fansai-data-system tokens —— */
+  --ink:#1b2430; --ink2:#0f3132; --muted:#64748b; --muted2:#94a3b8; --muted3:#727272;
+  --teal:#008aa8; --teal2:#0c7074; --blue:#49B6D8; --green:#8BD98C; --lime:#A7E885;
+  --green-deep:#34A85E; --green-ink:#1F6F4A; --line:#e8efef;
+  --warn:#FF9F6E; --ok:#3FB36A;
+  /* 令牌集中没有 danger 红，此处为本页新增，需你确认后回写规范 */
+  --alert:#E5484D;
+  /* 阶段色：冷→绿的推进，唯一的橙留给「需要人动手」的用章闸口 */
+  --st1:#94A3B8; --st2:#FF9F6E; --st3:#49B6D8; --st4:#008AA8; --st5:#1F6F4A; --st6:#3FB36A;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","Noto Sans SC",sans-serif;
+  --pad:36px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--cn); font-weight:500; color:var(--ink);
+  background:#ECF4F2; min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(760px 520px at 8% -6%, rgba(167,232,133,.34), transparent 62%),
+    radial-gradient(700px 520px at 92% 2%, rgba(73,182,216,.28), transparent 60%),
+    radial-gradient(900px 640px at 62% 108%, rgba(0,138,168,.16), transparent 64%);
+}
+.wrap{position:relative; z-index:1; max-width:1640px; margin:0 auto; padding:0 var(--pad) 72px}
+.glass{
+  background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.5));
+  backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%);
+  border:1px solid rgba(255,255,255,.78);
+  box-shadow:0 24px 54px -28px rgba(20,60,60,.26), inset 0 1px 0 rgba(255,255,255,.65);
+}
+.num{font-family:var(--en); font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1}
+
+/* ——— topbar / 面包屑 ——— */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:28px 0 0;margin-bottom:18px;position:relative;z-index:1}
+.bcrumb{display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:20px;
+  background:#fff; border:2px solid #f5fffe; box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9ADCCB,#49B6D8)}
+.bmain{font-family:var(--en);font-weight:700;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.bsub{font-family:var(--en);font-weight:300;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.tb-right{display:flex;align-items:center;gap:14px}
+.bellbtn{position:relative;width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bellbtn .badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--alert);
+  color:#fff;font-family:var(--en);font-weight:600;font-size:11px;line-height:18px;text-align:center;border:2px solid #fff}
+.me{display:flex;align-items:center;gap:10px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:linear-gradient(140deg,#A7E885,#008aa8);
+  color:#04312f;font-family:var(--en);font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center}
+.mename{font-family:var(--en);font-weight:500;font-size:18px}
+
+/* ——— page navigation / aligned to project management ——— */
+.glass-lite{background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.72);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%)}
+.navrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.tabs{display:flex;align-items:center;gap:6px;width:fit-content;padding:6px;border-radius:18px}
+.tab{display:flex;align-items:baseline;gap:7px;padding:9px 18px;border:0;border-radius:13px;background:transparent;color:var(--muted);font-family:var(--cn);font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:.18s}
+.tab .ten{font-family:var(--en);font-size:9.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2)}
+.tab.on{background:var(--ink);color:#fff;font-weight:600;box-shadow:0 10px 22px -10px rgba(15,49,50,.4)}
+.tab.on .ten{color:rgba(255,255,255,.62)}
+.tab:not(.on):hover{color:var(--ink);background:rgba(255,255,255,.6)}
+.ctrlrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.seg{display:flex;padding:4px;border-radius:16px;background:rgba(255,255,255,.66);border:1px solid rgba(255,255,255,.8);
+  box-shadow:0 6px 18px -12px rgba(15,49,50,.2)}
+.seg button{border:0;background:transparent;font-family:var(--cn);font-weight:500;font-size:13px;color:var(--muted);
+  padding:8px 16px;border-radius:12px;cursor:pointer;transition:.18s}
+.seg button.on{background:var(--ink2);color:#eafcf7}
+.btn-primary{display:flex;align-items:center;gap:8px;border:0;cursor:pointer;padding:12px 20px;border-radius:16px;
+  background:linear-gradient(150deg,#12454a,#0f3132);color:#eafcf7;font-family:var(--cn);font-weight:500;font-size:14px;
+  box-shadow:0 16px 30px -18px rgba(15,49,50,.75);transition:.2s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 20px 36px -18px rgba(15,49,50,.8)}
+.navrow .btn-primary{min-height:44px;padding:0 18px;border-radius:14px;font-weight:600}
+.btn-ghost{display:flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.85);background:rgba(255,255,255,.6);
+  color:var(--ink);font-family:var(--cn);font-weight:500;font-size:13px;padding:10px 15px;border-radius:14px;cursor:pointer;transition:.18s}
+.btn-ghost:hover{background:#fff}
+
+/* ——— sublabel ——— */
+.sublabel{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.sublabel .t{font-size:15px;font-weight:500}
+.sublabel .en{font-family:var(--en);font-weight:400;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted2)}
+.sublabel .cnt{font-family:var(--en);font-weight:600;font-size:12px;color:var(--teal2);background:rgba(0,138,168,.1);
+  padding:2px 9px;border-radius:9px}
+.sublabel .rule{flex:1;height:1px;background:linear-gradient(90deg,rgba(27,36,48,.14),rgba(27,36,48,0))}
+.sublabel .hint{font-size:12px;color:var(--muted2);font-weight:400}
+
+/* ——— KPI 行 ——— */
+.kpi{display:grid;grid-template-columns:1.62fr 1fr 1fr 1fr 1fr;gap:16px;margin-bottom:18px;align-items:stretch}
+.card{border-radius:24px;padding:22px}
+.stat{border-radius:22px;padding:12px 15px 10px;min-height:0;display:flex;flex-direction:column}
+.anchor{width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none}
+.stat-top{display:flex;align-items:center;gap:10px}
+.stat-lab{font-size:13px;color:var(--muted);font-weight:400}
+.stat-lab b{display:block;color:var(--ink);font-weight:500;font-size:13.5px}
+.v-row{display:flex;align-items:baseline;gap:4px;margin:7px 0 2px}
+.v-pre{font-family:var(--en);font-weight:500;font-size:15px;color:var(--muted2)}
+.v-main{font-family:var(--en);font-weight:600;font-size:34px;line-height:1;letter-spacing:-.45px;font-variant-numeric:tabular-nums}
+.v-unit{font-family:var(--cn);font-weight:500;font-size:13px;color:var(--muted2)}
+.v-sub{font-size:12px;color:var(--muted);font-weight:400;line-height:1.55}
+.hero-money{display:flex;flex-direction:column;justify-content:flex-start}
+.hero-money .v-main{font-size:34px}
+.compbar{display:flex;height:8px;border-radius:6px;overflow:hidden;background:rgba(27,36,48,.06);margin:9px 0 7px}
+.compbar i{display:block;height:100%}
+.complegend{display:flex;gap:14px;flex-wrap:wrap}
+.complegend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:400}
+.complegend em{width:8px;height:8px;border-radius:3px;font-style:normal}
+.complegend b{font-family:var(--en);font-weight:600;font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums}
+.moneyfoot{display:flex;gap:17px;margin-top:8px;padding-top:7px;border-top:1px solid rgba(27,36,48,.07)}
+.moneyfoot div{display:flex;flex-direction:column;gap:3px}
+.moneyfoot .k{font-size:11.5px;color:var(--muted2);font-weight:400}
+.moneyfoot .n{font-family:var(--en);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.distbar{display:flex;gap:3px;height:6px;margin-top:8px}
+.distbar i{display:block;height:100%;border-radius:3px}
+.statfoot{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;padding-top:7px;border-top:1px solid rgba(27,36,48,.07)}
+.statfoot .sf{display:flex;flex-direction:column;gap:3px;min-width:56px}
+.statfoot .sf .k{font-size:10.5px;color:var(--muted2);font-weight:400;white-space:nowrap}
+.statfoot .sf .v{font-family:var(--en);font-weight:600;font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
+.statfoot.stage-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.statfoot.stage-summary .sf{min-width:0}
+.statfoot.stage-summary .sf .k{font-size:9.8px}
+.statnote{margin-top:5px;font-size:10.5px;color:var(--muted);line-height:1.4}
+.statnote.warn{color:#E5484D;font-weight:500}
+.statnote b.num{color:var(--ink);font-weight:600}
+.stat .stat-body{display:flex;flex-direction:column;flex:1}
+.ring{width:48px;height:48px;flex:none}
+
+/* ——— 双面板：等我处理 / 近期节点 ——— */
+.row2{display:grid;grid-template-columns:1.32fr 1fr;gap:22px;margin-bottom:24px}
+.queue{display:flex;flex-direction:column;gap:10px}
+.scrollcap{position:relative}
+.scrollcap .queue,.scrollcap .mlist{overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(27,36,48,.2) transparent}
+.scrollcap .queue::-webkit-scrollbar,.scrollcap .mlist::-webkit-scrollbar{width:5px}
+.scrollcap .queue::-webkit-scrollbar-thumb,.scrollcap .mlist::-webkit-scrollbar-thumb{background:rgba(27,36,48,.2);border-radius:4px}
+.scrollcap.has-more::after{content:'';position:absolute;left:0;right:6px;bottom:0;height:38px;background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.92));pointer-events:none;border-radius:0 0 18px 18px;opacity:1;transition:opacity .2s}
+.scrollcap.has-more.at-bottom::after{opacity:0}
+.scrollcap .more-tag{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);display:flex;align-items:center;gap:4px;padding:4px 11px;border-radius:999px;background:rgba(27,36,48,.86);color:#fff;font-size:10.5px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s}
+.scrollcap.has-more .more-tag{opacity:1}
+.scrollcap.has-more.at-bottom .more-tag{opacity:0}
+.scrollcap .more-tag svg{width:10px;height:10px}
+.qitem{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:13px 14px;border-radius:16px;
+  background:rgba(255,255,255,.52);border:1px solid rgba(255,255,255,.7);transition:.18s;cursor:pointer}
+.qitem:hover{background:#fff;transform:translateX(2px)}
+.qtype{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;padding:5px 10px;border-radius:10px;white-space:nowrap}
+.qtype i{width:6px;height:6px;border-radius:50%;flex:none}
+.qname{font-size:14px;font-weight:500;margin-bottom:5px}
+.qmeta{font-size:11.5px;color:var(--muted);font-weight:400;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.qmeta .dot{width:3px;height:3px;border-radius:50%;background:var(--muted2)}
+.qright{display:flex;align-items:center;gap:14px}
+.dwell{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:64px}
+.dwell .d{font-family:var(--en);font-weight:600;font-size:16px;font-variant-numeric:tabular-nums}
+.dwell .l{font-size:10.5px;color:var(--muted2);font-weight:400}
+.track{width:88px}
+.track .bar{height:5px;border-radius:3px;background:rgba(27,36,48,.08);overflow:hidden}
+.track .bar i{display:block;height:100%;border-radius:3px}
+.track .lb{display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;color:var(--muted2);font-weight:400}
+.track .lb b{font-family:var(--en);font-weight:600;color:var(--muted)}
+.golink{font-size:12px;color:var(--teal);font-weight:500;white-space:nowrap;opacity:.55;transition:.18s}
+.qitem:hover .golink{opacity:1}
+
+.miletabs{display:flex;gap:6px;margin-bottom:12px}
+.miletabs button{border:0;background:transparent;cursor:pointer;font-family:var(--cn);font-weight:500;font-size:12.5px;
+  color:var(--muted);padding:6px 12px;border-radius:11px;transition:.18s}
+.miletabs button.on{background:rgba(0,138,168,.1);color:var(--teal2)}
+.mlist{display:flex;flex-direction:column}
+.mrow{display:grid;grid-template-columns:16px 1fr auto;gap:12px;padding:11px 0;border-bottom:1px dashed rgba(27,36,48,.09)}
+.mrow:last-child{border-bottom:0}
+.mdot{position:relative;width:10px;height:10px;border-radius:50%;margin-top:5px;background:#fff;border:2px solid var(--muted2)}
+.mdot.late{background:var(--alert);border-color:var(--alert)}
+.mdot.soon{background:var(--warn);border-color:var(--warn)}
+.mname{font-size:13.5px;font-weight:500}
+.mmeta{font-size:11.5px;color:var(--muted);font-weight:400;margin-top:4px}
+.mdate{text-align:right}
+.mdate .d{font-family:var(--en);font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+.mdate .s{font-size:11px;font-weight:400;margin-top:3px}
+
+/* ——— 过滤条 ——— */
+.filters{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.search{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:15px;background:rgba(255,255,255,.66);
+  border:1px solid rgba(255,255,255,.82);min-width:290px;transition:.18s}
+.search:focus-within{border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.14)}
+.search input{border:0;background:transparent;outline:0;font-family:var(--cn);font-weight:500;font-size:13px;color:var(--ink);width:100%}
+.search input::placeholder{color:var(--muted2);font-weight:400}
+.spacer{flex:1}
+
+/* ——— 瓦片下拉 ——— */
+.dd{position:relative}
+.dd-trig{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:15px;background:rgba(255,255,255,.66);
+  border:1px solid rgba(255,255,255,.82);cursor:pointer;font-family:var(--cn);font-weight:500;font-size:13px;
+  color:var(--ink);white-space:nowrap;transition:.18s;min-height:42px}
+.dd-trig:hover{background:#fff}
+.dd.open .dd-trig{border-color:var(--teal);box-shadow:0 0 0 4px rgba(0,138,168,.13);background:#fff}
+.dd-trig .ph{color:var(--muted2);font-weight:400}
+.dd-trig .sdot{width:7px;height:7px;border-radius:50%;flex:none}
+.dd-trig .arw{margin-left:auto;width:8px;height:8px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);
+  transform:rotate(45deg) translateY(-2px);transition:.2s;flex:none}
+.dd.open .dd-trig .arw{transform:rotate(-135deg) translateY(-2px);border-color:var(--teal)}
+.dd-panel{position:absolute;top:calc(100% + 8px);left:0;min-width:100%;z-index:60;padding:8px;border-radius:18px;
+  display:none;max-height:288px;overflow:auto;
+  background:linear-gradient(160deg,rgba(255,255,255,.94),rgba(255,255,255,.86));
+  backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+  border:1px solid rgba(255,255,255,.9);box-shadow:0 26px 60px -26px rgba(20,60,60,.4)}
+.dd.up .dd-panel{top:auto;bottom:calc(100% + 8px)}
+.dd.open .dd-panel{display:block;animation:pop .16s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.dd-opt{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:13px;cursor:pointer;font-size:13px;
+  font-weight:500;color:var(--ink);border:1px solid transparent;transition:.14s;white-space:nowrap}
+.dd-opt:hover{background:rgba(27,36,48,.045)}
+.dd-opt.sel{border-color:var(--blue);background:rgba(73,182,216,.1);color:var(--ink2)}
+.dd-opt .sdot{width:7px;height:7px;border-radius:50%;flex:none}
+.dd-opt .sub{margin-left:auto;font-family:var(--en);font-weight:500;font-size:11.5px;color:var(--muted2);padding-left:14px}
+
+/* ——— 看板 ——— */
+.board{display:grid;grid-template-columns:repeat(6,minmax(228px,1fr));gap:16px;align-items:start;overflow-x:auto;padding-bottom:8px}
+.col{border-radius:22px;padding:16px 14px;background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.62);min-height:180px}
+.colhead{padding:0 4px 12px}
+.colhead .l1{display:flex;align-items:center;gap:8px}
+.colhead .l1 i{width:7px;height:7px;border-radius:50%;flex:none}
+.colhead .l1 .t{font-size:13px;font-weight:500}
+.colhead .l1 .c{font-family:var(--en);font-weight:600;font-size:11.5px;color:var(--muted);background:rgba(27,36,48,.06);
+  padding:2px 8px;border-radius:8px;margin-left:auto;font-variant-numeric:tabular-nums}
+.colhead .l2{display:flex;align-items:baseline;justify-content:space-between;margin-top:9px}
+.colhead .amt{font-family:var(--en);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.colhead .amt .pre{font-size:11px;color:var(--muted2);font-weight:500}
+.colhead .dw{font-size:11px;color:var(--muted2);font-weight:400}
+.colhead .dw b{font-family:var(--en);font-weight:600;color:var(--muted)}
+.colrule{height:2px;border-radius:2px;margin:10px 4px 12px}
+.pcard{border-radius:16px;padding:14px;background:linear-gradient(160deg,rgba(255,255,255,.9),rgba(255,255,255,.72));
+  border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 26px -20px rgba(20,60,60,.4);margin-bottom:12px;cursor:pointer;transition:.18s}
+.pcard:hover{transform:translateY(-2px);box-shadow:0 20px 36px -22px rgba(20,60,60,.5)}
+.pcard:last-child{margin-bottom:0}
+.pc-t{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.pc-t .n{font-size:13.5px;font-weight:500;line-height:1.4}
+.pc-t .a{font-family:var(--en);font-weight:600;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pc-t .a .pre{font-size:10.5px;color:var(--muted2);font-weight:500}
+.pc-t .a.zero{color:var(--muted2);font-weight:500}
+.pc-v{font-size:11.5px;color:var(--muted);font-weight:400;margin-top:5px}
+.gate{margin-top:11px;padding:9px 10px;border-radius:12px;background:rgba(27,36,48,.035)}
+.gate .g1{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px;font-weight:500}
+.gate .g1 .st{display:flex;align-items:center;gap:6px}
+.gate .g1 .st i{width:6px;height:6px;border-radius:50%;flex:none}
+.gate .g1 .r{font-family:var(--en);font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.gate .g2{margin-top:7px;height:4px;border-radius:2px;background:rgba(27,36,48,.09);overflow:hidden}
+.gate .g2 i{display:block;height:100%;border-radius:2px}
+.gate .g3{margin-top:6px;font-size:10.5px;color:var(--muted2);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pips{display:flex;gap:4px;margin-top:7px}
+.pips i{flex:1;height:4px;border-radius:2px;background:rgba(27,36,48,.1)}
+.pc-f{display:flex;align-items:center;gap:8px;margin-top:12px}
+.catchip{font-size:11px;font-weight:400;color:var(--muted);background:rgba(27,36,48,.05);padding:4px 9px;border-radius:9px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:132px}
+.av{width:24px;height:24px;border-radius:50%;font-family:var(--en);font-weight:600;font-size:10px;color:#04312f;
+  display:flex;align-items:center;justify-content:center;flex:none;margin-left:auto}
+.empty{border:1px dashed rgba(27,36,48,.14);border-radius:16px;padding:22px 12px;text-align:center;font-size:12px;
+  color:var(--muted2);font-weight:400;line-height:1.7}
+.empty b{display:block;color:var(--muted);font-weight:500;font-size:12.5px;margin-bottom:4px}
+
+/* ——— 列表视图 ——— */
+.tablewrap{border-radius:24px;padding:6px 22px 18px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:1080px}
+th{text-align:left;font-size:11px;font-weight:400;color:var(--muted2);letter-spacing:.6px;padding:14px 12px;
+  border-bottom:1px solid rgba(27,36,48,.09);white-space:nowrap}
+th.r,td.r{text-align:right}
+td{padding:14px 12px;border-bottom:1px solid rgba(27,36,48,.055);font-size:13px;font-weight:500}
+tr:last-child td{border-bottom:0}
+tbody tr{transition:.14s;cursor:pointer}
+tbody tr:hover{background:rgba(255,255,255,.5)}
+td .s{font-size:11.5px;color:var(--muted);font-weight:400;margin-top:3px}
+.stagepill{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:11px;font-size:11.5px;font-weight:500}
+.stagepill i{width:6px;height:6px;border-radius:50%}
+.hide{display:none !important}
+
+/* ——— 玻璃模态 ——— */
+.scrim{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:32px 16px;
+  background:rgba(16,48,50,.34);backdrop-filter:blur(9px) saturate(130%);-webkit-backdrop-filter:blur(9px) saturate(130%)}
+.scrim.on{display:flex;animation:fade .2s ease-out}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{width:min(760px,100%);max-height:min(88vh,940px);display:flex;flex-direction:column;border-radius:26px;overflow:hidden;
+  animation:rise .26s cubic-bezier(.2,.9,.3,1.1)}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.mhead{padding:26px 36px 18px;border-bottom:1px solid rgba(27,36,48,.07);position:relative}
+.mhead h2{margin:0;font-size:19px;font-weight:500}
+.mhead p{margin:8px 0 0;font-size:12.5px;color:var(--muted);font-weight:400;line-height:1.6}
+.mclose{position:absolute;top:22px;right:28px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(27,36,48,.09);
+  background:rgba(255,255,255,.7);cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:.18s}
+.mclose:hover{background:#fff;color:var(--ink)}
+.mbody{padding:22px 36px 28px;overflow:auto;flex:1}
+.mfoot{padding:16px 36px;border-top:1px solid rgba(27,36,48,.07);display:flex;align-items:center;gap:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.5))}
+.mfoot .hint{font-size:11.5px;color:var(--muted);font-weight:400;line-height:1.6;flex:1}
+.mfoot .acts{display:flex;gap:10px;margin-left:auto}
+.btn-cancel{border:1px solid rgba(27,36,48,.12);background:rgba(255,255,255,.7);color:var(--ink);font-family:var(--cn);
+  font-weight:500;font-size:13.5px;padding:11px 22px;border-radius:14px;cursor:pointer;transition:.18s}
+.btn-cancel:hover{background:#fff}
+.fsec{margin-bottom:26px}
+.fsec:last-child{margin-bottom:0}
+.fsec-h{display:flex;align-items:center;gap:10px;margin-bottom:15px}
+.fsec-h .t{font-size:14px;font-weight:500}
+.fsec-h .d{font-size:11.5px;color:var(--muted2);font-weight:400}
+.fsec-h .rule{flex:1;height:1px;background:linear-gradient(90deg,rgba(27,36,48,.12),rgba(27,36,48,0))}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.f{margin-bottom:16px}
+.f:last-child{margin-bottom:0}
+.f.full{grid-column:1 / -1}
+.flabel{display:flex;align-items:center;gap:8px;margin-bottom:9px;font-size:12.5px;font-weight:500;transition:.16s}
+.flabel .req{font-size:10.5px;font-weight:400;color:var(--green-ink);background:rgba(63,179,106,.13);padding:2px 7px;border-radius:7px}
+.flabel .tip{font-size:11px;color:var(--muted2);font-weight:400;margin-left:auto}
+.f.focus .flabel{color:var(--teal)}
+.inp{width:100%;padding:12px 15px;border-radius:15px;background:rgba(255,255,255,.66);border:1px solid rgba(255,255,255,.85);
+  font-family:var(--cn);font-weight:500;font-size:13.5px;color:var(--ink);outline:0;transition:.18s;min-height:44px}
+.inp::placeholder{color:var(--muted2);font-weight:400}
+.inp:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(0,138,168,.13);background:#fff}
+textarea.inp{min-height:92px;resize:vertical;line-height:1.65;font-weight:400}
+input.num-inp{font-family:var(--en);font-weight:600;font-variant-numeric:tabular-nums}
+.range{display:grid;grid-template-columns:1fr 18px 1fr;align-items:center;gap:8px}
+.range .tilde{text-align:center;color:var(--muted2);font-family:var(--en);font-size:14px}
+.f.err .inp,.f.err .dd-trig{border-color:var(--alert) !important;box-shadow:0 0 0 4px rgba(229,72,77,.12) !important;background:rgba(229,72,77,.03)}
+.f.err .errmsg{display:block}
+.errmsg{display:none;margin-top:7px;font-size:11.5px;color:var(--alert);font-weight:400}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-5px)}40%,60%{transform:translateX(5px)}}
+.shake{animation:shake .5s cubic-bezier(.36,.07,.19,.97)}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.choice{padding:13px 14px;border-radius:15px;border:1px solid rgba(255,255,255,.85);background:rgba(255,255,255,.6);
+  cursor:pointer;transition:.16s}
+.choice:hover{background:#fff}
+.choice.sel{border-color:var(--blue);background:rgba(73,182,216,.1)}
+.choice .ct{font-size:13px;font-weight:500}
+.choice .cd{font-size:11px;color:var(--muted);font-weight:400;margin-top:5px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:9px;border-radius:15px;background:rgba(255,255,255,.66);
+  border:1px solid rgba(255,255,255,.85);min-height:44px;align-items:center;transition:.18s}
+.chips:focus-within{border-color:var(--teal);box-shadow:0 0 0 4px rgba(0,138,168,.13);background:#fff}
+.chip{display:flex;align-items:center;gap:7px;padding:6px 9px 6px 11px;border-radius:11px;background:rgba(0,138,168,.09);
+  border:1px solid rgba(0,138,168,.18);font-size:12.5px;font-weight:500;color:var(--ink2)}
+.chip b{cursor:pointer;color:var(--teal2);opacity:.6;font-weight:400;font-size:14px;line-height:1}
+.chip b:hover{opacity:1}
+.chips input{border:0;background:transparent;outline:0;font-family:var(--cn);font-weight:500;font-size:13px;
+  color:var(--ink);flex:1;min-width:120px;padding:5px}
+.chips input::placeholder{color:var(--muted2);font-weight:400}
+.upload{display:flex;align-items:center;gap:12px;padding:15px;border-radius:15px;border:1px dashed rgba(27,36,48,.18);
+  background:rgba(255,255,255,.4);cursor:pointer;transition:.16s}
+.upload:hover{border-color:var(--teal);background:rgba(0,138,168,.04)}
+.upload .t{font-size:12.5px;font-weight:500}
+.upload .d{font-size:11px;color:var(--muted2);font-weight:400;margin-top:4px}
+.budgethint{margin-top:9px;font-size:11.5px;color:var(--muted);font-weight:400;display:flex;align-items:center;gap:7px}
+.budgethint b{font-family:var(--en);font-weight:600;color:var(--teal2);font-variant-numeric:tabular-nums}
+.toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);z-index:300;opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:10px;padding:14px 22px;border-radius:17px;background:rgba(15,49,50,.95);color:#eafcf7;
+  font-size:13px;font-weight:500;box-shadow:0 24px 50px -22px rgba(15,49,50,.7);transition:.28s}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media (max-width:1400px){
+  .kpi{grid-template-columns:1.6fr 1fr 1fr;grid-auto-rows:auto}
+  .kpi .hero-money{grid-row:auto}
+}
+@media (max-width:1080px){
+  :root{--pad:20px}
+  .kpi{grid-template-columns:1fr 1fr}
+  .kpi .hero-money{grid-column:1 / -1;grid-row:auto}
+  .row2{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+  .choices{grid-template-columns:1fr}
+  .mhead,.mbody,.mfoot{padding-left:22px;padding-right:22px}
+}
+@media (max-width:760px){
+  :root{--pad:14px}.topbar{align-items:flex-start;padding-top:18px}.bsub,.mename{display:none}
+  .navrow{align-items:stretch;margin-bottom:18px}.tabs{max-width:100%;overflow-x:auto}.ctrlrow{width:100%}
+  .ctrlrow .btn-primary{width:100%;justify-content:center}.kpi{grid-template-columns:1fr}
+}
+@media (max-width:520px){.tab .ten{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ————— 面包屑 header ————— -->
+  <div class="topbar">
+    <div class="bcrumb">
+      <span class="bdot"></span>
+      <span class="bmain">Customer_Management</span>
+      <span class="bsub">/ 采购管理</span>
+    </div>
+    <div class="tb-right">
+      <button class="bellbtn" aria-label="通知">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span class="badge num">7</span>
+      </button>
+      <div class="me"><div class="avatar">K</div><span class="mename">Kora</span></div>
+    </div>
+  </div>
+
+  <!-- ————— 范围切换与主操作 ————— -->
+  <nav class="navrow" aria-label="采购范围与页面操作">
+    <div class="tabs glass-lite" id="scope-seg">
+      <button class="tab on" data-scope="all" aria-pressed="true">全部采购<span class="ten">All</span></button>
+      <button class="tab" data-scope="mine" aria-pressed="false">我发起的<span class="ten">Mine</span></button>
+    </div>
+    <div class="ctrlrow">
+      <button class="btn-primary" id="btn-new">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        新建采购需求
+      </button>
+    </div>
+  </nav>
+
+  <!-- ————— KPI ————— -->
+  <section class="kpi" id="kpi"></section>
+
+  <!-- ————— 等我处理 / 近期节点 ————— -->
+  <section class="row2">
+    <div class="card glass">
+      <div class="sublabel">
+        <span class="t">等我处理</span>
+        <span class="en">My Queue</span>
+        <span class="cnt num" id="q-count">7</span>
+        <span class="rule"></span>
+        <span class="hint" id="q-hint"></span>
+      </div>
+      <div class="scrollcap" id="queue-wrap"><div class="queue" id="queue"></div><span class="more-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>上下滑动查看更多</span></div>
+    </div>
+
+    <div class="card glass">
+      <div class="sublabel">
+        <span class="t">近期节点</span>
+        <span class="en">Milestones</span>
+        <span class="rule"></span>
+        <span class="hint">交付日与应付款日 · 未来两周</span>
+      </div>
+      <div class="miletabs" id="miletabs">
+        <button data-mile="delivery" class="on">交付节点 <b class="num" id="mt-d">3</b></button>
+        <button data-mile="payment">付款节点 <b class="num" id="mt-p">2</b></button>
+      </div>
+      <div class="scrollcap" id="mlist-wrap"><div class="mlist" id="mlist"></div><span class="more-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>上下滑动查看更多</span></div>
+    </div>
+  </section>
+
+  <!-- ————— 过滤条 ————— -->
+  <div class="filters">
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      <input id="q-search" type="search" placeholder="搜索需求、供应商、发起人…">
+    </label>
+    <div class="dd" data-dd="cat1"><div class="dd-trig"><span class="lbl ph">全部一级类目</span><span class="arw"></span></div><div class="dd-panel"></div></div>
+    <div class="dd" data-dd="stage"><div class="dd-trig"><span class="sdot" style="background:transparent"></span><span class="lbl ph">全部阶段</span><span class="arw"></span></div><div class="dd-panel"></div></div>
+    <div class="dd" data-dd="owner"><div class="dd-trig"><span class="lbl ph">全部发起人</span><span class="arw"></span></div><div class="dd-panel"></div></div>
+    <div class="spacer"></div>
+    <div class="seg" id="view-seg">
+      <button data-view="board" class="on">看板</button>
+      <button data-view="list">列表</button>
+    </div>
+    <button class="btn-ghost" id="btn-export">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg>
+      导出
+    </button>
+  </div>
+
+  <!-- ————— 看板 / 列表 ————— -->
+  <section class="board" id="view-board"></section>
+  <section class="tablewrap card glass hide" id="view-list">
+    <table>
+      <thead><tr>
+        <th>需求 / 供应商</th><th>阶段</th><th>采购类目</th><th class="r">金额</th>
+        <th>闸口</th><th class="r">本阶段停留</th><th>交付日</th><th>发起人</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </section>
+</div>
+
+<!-- ————— 新建采购需求 · 玻璃模态 ————— -->
+<div class="scrim" id="scrim">
+  <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+    <div class="mhead">
+      <h2 id="mtitle">新建采购需求</h2>
+      <p>不关联客户项目的纯外采需求；提交后进入「需求比价」。</p>
+      <button class="mclose" id="mclose" aria-label="关闭">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="mbody">
+      <div class="fsec">
+        <div class="fsec-h"><span class="t">需求信息</span><span class="rule"></span></div>
+
+        <div class="f" data-req="1" id="f-name">
+          <div class="flabel">需求名称 <span class="req">必填</span></div>
+          <input class="inp" id="i-name" placeholder="例：数据分析岗猎头招聘（2 名）" autocomplete="off">
+          <div class="errmsg">填一句话说清「买什么、多少量」，比价时供应商靠它报价。</div>
+        </div>
+
+        <div class="fgrid">
+          <div class="f" data-req="1" id="f-cat1">
+            <div class="flabel">一级类目 <span class="req">必填</span></div>
+            <div class="dd" data-dd="mcat1"><div class="dd-trig"><span class="lbl ph">选择一级类目</span><span class="arw"></span></div><div class="dd-panel"></div></div>
+            <div class="errmsg">请选择一级类目。</div>
+          </div>
+          <div class="f" data-req="1" id="f-cat2">
+            <div class="flabel">二级类目 <span class="req">必填</span><span class="tip" id="cat2-tip">先选一级类目</span></div>
+            <div class="dd" data-dd="mcat2"><div class="dd-trig"><span class="lbl ph">选择二级类目</span><span class="arw"></span></div><div class="dd-panel"></div></div>
+            <div class="errmsg">请选择二级类目。</div>
+          </div>
+        </div>
+
+        <div class="f" data-req="1" id="f-owner">
+          <div class="flabel">需求发起人 <span class="req">必填</span></div>
+          <div class="dd" data-dd="mowner"><div class="dd-trig"><span class="lbl">袁海娟 · kora.yuan@fscity.art</span><span class="arw"></span></div><div class="dd-panel"></div></div>
+          <div class="errmsg">请选择需求发起人。</div>
+        </div>
+
+        <div class="fgrid">
+          <div class="f" data-req="1" id="f-budget">
+            <div class="flabel">预算区间 <span class="req">必填</span></div>
+            <div class="range">
+              <input class="inp num-inp" id="i-bmin" inputmode="numeric" placeholder="30000">
+              <span class="tilde">—</span>
+              <input class="inp num-inp" id="i-bmax" inputmode="numeric" placeholder="40000">
+            </div>
+            <div class="budgethint" id="budget-hint" style="display:none">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#008aa8" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+              <span>报价高于 <b id="hint-max">—</b> 将自动转「超预算审批」；中位 <b id="hint-mid">—</b> 用于比价偏离度。</span>
+            </div>
+            <div class="errmsg">填写预算下限与上限（上限须不小于下限）。</div>
+          </div>
+          <div class="f" id="f-cur">
+            <div class="flabel">结算币种</div>
+            <div class="dd" data-dd="mcur"><div class="dd-trig"><span class="lbl">CNY · 人民币</span><span class="arw"></span></div><div class="dd-panel"></div></div>
+          </div>
+        </div>
+
+        <div class="fgrid">
+          <div class="f" data-req="1" id="f-date">
+            <div class="flabel">期望交付日 <span class="req">必填</span></div>
+            <input class="inp num-inp" type="date" id="i-date" value="2026-09-07">
+            <div class="errmsg">请选择期望交付日（不早于今天）。</div>
+          </div>
+          <div class="f" id="f-entity">
+            <div class="flabel">费用归属主体</div>
+            <div class="dd" data-dd="mentity"><div class="dd-trig"><span class="lbl">杭州垚城智能科技有限公司</span><span class="arw"></span></div><div class="dd-panel"></div></div>
+          </div>
+        </div>
+
+        <div class="f full">
+          <div class="flabel">需求说明<span class="tip">写清为什么外采、内部为何无法承接</span></div>
+          <textarea class="inp" id="i-desc" placeholder="例：数据中台缺 2 名数据分析岗，内部招聘 6 周未到岗，走猎头渠道补位。"></textarea>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="fsec-h"><span class="t">采购要求</span><span class="rule"></span></div>
+        <div class="f">
+          <div class="flabel">比价要求 <span class="req">必填</span></div>
+          <div class="choices" id="cmp-choices">
+            <div class="choice sel" data-cmp="2"><div class="ct">比价 2 家</div><div class="cd">默认门槛，满 2 家可定标</div></div>
+            <div class="choice" data-cmp="3"><div class="ct">比价 3 家</div><div class="cd">金额较大或首次合作</div></div>
+            <div class="choice" data-cmp="1"><div class="ct">单一来源</div><div class="cd">需填理由，走加签审批</div></div>
+          </div>
+        </div>
+        <div class="f hide" data-req="1" id="f-reason">
+          <div class="flabel">单一来源理由 <span class="req">必填</span></div>
+          <textarea class="inp" id="i-reason" placeholder="例：该场地为活动指定场馆，市场无第二家可替代供应商。"></textarea>
+          <div class="errmsg">单一来源必须写明不可替代的原因，审批人据此加签。</div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="fsec-h"><span class="t">供应商</span><span class="d">选了也先进比价，定标后才成为正式供应商</span><span class="rule"></span></div>
+        <div class="f">
+          <div class="flabel">意向供应商<span class="tip">回车或逗号添加，可留空</span></div>
+          <div class="chips" id="vchips"><input id="i-vendor" placeholder="输入供应商名称…" autocomplete="off"></div>
+        </div>
+        <div class="f">
+          <div class="flabel">需求书 / SOW</div>
+          <div class="upload">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#008aa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5"/><path d="m7 10 5-5 5 5"/><path d="M4 19h16"/></svg>
+            <div><div class="t">上传需求书或 SOW</div><div class="d">PDF / DOCX / XLSX · 单个 20MB 以内 · 供应商报价时可见</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mfoot">
+      <div class="hint">提交后进入「需求比价」，比价满 <b class="num" id="foot-req">2</b> 家可发起合同审批。</div>
+      <div class="acts">
+        <button class="btn-cancel" id="mcancel">取消</button>
+        <button class="btn-primary" id="msubmit">创建需求</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A7E885" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+  <span id="toast-msg">已创建</span>
+</div>
+
+<script>
+/* 采购管理 · Procurement Board */
+const TODAY = new Date(2026, 7, 24);              // 2026-08-24
+const fmt   = n => n.toLocaleString('en-US');
+const yuan  = n => '¥' + fmt(n);
+const dAdd  = (a, b) => Math.round((b - a) / 86400000);
+const md    = d => String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+
+const STAGES = [
+  { k:1, cn:'需求比价',   en:'Sourcing',   hex:'#94A3B8', thr:7    },
+  { k:2, cn:'合同审批',   en:'Contract',   hex:'#FF9F6E', thr:3    },
+  { k:3, cn:'执行中',     en:'Delivery',   hex:'#49B6D8', thr:null },
+  { k:4, cn:'验收交付',   en:'Acceptance', hex:'#008AA8', thr:5    },
+  { k:5, cn:'付款审批',   en:'Payment',    hex:'#1F6F4A', thr:5    },
+  { k:6, cn:'已结项',     en:'Closed',     hex:'#3FB36A', thr:null }
+];
+const S = k => STAGES[k - 1];
+
+const CATS = {
+  '人力与外包'  : ['招聘及猎头费', '劳务外包费', '培训费'],
+  '营销投放'    : ['境内-线上投放', '境内-线下投放', '达人合作费'],
+  '技术与 SaaS' : ['SaaS订阅及系统年费', '数据服务费', '算力与云资源'],
+  '行政与场地'  : ['场地租赁费', '装修施工费', '办公用品'],
+  '咨询服务'    : ['咨询顾问费', '法务及审计费']
+};
+const OWNERS = [
+  { id:'u-kora',   name:'袁海娟',      ini:'Ko', mail:'kora.yuan@fscity.art' },
+  { id:'u-jessie', name:'jessie',      ini:'ju', mail:'jessie@fscity.art'    },
+  { id:'u-mia',    name:'Mia',         ini:'Mi', mail:'mia@fscity.art'       },
+  { id:'u-rachel', name:'Rachel',      ini:'Ra', mail:'rachel@fscity.art'    },
+  { id:'u-admin',  name:'FansAI Admin',ini:'Fa', mail:'admin@fscity.art'     },
+  { id:'u-wanda',  name:'wanda',       ini:'wa', mail:'wanda@fscity.art'     },
+  { id:'u-karen',  name:'Karen',       ini:'Ka', mail:'karen@fscity.art'     }
+];
+const ENTITIES = ['杭州垚城智能科技有限公司', '上海梵赛网络科技有限公司', '杭州垚城文化创意有限公司'];
+const CURRENCIES = [['CNY','人民币'], ['USD','美元'], ['HKD','港币']];
+
+/* 默认头像：hash(id) % N 确定性分配（同一用户固定，不随机） */
+const AV_GRADS = [
+  'linear-gradient(140deg,#A7E885,#008aa8)', 'linear-gradient(140deg,#9ADCCB,#49B6D8)',
+  'linear-gradient(140deg,#BFE9F5,#0c7074)', 'linear-gradient(140deg,#D8F3B8,#34A85E)',
+  'linear-gradient(140deg,#C6E3F7,#1b2430)'
+];
+function hashId(id){ let h = 0; id = String(id); for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0; return h; }
+const avatarBg = id => AV_GRADS[hashId(id) % AV_GRADS.length];
+
+let DEMANDS = [
+  { id:'PR-0001', name:'超创2名',            vendor:'—',                 cat1:'人力与外包',  cat2:'招聘及猎头费',      amount:0,     stage:1, dwell:6, owner:'u-jessie', quotes:0, quotesReq:2, delivery:null },
+  { id:'PR-0002', name:'SK大厦办公室装修施工', vendor:'—',                 cat1:'咨询服务',   cat2:'咨询顾问费',        amount:0,     stage:1, dwell:4, owner:'u-mia',    quotes:2, quotesReq:2, delivery:null },
+  { id:'PR-0003', name:'xx',                 vendor:'—',                 cat1:'咨询服务',   cat2:'咨询顾问费',        amount:0,     stage:1, dwell:9, owner:'u-rachel', quotes:0, quotesReq:2, delivery:null },
+  { id:'PR-0004', name:'数据分析',            vendor:'—',                 cat1:'咨询服务',   cat2:'咨询顾问费',        amount:0,     stage:1, dwell:3, owner:'u-rachel', quotes:0, quotesReq:2, delivery:null },
+  { id:'PR-0005', name:'xx采购',             vendor:'测试1',              cat1:'技术与 SaaS',cat2:'SaaS订阅及系统年费', amount:1200,  stage:2, dwell:3, owner:'u-admin',  seal:{done:0,total:5,who:'FansAI Admin、Mia 审批'}, delivery:'2026-08-21' },
+  { id:'PR-0006', name:'aso投放优化',         vendor:'江苏柚鸥广告有限公司', cat1:'营销投放',   cat2:'境内-线上投放',      amount:1000,  stage:2, dwell:4, owner:'u-wanda',  seal:{done:1,total:5,who:'FansAI Admin、jessie 审批'}, delivery:null },
+  { id:'PR-0007', name:'AIGC超创活动场地费',   vendor:'场地二',             cat1:'人力与外包',  cat2:'招聘及猎头费',      amount:5000,  stage:2, dwell:5, owner:'u-karen',  seal:{done:1,total:5,who:'FansAI Admin、jessie 审批'}, delivery:'2026-08-21', flag:'类目与需求名不符' },
+  { id:'PR-0008', name:'数据分析岗位招聘',     vendor:'测试1',              cat1:'人力与外包',  cat2:'招聘及猎头费',      amount:20000, stage:3, dwell:2, owner:'u-admin',  delivery:'2026-08-29' },
+  { id:'PR-0009', name:'猎头招聘外包',         vendor:'上海泽猎',           cat1:'人力与外包',  cat2:'招聘及猎头费',      amount:10000, stage:6, dwell:0, owner:'u-rachel', delivery:'2026-08-12', paid:10000 }
+];
+
+/* —— 派生 —— */
+function enrich(d){
+  const o = OWNERS.find(x => x.id === d.owner) || OWNERS[0];
+  const dt = d.delivery ? new Date(d.delivery + 'T00:00:00') : null;
+  const dueIn = dt ? dAdd(TODAY, dt) : null;
+  const overdue = dt !== null && dueIn < 0 && d.stage < 6;
+  const thr = S(d.stage).thr;
+  const risk = overdue ? 'late' : (thr && d.dwell >= thr ? 'warn' : '');
+  let text;
+  if (d.stage === 1) text = d.quotes >= d.quotesReq ? '待定标 · 已比价 ' + d.quotes + '/' + d.quotesReq : '比价不足 ' + d.quotes + '/' + d.quotesReq;
+  else if (d.stage === 2) text = '合同用章 ' + d.seal.done + '/' + d.seal.total;
+  else if (d.stage === 3) text = overdue ? '交付逾期 ' + Math.abs(dueIn) + ' 天' : '交付 ' + md(dt) + ' · ' + dueIn + ' 天后';
+  else if (d.stage === 4) text = '待验收确认';
+  else if (d.stage === 5) text = '待付款审批';
+  else text = '已结项 · 已核销';
+  return Object.assign({}, d, { o, dt, dueIn, overdue, risk, text });
+}
+const all = () => DEMANDS.map(enrich);
+
+let scope = 'all', view = 'board', mile = 'delivery';
+const filt = { search:'', cat1:'', stage:'', owner:'' };
+const scoped = () => all().filter(d => scope === 'all' || d.owner === 'u-kora');
+function filtered(){
+  return scoped().filter(d => {
+    if (filt.cat1  && d.cat1 !== filt.cat1) return false;
+    if (filt.stage && String(d.stage) !== filt.stage) return false;
+    if (filt.owner && d.owner !== filt.owner) return false;
+    if (filt.search){
+      const q = filt.search.toLowerCase();
+      if (![d.name, d.vendor, d.cat2, d.o.name].join(' ').toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+const sum = (arr, f) => arr.reduce((a, b) => a + f(b), 0);
+const byStage = (list, k) => list.filter(d => d.stage === k);
+const avg = arr => arr.length ? Math.round(sum(arr, d => d.dwell) / arr.length * 10) / 10 : 0;
+
+/* —— 图标（IconPark 风格 outline，交付时替换为官方 SVG）—— */
+const IC = {
+  wallet:'<path d="M3 8a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 8V6.5A1.5 1.5 0 0 1 4.5 5H16"/><circle cx="16.5" cy="12.5" r="1.2"/>',
+  layers:'<path d="M12 3 3 8l9 5 9-5z"/><path d="m3 13 9 5 9-5"/>',
+  inbox:'<path d="M3 12h5l2 3h4l2-3h5"/><path d="M5 5h14l2 7v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/>',
+  alarm:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M5 3 3 5m18 0-2-2"/>',
+  scale:'<path d="M12 4v16M6 8h12"/><path d="m6 8-3 6h6zM18 8l-3 6h6z"/>',
+  seal:'<path d="M8 14V9a4 4 0 0 1 8 0v5"/><rect x="5" y="14" width="14" height="6" rx="2"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/>'
+};
+const icon = (n, c, s) => '<svg width="' + (s || 15) + '" height="' + (s || 15) + '" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + IC[n] + '</svg>';
+const anchor = (n, hex, s) => '<span class="anchor" style="background:' + hex + '1a">' + icon(n, hex, s) + '</span>';
+const el = id => document.getElementById(id);
+
+/* ===================== KPI ===================== */
+function renderKPI(){
+  const L = scoped();
+  const inflight = L.filter(d => d.stage >= 2 && d.stage <= 5);
+  const committed = sum(inflight, d => d.amount);
+  const exec = sum(L.filter(d => d.stage >= 3 && d.stage <= 5), d => d.amount);
+  const pend = sum(byStage(L, 2), d => d.amount);
+  const paid = sum(L.filter(d => d.paid), d => d.paid);
+  const unpaid = sum(byStage(L, 5), d => d.amount);
+  const sourcing = byStage(L, 1);
+  const queue = byStage(L, 2).length + sourcing.length;
+  const late = L.filter(d => d.overdue);
+  const ok = sourcing.filter(d => d.quotes >= d.quotesReq).length;
+  const pct = sourcing.length ? Math.round(ok / sourcing.length * 100) : 0;
+  const pw = committed ? Math.round(exec / committed * 100) : 0;
+  const dist = STAGES.map(s => ({ s, n: byStage(L, s.k).length })).filter(x => x.n > 0);
+  const C = 2 * Math.PI * 21;
+
+  el('kpi').innerHTML =
+  '<div class="card glass stat hero-money">' +
+    '<div>' +
+      '<div class="stat-top">' + anchor('wallet', '#008aa8', 16) + '<div class="stat-lab"><b>在途金额</b>已签或待签、尚未结项</div></div>' +
+      '<div class="v-row"><span class="v-pre">¥</span><span class="v-main">' + fmt(committed) + '</span></div>' +
+      '<div class="compbar">' +
+        (exec ? '<i style="width:' + pw + '%;background:linear-gradient(90deg,#49B6D8,#008aa8)"></i>' : '') +
+        (pend ? '<i style="width:' + (100 - pw) + '%;background:#FF9F6E"></i>' : '') +
+      '</div>' +
+      '<div class="complegend">' +
+        '<span><em style="background:#008aa8"></em>执行中 <b>' + yuan(exec) + '</b></span>' +
+        '<span><em style="background:#FF9F6E"></em>合同待批 <b>' + yuan(pend) + '</b>（' + (100 - pw) + '%）</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="moneyfoot">' +
+      '<div><span class="k">本月已付</span><span class="n">' + yuan(paid) + '</span></div>' +
+      '<div><span class="k">待付</span><span class="n" style="color:var(--muted2)">' + yuan(unpaid) + '</span></div>' +
+      '<div><span class="k">比价中（尚无报价）</span><span class="n">' + sourcing.length + ' <span style="font-size:12px;color:var(--muted2)">单</span></span></div>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="card glass stat">' +
+    '<div><div class="stat-top">' + anchor('layers', '#1b2430', 15) + '<div class="stat-lab"><b>全部外包需求</b>含已结项</div></div>' +
+      '<div class="v-row"><span class="v-main">' + L.length + '</span><span class="v-unit">个</span></div>' +
+      '<div class="distbar">' + dist.map(x => '<i style="flex:' + x.n + ';background:' + x.s.hex + '"></i>').join('') + '</div>' +
+    '</div>' +
+    '<div class="statfoot stage-summary">' + dist.map(x => '<div class="sf"><span class="k">' + x.s.cn + '</span><span class="v">' + x.n + '</span></div>').join('') + '</div>' +
+  '</div>' +
+
+  '<div class="card glass stat">' +
+    '<div><div class="stat-top">' + anchor('inbox', '#FF9F6E', 15) + '<div class="stat-lab"><b>等我处理</b>审批与定标卡点</div></div>' +
+      '<div class="v-row"><span class="v-main" style="color:#FF9F6E">' + queue + '</span><span class="v-unit">项</span></div>' +
+    '</div>' +
+    '<div class="statfoot"><div class="sf"><span class="k">用章审批</span><span class="v">' + byStage(L, 2).length + '</span></div><div class="sf"><span class="k">比价定标</span><span class="v">' + sourcing.length + '</span></div></div>' +
+    '<div class="statnote">最久一项已停留 <b class="num">' + Math.max.apply(null, [0].concat(L.filter(d => d.stage < 3).map(d => d.dwell))) + '</b> 天</div>' +
+  '</div>' +
+
+  '<div class="card glass stat">' +
+    '<div><div class="stat-top">' + anchor('alarm', '#E5484D', 15) + '<div class="stat-lab"><b>逾期节点</b>交付日已过</div></div>' +
+      '<div class="v-row"><span class="v-main" style="color:' + (late.length ? '#E5484D' : '#1b2430') + '">' + late.length + '</span><span class="v-unit">单</span></div>' +
+    '</div>' +
+    (late.length
+      ? '<div class="statfoot"><div class="sf"><span class="k">合计金额</span><span class="v">¥' + fmt(sum(late, d => d.amount)) + '</span></div><div class="sf"><span class="k">最长逾期</span><span class="v">' + Math.max.apply(null, late.map(d => -d.dueIn)) + ' 天</span></div></div><div class="statnote warn">全部卡在合同用章</div>'
+      : '<div class="statnote" style="margin-top:auto;padding-top:14px;border-top:1px solid rgba(27,36,48,.07)">当前无逾期交付节点</div>') +
+  '</div>' +
+
+  '<div class="card glass stat">' +
+    '<div class="stat-top">' + anchor('scale', '#008aa8', 15) + '<div class="stat-lab"><b>比价达标率</b>满足最低比价家数</div></div>' +
+    '<div style="display:flex;align-items:center;gap:14px;margin-top:12px">' +
+      '<svg class="ring" viewBox="0 0 56 56">' +
+        '<circle cx="28" cy="28" r="21" fill="none" stroke="#1b2430" stroke-opacity=".08" stroke-width="9"/>' +
+        '<circle cx="28" cy="28" r="21" fill="none" stroke="' + (pct >= 60 ? '#3FB36A' : '#FF9F6E') + '" stroke-width="9" stroke-linecap="round"' +
+        ' stroke-dasharray="' + (C * pct / 100).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 28 28)"/>' +
+      '</svg>' +
+      '<div class="v-row" style="margin:0"><span class="v-main" style="color:' + (pct >= 60 ? '#3FB36A' : '#FF9F6E') + '">' + pct + '</span><span class="v-unit">%</span></div>' +
+    '</div>' +
+    '<div class="statfoot"><div class="sf"><span class="k">已满 2 家</span><span class="v">' + ok + '/' + sourcing.length + '</span></div><div class="sf"><span class="k">0 家报价</span><span class="v">' + (sourcing.length - ok) + ' 单</span></div></div>' +
+    (sourcing.length - ok ? '<div class="statnote warn">定标无法启动</div>' : '') +
+  '</div>';
+
+  const subTotal = el('sub-total'); if (subTotal) subTotal.textContent = L.length;
+  el('q-count').textContent = queue;
+  const bell = document.querySelector('.bellbtn .badge'); if (bell) bell.textContent = queue;
+}
+
+/* 列表只展示前 N 行，超出部分改为容器内上下滑动；用真实渲染出的行高来算高度，不写死像素 */
+function capScroll(wrapId, listId, visible){
+  const wrap = el(wrapId), list = el(listId);
+  const items = list.children;
+  wrap.classList.remove('has-more', 'at-bottom');
+  list.style.maxHeight = '';
+  list.onscroll = null;
+  if (items.length <= visible || (items.length === 1 && items[0].classList.contains('empty'))) return;
+  const listTop = list.getBoundingClientRect().top;
+  const cut = items[visible - 1].getBoundingClientRect().bottom - listTop;
+  list.style.maxHeight = Math.ceil(cut) + 'px';
+  wrap.classList.add('has-more');
+  const checkBottom = () => {
+    const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 2;
+    wrap.classList.toggle('at-bottom', atBottom);
+  };
+  list.onscroll = checkBottom;
+  checkBottom();
+}
+let capResizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(capResizeTimer);
+  capResizeTimer = setTimeout(() => { capScroll('queue-wrap', 'queue', 4); capScroll('mlist-wrap', 'mlist', 4); }, 150);
+});
+
+/* ===================== 等我处理 ===================== */
+function renderQueue(){
+  const L = scoped().filter(d => d.stage <= 2).sort((a, b) => b.dwell - a.dwell);
+  if (!L.length){ el('queue').innerHTML = '<div class="empty"><b>队列是空的</b>当前视角下没有等你审批或定标的需求。</div>'; el('q-hint').textContent = ''; capScroll('queue-wrap', 'queue', 4); return; }
+  el('queue').innerHTML = L.map(d => {
+    const seal = d.stage === 2;
+    const done = seal ? d.seal.done : d.quotes, total = seal ? d.seal.total : d.quotesReq;
+    const c = seal ? '#FF9F6E' : '#94A3B8';
+    const over = S(d.stage).thr && d.dwell >= S(d.stage).thr;
+    return '<div class="qitem">' +
+      '<span class="qtype" style="background:' + c + '14;color:' + (seal ? '#B4622F' : '#5A6A7D') + '"><i style="background:' + c + '"></i>' + (seal ? '用章审批' : '比价定标') + '</span>' +
+      '<div><div class="qname">' + d.name + '</div>' +
+        '<div class="qmeta"><span>' + (seal ? d.seal.who : (d.quotes >= d.quotesReq ? '报价已齐，待你定标' : '还缺 ' + (d.quotesReq - d.quotes) + ' 家报价')) + '</span>' +
+        '<i class="dot"></i><span>' + d.cat2 + '</span>' + (d.amount ? '<i class="dot"></i><span class="num">' + yuan(d.amount) + '</span>' : '') + '</div></div>' +
+      '<div class="qright">' +
+        '<div class="track"><div class="bar"><i style="width:' + (done / total * 100) + '%;background:' + c + '"></i></div>' +
+          '<div class="lb"><span>' + (seal ? '用章' : '报价') + '</span><b>' + done + '/' + total + '</b></div></div>' +
+        '<div class="dwell"><span class="d" style="color:' + (over ? '#E5484D' : '#1b2430') + '">' + d.dwell + '<span style="font-size:11px;color:var(--muted2)">d</span></span><span class="l">已停留</span></div>' +
+        '<span class="golink">去处理 →</span>' +
+      '</div></div>';
+  }).join('');
+  el('q-hint').textContent = L.length > 4 ? '仅显示前 4 项' : '';
+  capScroll('queue-wrap', 'queue', 4);
+}
+
+/* ===================== 近期节点 ===================== */
+function renderMiles(){
+  const L = scoped();
+  let rows;
+  if (mile === 'delivery'){
+    rows = L.filter(d => d.dt && d.stage < 6).sort((a, b) => a.dt - b.dt).map(d => ({
+      name:d.name, meta:(d.vendor !== '—' ? d.vendor : d.cat2) + ' · ' + d.o.name, dt:d.dt, dueIn:d.dueIn, est:false
+    }));
+  } else {
+    rows = L.filter(d => d.stage === 3 && d.dt).map(d => {
+      const p = new Date(d.dt.getTime() + 30 * 86400000);
+      return { name:d.name, meta:yuan(d.amount) + ' · 交付验收后 30 天账期（预估）', dt:p, dueIn:dAdd(TODAY, p), est:true };
+    });
+  }
+  el('mt-d').textContent = L.filter(d => d.dt && d.stage < 6).length;
+  el('mt-p').textContent = L.filter(d => d.stage === 3 && d.dt).length;
+  if (!rows.length){ el('mlist').innerHTML = '<div class="empty"><b>未来两周没有节点</b>新需求定标后会自动生成交付与付款日。</div>'; capScroll('mlist-wrap', 'mlist', 4); return; }
+  el('mlist').innerHTML = rows.map(r => {
+    const late = r.dueIn < 0, soon = r.dueIn >= 0 && r.dueIn <= 7;
+    return '<div class="mrow">' +
+      '<span class="mdot ' + (late ? 'late' : soon ? 'soon' : '') + '"></span>' +
+      '<div><div class="mname">' + r.name + (r.est ? ' <span style="font-size:10.5px;color:var(--muted2);font-weight:400">预估</span>' : '') + '</div><div class="mmeta">' + r.meta + '</div></div>' +
+      '<div class="mdate"><div class="d">' + md(r.dt) + '</div><div class="s" style="color:' + (late ? '#E5484D' : soon ? '#FF9F6E' : 'var(--muted2)') + '">' + (late ? '逾期 ' + (-r.dueIn) + ' 天' : r.dueIn + ' 天后') + '</div></div>' +
+    '</div>';
+  }).join('');
+  capScroll('mlist-wrap', 'mlist', 4);
+}
+
+/* ===================== 看板 ===================== */
+function renderBoard(){
+  const L = filtered();
+  el('view-board').innerHTML = STAGES.map(s => {
+    const g = byStage(L, s.k), amt = sum(g, d => d.amount), a = avg(g);
+    const cards = g.length ? g.map(d => {
+      let gate = '';
+      if (d.stage === 1){
+        const need = d.quotesReq;
+        gate = '<div class="gate"><div class="g1"><span class="st"><i style="background:' + (d.quotes >= need ? '#3FB36A' : '#E5484D') + '"></i>' + (d.quotes >= need ? '待定标选供应商' : '比价不足') + '</span><span class="r">' + d.quotes + '/' + need + '</span></div>' +
+          '<div class="pips">' + Array.from({ length:need }, (_, i) => '<i style="background:' + (i < d.quotes ? '#3FB36A' : 'rgba(27,36,48,.1)') + '"></i>').join('') + '</div></div>';
+      } else if (d.stage === 2){
+        gate = '<div class="gate"><div class="g1"><span class="st"><i style="background:#FF9F6E"></i>合同用章</span><span class="r">' + d.seal.done + '/' + d.seal.total + '</span></div>' +
+          '<div class="g2"><i style="width:' + (d.seal.done / d.seal.total * 100) + '%;background:#FF9F6E"></i></div>' +
+          '<div class="g3">' + d.seal.who + '</div></div>';
+      } else if (d.stage === 3){
+        gate = '<div class="gate"><div class="g1"><span class="st"><i style="background:' + (d.overdue ? '#E5484D' : '#49B6D8') + '"></i>' + (d.overdue ? '交付逾期' : '交付 ' + md(d.dt)) + '</span><span class="r" style="color:' + (d.overdue ? '#E5484D' : 'var(--muted)') + '">' + (d.overdue ? -d.dueIn + 'd' : d.dueIn + 'd') + '</span></div></div>';
+      } else if (d.stage === 6){
+        gate = '<div class="gate"><div class="g1"><span class="st"><i style="background:#3FB36A"></i>已结项 · 已核销</span><span class="r">' + yuan(d.paid) + '</span></div></div>';
+      }
+      return '<div class="pcard">' +
+        '<div class="pc-t"><span class="n">' + d.name + '</span><span class="a' + (d.amount ? '' : ' zero') + '">' + (d.amount ? '<span class="pre">¥</span>' + fmt(d.amount) : '未报价') + '</span></div>' +
+        '<div class="pc-v">' + (d.vendor !== '—' ? d.vendor : '尚未选定供应商') + '</div>' + gate +
+        '<div class="pc-f"><span class="catchip">' + d.cat2 + '</span>' + (d.stage < 6 ? '<span class="catchip" style="background:rgba(27,36,48,.03)">停留 <b class="num" style="font-weight:600">' + d.dwell + 'd</b></span>' : '') +
+        '<span class="av" style="background:' + avatarBg(d.owner) + '" title="' + d.o.name + '">' + d.o.ini + '</span></div></div>';
+    }).join('') : '<div class="empty"><b>暂无</b>' + (s.k === 4 ? '执行完成后在这里确认验收' : s.k === 5 ? '验收通过后自动生成付款单' : '还没有需求进入此阶段') + '</div>';
+    return '<div class="col"><div class="colhead"><div class="l1"><i style="background:' + s.hex + '"></i><span class="t">' + s.cn + '</span><span class="c">' + g.length + '</span></div>' +
+      '<div class="l2"><span class="amt">' + (amt ? '<span class="pre">¥</span>' + fmt(amt) : '<span style="color:var(--muted2);font-size:12px">—</span>') + '</span>' +
+      '<span class="dw">' + (g.length && s.thr ? '均 <b>' + a + '</b> 天' : '') + '</span></div></div>' +
+      '<div class="colrule" style="background:' + s.hex + '33"></div>' + cards + '</div>';
+  }).join('');
+}
+
+/* ===================== 列表 ===================== */
+function renderList(){
+  const L = filtered().sort((a, b) => a.stage - b.stage || b.dwell - a.dwell);
+  el('tbody').innerHTML = L.map(d => '<tr>' +
+    '<td><div>' + d.name + '</div><div class="s">' + (d.vendor !== '—' ? d.vendor : '未选定供应商') + '</div></td>' +
+    '<td><span class="stagepill" style="background:' + S(d.stage).hex + '14;color:#1b2430"><i style="background:' + S(d.stage).hex + '"></i>' + S(d.stage).cn + '</span></td>' +
+    '<td><div>' + d.cat2 + '</div><div class="s">' + d.cat1 + (d.flag ? ' · <span style="color:#FF9F6E">' + d.flag + '</span>' : '') + '</div></td>' +
+    '<td class="r num" style="font-weight:600">' + (d.amount ? yuan(d.amount) : '<span style="color:var(--muted2);font-weight:400">未报价</span>') + '</td>' +
+    '<td>' + d.text + '</td>' +
+    '<td class="r" style="color:' + (d.risk ? (d.risk === 'late' ? '#E5484D' : '#FF9F6E') : '#1b2430') + '">' + (d.stage < 6 ? '<b class="num" style="font-weight:600">' + d.dwell + '</b> <span style="font-weight:500;font-size:12px">天</span>' : '<span style="color:var(--muted2)">—</span>') + '</td>' +
+    '<td class="num">' + (d.dt ? md(d.dt) : '<span style="color:var(--muted2)">—</span>') + (d.overdue ? '<div class="s" style="color:#E5484D">逾期 ' + (-d.dueIn) + ' 天</div>' : '') + '</td>' +
+    '<td><span style="display:flex;align-items:center;gap:8px"><span class="av" style="margin:0;background:' + avatarBg(d.owner) + '">' + d.o.ini + '</span>' + d.o.name + '</span></td>' +
+  '</tr>').join('') || '<tr><td colspan="8"><div class="empty"><b>没有匹配的需求</b>换个筛选条件，或新建一条采购需求。</div></td></tr>';
+}
+
+function renderAll(){ renderKPI(); renderQueue(); renderMiles(); renderBoard(); renderList(); }
+
+/* ===================== 瓦片下拉（替代原生 select） ===================== */
+const DD = {};
+function ddOptions(key){
+  if (key === 'cat1')  return [{ v:'', t:'全部一级类目' }].concat(Object.keys(CATS).map(c => ({ v:c, t:c })));
+  if (key === 'stage') return [{ v:'', t:'全部阶段' }].concat(STAGES.map(s => ({ v:String(s.k), t:s.cn, dot:s.hex, sub:String(byStage(scoped(), s.k).length) })));
+  if (key === 'owner') return [{ v:'', t:'全部发起人' }].concat(OWNERS.filter(o => scoped().some(d => d.owner === o.id)).map(o => ({ v:o.id, t:o.name })));
+  if (key === 'mcat1') return Object.keys(CATS).map(c => ({ v:c, t:c }));
+  if (key === 'mcat2') return (CATS[DD.mcat1] || []).map(c => ({ v:c, t:c }));
+  if (key === 'mowner')return OWNERS.map(o => ({ v:o.id, t:o.name, sub:o.mail }));
+  if (key === 'mcur')  return CURRENCIES.map(c => ({ v:c[0], t:c[0] + ' · ' + c[1] }));
+  if (key === 'mentity') return ENTITIES.map(e => ({ v:e, t:e }));
+  return [];
+}
+function paintDD(node){
+  const key = node.dataset.dd, opts = ddOptions(key), cur = DD[key] || '';
+  node.querySelector('.dd-panel').innerHTML = opts.map(o =>
+    '<div class="dd-opt' + (o.v === cur ? ' sel' : '') + '" data-v="' + o.v + '">' +
+    (o.dot ? '<span class="sdot" style="background:' + o.dot + '"></span>' : '') +
+    '<span>' + o.t + '</span>' + (o.sub ? '<span class="sub">' + o.sub + '</span>' : '') + '</div>').join('')
+    || '<div class="dd-opt" style="color:var(--muted2);cursor:default">先选一级类目</div>';
+  const hit = opts.find(o => o.v === cur);
+  const lbl = node.querySelector('.lbl');
+  lbl.textContent = hit ? hit.t : opts[0] ? opts[0].t : '请选择';
+  lbl.classList.toggle('ph', !cur);
+  const sd = node.querySelector('.dd-trig .sdot');
+  if (sd) sd.style.background = hit && hit.dot ? hit.dot : 'transparent';
+}
+function initDD(){
+  document.querySelectorAll('.dd').forEach(node => {
+    paintDD(node);
+    node.querySelector('.dd-trig').addEventListener('click', e => {
+      e.stopPropagation();
+      const open = node.classList.contains('open');
+      document.querySelectorAll('.dd.open').forEach(n => n.classList.remove('open'));
+      if (open) return;
+      paintDD(node);
+      const r = node.getBoundingClientRect();
+      node.classList.toggle('up', window.innerHeight - r.bottom < 320);
+      node.classList.add('open');
+    });
+    node.querySelector('.dd-panel').addEventListener('click', e => {
+      const opt = e.target.closest('.dd-opt'); if (!opt || opt.dataset.v === undefined) return;
+      const key = node.dataset.dd;
+      DD[key] = opt.dataset.v;
+      node.classList.remove('open');
+      node.closest('.f') && node.closest('.f').classList.remove('err');
+      if (key === 'mcat1'){ DD.mcat2 = ''; const n2 = document.querySelector('[data-dd="mcat2"]'); if (n2) paintDD(n2); const t = el('cat2-tip'); if (t) t.textContent = DD.mcat1 + ' 下 ' + (CATS[DD.mcat1] || []).length + ' 个'; }
+      paintDD(node);
+      if (['cat1','stage','owner'].includes(key)){ filt[key] = opt.dataset.v; renderBoard(); renderList(); }
+    });
+  });
+  document.addEventListener('click', () => document.querySelectorAll('.dd.open').forEach(n => n.classList.remove('open')));
+}
+
+/* ===================== 交互 ===================== */
+function bind(){
+  el('q-search').addEventListener('input', e => { filt.search = e.target.value.trim(); renderBoard(); renderList(); });
+
+  document.querySelectorAll('#scope-seg button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#scope-seg button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    scope = b.dataset.scope; renderAll();
+    document.querySelectorAll('.dd[data-dd="stage"],.dd[data-dd="owner"]').forEach(paintDD);
+  }));
+
+  document.querySelectorAll('#view-seg button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#view-seg button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); view = b.dataset.view;
+    el('view-board').classList.toggle('hide', view !== 'board');
+    el('view-list').classList.toggle('hide', view !== 'list');
+  }));
+
+  document.querySelectorAll('#miletabs button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#miletabs button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); mile = b.dataset.mile; renderMiles();
+  }));
+
+  el('btn-export').addEventListener('click', () => toast('已导出 ' + filtered().length + ' 条需求为 CSV'));
+
+  /* —— 焦点态：标签变 teal —— */
+  document.querySelectorAll('.mbody .inp').forEach(i => {
+    i.addEventListener('focus', () => i.closest('.f').classList.add('focus'));
+    i.addEventListener('blur',  () => i.closest('.f').classList.remove('focus'));
+    i.addEventListener('input', () => i.closest('.f').classList.remove('err'));
+  });
+
+  /* —— 预算实时提示 —— */
+  ['i-bmin','i-bmax'].forEach(id => el(id).addEventListener('input', () => {
+    const a = +el('i-bmin').value, b = +el('i-bmax').value;
+    const show = a > 0 && b > 0 && b >= a;
+    el('budget-hint').style.display = show ? 'flex' : 'none';
+    if (show){ el('hint-max').textContent = yuan(b); el('hint-mid').textContent = yuan(Math.round((a + b) / 2)); }
+  }));
+
+  /* —— 比价要求 —— */
+  document.querySelectorAll('#cmp-choices .choice').forEach(c => c.addEventListener('click', () => {
+    document.querySelectorAll('#cmp-choices .choice').forEach(x => x.classList.remove('sel'));
+    c.classList.add('sel');
+    const single = c.dataset.cmp === '1';
+    el('f-reason').classList.toggle('hide', !single);
+    el('foot-req').textContent = single ? '0' : c.dataset.cmp;
+  }));
+
+  /* —— 供应商 chips —— */
+  const vin = el('i-vendor');
+  vin.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ','){ e.preventDefault(); addChip(vin.value.trim()); vin.value = ''; }
+    if (e.key === 'Backspace' && !vin.value){ const last = el('vchips').querySelectorAll('.chip'); if (last.length) last[last.length - 1].remove(); }
+  });
+
+  el('btn-new').addEventListener('click', openModal);
+  el('mclose').addEventListener('click', closeModal);
+  el('mcancel').addEventListener('click', closeModal);
+  el('scrim').addEventListener('click', e => { if (e.target === el('scrim')) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && el('scrim').classList.contains('on')) closeModal(); });
+  el('msubmit').addEventListener('click', submit);
+}
+function addChip(v){
+  if (!v) return;
+  const box = el('vchips'), s = document.createElement('span');
+  s.className = 'chip'; s.innerHTML = '<span>' + v + '</span><b>×</b>';
+  s.querySelector('b').addEventListener('click', () => s.remove());
+  box.insertBefore(s, el('i-vendor'));
+}
+function toast(msg){ el('toast-msg').textContent = msg; el('toast').classList.add('on'); setTimeout(() => el('toast').classList.remove('on'), 2600); }
+
+/* ===================== 模态 ===================== */
+function openModal(){
+  DD.mcat1 = ''; DD.mcat2 = ''; DD.mowner = 'u-kora'; DD.mcur = 'CNY'; DD.mentity = ENTITIES[0];
+  ['i-name','i-bmin','i-bmax','i-desc','i-reason'].forEach(id => el(id).value = '');
+  el('i-date').value = '2026-09-07';
+  el('budget-hint').style.display = 'none';
+  el('vchips').querySelectorAll('.chip').forEach(c => c.remove());
+  document.querySelectorAll('.mbody .f').forEach(f => f.classList.remove('err'));
+  document.querySelectorAll('#cmp-choices .choice').forEach((c, i) => c.classList.toggle('sel', i === 0));
+  el('f-reason').classList.add('hide'); el('foot-req').textContent = '2';
+  el('cat2-tip').textContent = '先选一级类目';
+  document.querySelectorAll('.modal .dd').forEach(paintDD);
+  el('scrim').classList.add('on');
+  setTimeout(() => el('i-name').focus(), 120);
+}
+function closeModal(){ el('scrim').classList.remove('on'); }
+
+function submit(){
+  const bad = [];
+  const mark = id => { const f = el(id); f.classList.add('err'); f.classList.add('shake'); setTimeout(() => f.classList.remove('shake'), 520); bad.push(f); };
+  if (!el('i-name').value.trim()) mark('f-name');
+  if (!DD.mcat1) mark('f-cat1');
+  if (!DD.mcat2) mark('f-cat2');
+  if (!DD.mowner) mark('f-owner');
+  const a = +el('i-bmin').value, b = +el('i-bmax').value;
+  if (!(a > 0 && b > 0 && b >= a)) mark('f-budget');
+  const dv = el('i-date').value;
+  if (!dv || new Date(dv + 'T00:00:00') < TODAY) mark('f-date');
+  const req = +document.querySelector('#cmp-choices .choice.sel').dataset.cmp;
+  if (req === 1 && !el('i-reason').value.trim()) mark('f-reason');
+  if (bad.length){ bad[0].scrollIntoView({ behavior:'smooth', block:'center' }); toast('还有 ' + bad.length + ' 项没填完'); return; }
+
+  const vendors = Array.from(el('vchips').querySelectorAll('.chip span')).map(s => s.textContent);
+  DEMANDS.push({
+    id:'PR-' + String(DEMANDS.length + 1).padStart(4, '0'),
+    name:el('i-name').value.trim(), vendor:vendors[0] || '—',
+    cat1:DD.mcat1, cat2:DD.mcat2, amount:0, stage:1, dwell:0,
+    owner:DD.mowner, quotes:0, quotesReq:req === 1 ? 1 : req, delivery:dv
+  });
+  closeModal(); renderAll();
+  document.querySelectorAll('.dd[data-dd="stage"],.dd[data-dd="owner"],.dd[data-dd="cat1"]').forEach(paintDD);
+  toast(req === 1 ? '已创建 · 单一来源已提交加签审批' : '已创建 · 进入「需求比价」，还缺 ' + req + ' 家报价');
+}
+
+renderAll(); initDD(); bind();
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>部门管理 | FansAI 数据中台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b2430;--ink2:#0f3132;--muted:#64748b;--muted2:#94a3b8;--line:#e8efef;
+  --teal:#008aa8;--teal2:#0c7074;--blue:#49b6d8;--ok:#1a9e4b;--warn:#c77b26;--err:#d6455b;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","Noto Sans SC",sans-serif;
+  --shadow:0 24px 54px -28px rgba(20,60,60,.26),inset 0 1px 0 rgba(255,255,255,.65)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{min-height:100vh;color:var(--ink);font-family:var(--cn);font-weight:500;-webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(1000px 610px at 8% -7%,rgba(154,220,203,.40),transparent 61%),
+    radial-gradient(850px 540px at 92% 2%,rgba(73,182,216,.27),transparent 60%),
+    radial-gradient(780px 520px at 55% 108%,rgba(0,138,168,.09),transparent 62%),
+    #edf5f3;background-attachment:fixed}
+button,input{font:inherit;color:inherit}button{cursor:pointer}.tnum{font-family:var(--en);font-variant-numeric:tabular-nums}
+.wrap{max-width:1680px;margin:0 auto;padding:26px 36px 52px}
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.76),rgba(255,255,255,.53));border:1px solid rgba(255,255,255,.82);box-shadow:var(--shadow);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%)}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}.reveal{animation:rise .48s cubic-bezier(.2,.7,.2,1) both}
+
+/* header */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;border:2px solid #f5fffe;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;flex:0 0 auto;border-radius:50%;background:linear-gradient(140deg,#9adccb,#49b6d8)}
+.bmain,.bsub{font-family:var(--en);font-size:18px;letter-spacing:1.08px;line-height:24px}.bmain{font-weight:700}.bsub{font-weight:300}
+.tb-right{display:flex;align-items:center;gap:12px}.bellbtn{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);box-shadow:0 6px 18px -10px rgba(15,49,50,.18);transition:.18s}.bellbtn:hover{transform:translateY(-1px)}.bellbtn svg{width:19px;height:19px}
+.me{display:flex;align-items:center;gap:8px;border:0;background:transparent}.avatar{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;border:2px solid #f5fffe;background:linear-gradient(140deg,#b5e9c2,#58bdd7);color:#04312f;font-family:var(--en);font-size:16px;font-weight:700}.mename{font-family:var(--en);font-size:18px;font-weight:500}.me>svg{width:14px;height:14px;color:var(--muted2)}
+
+/* global toolbar */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;position:relative;z-index:30}.dept-search{height:46px;min-width:280px;flex:1;display:flex;align-items:center;gap:10px;padding:0 15px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.65);transition:.18s}.dept-search:focus-within{background:#fff;border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.14)}.dept-search svg{width:16px;height:16px;color:var(--muted2)}.dept-search input{width:100%;border:0;outline:0;background:transparent;font-size:12.5px}.dept-search input::placeholder{color:var(--muted2)}
+.status-select{position:relative;flex:0 0 auto}.status-trigger,.collapse-btn{height:46px;display:flex;align-items:center;gap:9px;padding:0 15px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.65);font-size:12px;font-weight:650;white-space:nowrap}.status-trigger{min-width:140px;justify-content:space-between}.status-select.open .status-trigger{background:#fff;border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.14)}.chev{width:7px;height:7px;margin:0 3px 4px 12px;border-right:1.8px solid var(--muted2);border-bottom:1.8px solid var(--muted2);transform:rotate(45deg);transition:.18s}.status-select.open .chev{transform:rotate(225deg);margin-bottom:-3px}.status-pop{display:none;position:absolute;top:calc(100% + 8px);right:0;z-index:44;width:180px;padding:8px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 22px 54px -24px rgba(15,49,50,.42)}.status-select.open .status-pop{display:block;animation:rise .16s ease both}.status-opt{width:100%;display:flex;align-items:center;gap:8px;padding:10px 11px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:12px;text-align:left}.status-opt:hover{background:#f0f7f5;color:var(--ink2)}.status-opt.on{background:#e8f4f1;color:var(--teal2);font-weight:700}.status-dot{width:7px;height:7px;border-radius:50%;background:var(--dot,#94a3b8)}
+.collapse-btn{transition:.16s}.collapse-btn:hover{background:#fff;border-color:#c9deda;color:var(--teal2)}.collapse-btn svg{width:15px;height:15px}.primary{height:46px;display:flex;align-items:center;gap:8px;padding:0 18px;border:1px solid var(--ink2);border-radius:14px;background:var(--ink2);color:#fff;font-size:12.5px;font-weight:700;box-shadow:0 14px 28px -15px rgba(15,49,50,.62);transition:.18s;white-space:nowrap}.primary:hover{transform:translateY(-1px);background:#123d3a}.primary svg{width:15px;height:15px}
+
+/* master-detail */
+.org-grid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;align-items:stretch;min-height:calc(100vh - 204px)}
+.tree-panel,.detail-panel{display:flex;flex-direction:column;min-height:0;border-radius:24px}.tree-panel{padding:22px 14px 16px}.panel-label{padding:0 10px 14px}.panel-label h2{font-size:15px;font-weight:600;color:var(--ink2)}.panel-label p{margin-top:5px;color:var(--muted2);font-size:11.5px}
+.dept-tree{display:flex;flex-direction:column;gap:5px;flex:1 1 auto;min-height:0;overflow-y:auto;padding:0 1px 12px;scrollbar-width:thin;scrollbar-color:#cadbd8 transparent}.dept-row{width:100%;min-height:46px;display:grid;grid-template-columns:18px 22px minmax(0,1fr) auto;align-items:center;gap:8px;padding:0 12px;border:0;border-radius:14px;background:transparent;color:var(--ink);text-align:left;transition:.16s}.dept-row.child{width:calc(100% - 32px);margin-left:32px;padding-left:12px}.dept-row:hover{background:rgba(0,138,168,.06)}.dept-row.child.on{background:#263743;color:#fff;box-shadow:0 13px 25px -14px rgba(32,55,67,.48)}.dept-row.root.on{background:#e6ecee;color:#354956;box-shadow:0 12px 24px -18px rgba(55,76,89,.38)}.tree-arrow{width:8px;height:8px;border-right:1.8px solid currentColor;border-bottom:1.8px solid currentColor;transform:rotate(45deg);transition:.18s;color:var(--muted2)}.tree-arrow.closed{transform:rotate(-45deg)}.dept-row.child.on .tree-arrow{color:rgba(255,255,255,.7)}.dept-row.root.on .tree-arrow{color:#6f8492}.tree-spacer{width:8px}.dept-icon{width:19px;height:19px;color:#8fa9bb}.dept-icon svg{width:19px;height:19px;display:block}.dept-row.child.on .dept-icon{color:rgba(255,255,255,.78)}.dept-row.root.on .dept-icon{color:#698493}.dept-name{min-width:0;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dept-count{min-width:26px;padding:3px 8px;border-radius:10px;background:rgba(148,163,184,.14);color:var(--muted);font-family:var(--en);font-size:11px;font-weight:700;text-align:center}.dept-row.child.on .dept-count{background:rgba(255,255,255,.20);color:#fff}.dept-row.root.on .dept-count{background:#d6e0e4;color:#536b79}
+.tree-empty{padding:52px 16px;text-align:center;color:var(--muted2);font-size:11.5px;line-height:1.7}.tree-foot{margin-top:auto;padding:14px 10px 0;border-top:1px solid rgba(232,239,239,.9);color:var(--muted2);font-size:10.5px;line-height:1.55}
+
+.detail-panel{overflow:hidden}.detail-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:23px 26px 18px;border-bottom:1px solid rgba(232,239,239,.82);flex-wrap:wrap}.detail-title{min-width:0}.title-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.detail-title h1{font-size:20px;font-weight:700;color:var(--ink2)}.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:12px;background:#eaf6ee;color:var(--ok);font-size:11px;font-weight:700}.status-pill.unknown{background:#f1f4f4;color:var(--muted2)}.status-pill i{width:6px;height:6px;border-radius:50%;background:currentColor}.detail-title p{margin-top:6px;color:var(--muted2);font-size:11.5px;line-height:1.55}.detail-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.member-search{width:250px;height:42px;display:flex;align-items:center;gap:9px;padding:0 13px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.65);transition:.16s}.member-search:focus-within{background:#fff;border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.14)}.member-search svg{width:15px;height:15px;color:var(--muted2)}.member-search input{width:100%;border:0;outline:0;background:transparent;font-size:12px}.member-search input::placeholder{color:var(--muted2)}
+.head-icon{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.68);color:var(--muted);position:relative;transition:.16s}.head-icon:hover{background:#fff;color:var(--teal2);border-color:rgba(0,138,168,.34);transform:translateY(-1px)}.head-icon.danger:hover{color:var(--err);border-color:rgba(214,69,91,.34)}.head-icon svg{width:16px;height:16px}.tooltip{position:absolute;right:0;bottom:calc(100% + 7px);z-index:12;padding:5px 8px;border-radius:8px;background:var(--ink);color:#fff;font-size:10px;white-space:nowrap;opacity:0;pointer-events:none;transition:.14s}.head-icon:hover .tooltip,.opicon:hover .tooltip{opacity:1}.detail-actions .primary{height:42px}.detail-actions .member-primary{background:linear-gradient(90deg,#41BACF 6.79%,#007E9A 116.67%);border-color:#168ea8;box-shadow:0 14px 28px -16px rgba(0,126,154,.58)}.detail-actions .member-primary:hover{background:linear-gradient(90deg,#41BACF 6.79%,#007E9A 116.67%);border-color:#087f99;filter:brightness(.95)}
+
+/* member table */
+.member-content{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}.table-wrap{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#c8dbd8 transparent}.member-table{width:100%;min-width:900px;table-layout:fixed;border-collapse:separate;border-spacing:0}.member-table th:nth-child(1),.member-table td:nth-child(1){width:auto}.member-table th:nth-child(2),.member-table td:nth-child(2){width:230px}.member-table th:nth-child(3),.member-table td:nth-child(3){width:120px}.member-table th:nth-child(4),.member-table td:nth-child(4){width:240px}.member-table thead th{position:sticky;top:0;z-index:3;height:52px;padding:0 20px;background:#f5faf9;border-bottom:1px solid var(--line);color:var(--muted2);font-size:11px;font-weight:700;letter-spacing:.25px;text-align:left}.member-table thead th:last-child{text-align:right;right:0;z-index:5}.member-table tbody tr{--row-bg:#f9fcfb;background:var(--row-bg)}.member-table tbody tr:nth-child(even){--row-bg:#fff}.member-table tbody tr:hover{--row-bg:#f1f8f6}.member-table tbody td{height:84px;padding:20px;background:var(--row-bg);border-bottom:1px solid rgba(226,236,234,.82);vertical-align:middle}.member-table tbody tr:last-child td{border-bottom:0}.member-table th:last-child,.member-table td:last-child{position:sticky;right:0;text-align:right;background:var(--row-bg);box-shadow:-12px 0 18px -20px rgba(15,49,50,.45)}.member-table th:last-child{background:#f5faf9}
+.member-cell{display:flex;align-items:center;gap:12px;min-width:0}.member-avatar{width:38px;height:38px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;border:2px solid rgba(255,255,255,.88);background:var(--avatar);color:#fff;font-family:var(--en);font-size:13px;font-weight:700;box-shadow:0 7px 16px -10px rgba(15,49,50,.65)}.member-copy{min-width:0}.member-name{display:block;font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.member-email{display:block;margin-top:4px;font-family:var(--en);font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.role-list{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.role{padding:5px 10px;border-radius:11px;background:#e8f4f1;color:var(--teal2);font-size:10.5px;font-weight:700;white-space:nowrap}.role.admin{background:#e1e9ed;color:#516a79;border:1px solid #d3e0e6}.member-status{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:12px;background:#eaf6ee;color:var(--ok);font-size:10.5px;font-weight:700;white-space:nowrap}.member-status i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.opgroup{display:inline-flex;align-items:center;justify-content:flex-end;gap:7px}.opicon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.76);color:var(--muted);position:relative;transition:.16s}.opicon svg{width:15px;height:15px}.opicon:hover{background:#fff;color:var(--teal2);border-color:rgba(0,138,168,.34);transform:translateY(-1px);box-shadow:0 10px 20px -13px rgba(0,138,168,.42)}.opicon.danger:hover{color:var(--err);border-color:rgba(214,69,91,.34);box-shadow:0 10px 20px -13px rgba(214,69,91,.32)}
+.detail-empty{flex:1 1 auto;min-height:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--muted2)}.empty-icon{width:52px;height:52px;display:grid;place-items:center;margin-bottom:13px;border:1px solid rgba(0,138,168,.10);border-radius:17px;background:rgba(0,138,168,.06);color:var(--teal2)}.empty-icon svg{width:24px;height:24px}.detail-empty strong{color:var(--muted);font-size:13px;font-weight:600}.detail-empty span{max-width:460px;margin-top:6px;font-size:11px;line-height:1.65}.detail-foot{margin-top:auto;padding:14px 26px 16px;border-top:1px solid rgba(232,239,239,.84);color:var(--muted2);font-size:10.5px;line-height:1.55}
+.toast{position:fixed;left:50%;bottom:26px;z-index:100;max-width:min(680px,calc(100vw - 32px));padding:11px 18px;border-radius:14px;background:var(--ink2);color:#fff;box-shadow:0 20px 42px -16px rgba(0,0,0,.42);font-size:12px;line-height:1.55;text-align:center;opacity:0;pointer-events:none;transform:translateX(-50%) translateY(18px);transition:.26s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:1260px){.wrap{padding-left:24px;padding-right:24px}.org-grid{grid-template-columns:270px minmax(0,1fr)}.detail-actions{width:100%}.member-search{flex:1;width:auto}}
+@media(max-width:900px){.toolbar{flex-wrap:wrap}.dept-search{min-width:100%}.org-grid{grid-template-columns:1fr;min-height:auto}.tree-panel{min-height:450px}.detail-panel{min-height:700px}.detail-head{align-items:flex-start}}
+@media(max-width:620px){.wrap{padding:18px 14px 40px}.bsub,.mename{display:none}.status-select,.status-trigger,.collapse-btn,.toolbar>.primary{flex:1}.status-trigger,.collapse-btn,.toolbar>.primary{width:100%;justify-content:center}.detail-head{padding-left:16px;padding-right:16px}.detail-actions,.member-search{width:100%}.detail-actions>.primary{width:100%;justify-content:center}.detail-foot{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="topbar reveal">
+    <div class="bcrumb"><span class="bdot"></span><span class="bmain">Organization_Management</span><span class="bsub">/ 部门管理</span></div>
+    <div class="tb-right">
+      <button class="bellbtn" id="bellBtn" aria-label="消息通知" title="消息通知"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9z"/><path d="M10.3 20a2 2 0 003.4 0"/></svg></button>
+      <button class="me" id="userBtn" type="button"><span class="avatar">K</span><span class="mename">Kora</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+    </div>
+  </header>
+
+  <section class="toolbar reveal" style="animation-delay:.02s">
+    <label class="dept-search" for="deptSearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg><input id="deptSearch" placeholder="搜索部门名称" autocomplete="off"></label>
+    <div class="status-select" id="statusSelect"><button class="status-trigger" type="button"><span id="statusValue">全部状态</span><i class="chev"></i></button><div class="status-pop" id="statusPop"></div></div>
+    <button class="collapse-btn" id="collapseBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5l4 4 4-4M8 19l4-4 4 4"/></svg><span>全部收起</span></button>
+    <button class="primary" id="newDeptBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>新建部门</button>
+  </section>
+
+  <section class="org-grid">
+    <aside class="tree-panel glass reveal" style="animation-delay:.04s">
+      <div class="panel-label"><h2>部门目录</h2><p>组织层级与成员数</p></div>
+      <div class="dept-tree" id="deptTree"></div>
+      <p class="tree-foot">源页面共展示 <span class="tnum">10</span> 个部门；仅 FansAI总部与 AI 生成内容部门提供了可完整读取的成员明细。</p>
+    </aside>
+
+    <section class="detail-panel glass reveal" style="animation-delay:.06s">
+      <header class="detail-head">
+        <div class="detail-title"><div class="title-line"><h1 id="deptTitle">FansAI总部</h1><span class="status-pill" id="deptStatus"><i></i>启用</span></div><p id="deptMeta">共 4 人 · 负责人 Harrison · 排序 1 · 仅显示你有权限管理的人员</p></div>
+        <div class="detail-actions" id="detailActions">
+          <label class="member-search" for="memberSearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg><input id="memberSearch" placeholder="搜索姓名或邮箱" autocomplete="off"></label>
+          <button class="head-icon" data-dept-action="调整层级" aria-label="调整层级"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="6" r="2"/><circle cx="17" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 8v3h10V8M12 11v5"/></svg><span class="tooltip">调整层级</span></button>
+          <button class="head-icon" data-dept-action="停用部门" aria-label="停用部门"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v10M18.4 5.6a9 9 0 11-12.8 0"/></svg><span class="tooltip">停用部门</span></button>
+          <button class="head-icon" data-dept-action="编辑部门" aria-label="编辑部门"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4.2-1 10-10a2.1 2.1 0 00-3-3l-10 10L4 20z"/><path d="M13.8 7.2l3 3"/></svg><span class="tooltip">编辑部门</span></button>
+          <button class="head-icon danger" data-dept-action="删除部门" aria-label="删除部门"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg><span class="tooltip">删除部门</span></button>
+          <button class="primary member-primary" id="addMemberBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>新增成员</button>
+        </div>
+      </header>
+      <div class="member-content" id="memberContent"></div>
+      <p class="detail-foot" id="detailFoot"></p>
+    </section>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEPARTMENTS=[
+ {key:'FansAI总部',count:4,parent:null,status:'启用',owner:'Harrison',order:1},
+ {key:'财务部',count:2,parent:'FansAI总部'},
+ {key:'商务拓展部',count:7,parent:'FansAI总部'},
+ {key:'AI 生成内容部门',count:4,parent:'FansAI总部',status:'启用',order:0},
+ {key:'AI 产品部',count:1,parent:'FansAI总部'},
+ {key:'市场与公共关系部',count:1,parent:'FansAI总部'},
+ {key:'增长与运营部',count:4,parent:'FansAI总部'},
+ {key:'人力资源部',count:3,parent:'FansAI总部'},
+ {key:'技术部',count:4,parent:'FansAI总部'},
+ {key:'投资者关系部',count:2,parent:'FansAI总部'}
+];
+const MEMBERS={
+ 'FansAI总部':[
+  {id:1,name:'凌卿',email:'harrison.ling@fscity.art',roles:['公司负责人','商务拓展'],status:'启用'},
+  {id:2,name:'Group',email:'fansai@fscity.art',roles:['超级管理员'],status:'启用'},
+  {id:3,name:'xing',email:'wangetcat@gmail.com',roles:['研发'],status:'启用'},
+  {id:4,name:'系统内置用户',email:'fansai@gmail.com',roles:['超级管理员'],status:'启用'}
+ ],
+ 'AI 生成内容部门':[
+  {id:5,name:'何炜城',email:'weicheng.he@fscity.art',roles:['AI生成内容'],status:'启用'},
+  {id:6,name:'罗月琳',email:'sabrina.luo@fscity.art',roles:['AI生成内容'],status:'启用'},
+  {id:7,name:'屠一宁',email:'martin.tu@fscity.art',roles:['AI生成内容'],status:'启用'},
+  {id:8,name:'沈洁',email:'sion.shen@fscity.art',roles:['AI生成内容'],status:'启用'}
+ ]
+};
+DEPARTMENTS.forEach(d=>MEMBERS[d.key]??=[]);
+const AVATARS=['linear-gradient(140deg,#9adccb,#49b6d8)','linear-gradient(140deg,#a7e885,#34a85e)','linear-gradient(140deg,#ffd39a,#e8854a)','linear-gradient(140deg,#b7c9ff,#5b7ce8)'];
+const state={active:'FansAI总部',deptSearch:'',memberSearch:'',status:'全部状态',expanded:true};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function hash(s){let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))>>>0;return h}
+function avatarText(name){return /^[A-Za-z]/.test(name)?name[0].toUpperCase():name.slice(0,1)}
+let toastTimer;function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000)}
+/* IconPark outline icons (Apache-2.0), mapped by department semantics. */
+function deptIcon(key){
+ const base='viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"';
+ const icons={
+  'FansAI总部':'<path d="M7 42h34M10 42V15l14-8 14 8v27M17 20h3m8 0h3m-14 8h3m8 0h3m-14 8h3m8 0h3"/>',
+  '财务部':'<circle cx="24" cy="24" r="18"/><path d="M17 17h14M17 24h14M24 17v17m-6-1h12"/>',
+  '商务拓展部':'<path d="M7 20l8-8 8 5-7 7-9-4Zm34 0-8-8-8 5 7 7 9-4ZM16 24l8 8 8-8m-13 3-6 6 7 7 5-5m4-8 6 6-7 7-4-4"/>',
+  'AI 生成内容部门':'<path d="m31 7 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5ZM15 22l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7Zm21 8 1.5 3.5L41 35l-3.5 1.5L36 40l-1.5-3.5L31 35l3.5-1.5L36 30Z"/>',
+  'AI 产品部':'<rect x="9" y="14" width="30" height="25" rx="7"/><path d="M24 8v6M18 26h.1M30 26h.1M18 33h12"/>',
+  '市场与公共关系部':'<path d="M8 21v8l24 9V12L8 21Zm24-4 8-4v24l-8-4M13 31l3 10h7l-3-8"/>',
+  '增长与运营部':'<path d="M8 39h32M11 34V24h7v10m4 0V16h7v18m4 0V8h7v26M10 17l10-7 8 3 11-8"/>',
+  '人力资源部':'<circle cx="18" cy="17" r="6"/><circle cx="33" cy="20" r="5"/><path d="M7 40c1-8 5-12 11-12s10 4 11 12m0-9c6 0 10 3 11 9"/>',
+  '技术部':'<path d="m18 13-11 11 11 11m12-22 11 11-11 11M27 8l-6 32"/>',
+  '投资者关系部':'<path d="M7 39h34M10 34l9-10 7 6 12-17M30 13h8v8"/>'
+ };
+ return `<svg ${base} aria-hidden="true">${icons[key]||icons['FansAI总部']}</svg>`;
+}
+function icon(kind){const paths={mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 7l8 6 8-6"/>',key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l7-7 2 2-2 2 1.5 1.5-2 2-1.5-1.5-2 2"/>',power:'<path d="M12 2v10M18.4 5.6a9 9 0 11-12.8 0"/>',edit:'<path d="M4 20l4.2-1 10-10a2.1 2.1 0 00-3-3l-10 10L4 20z"/><path d="M13.8 7.2l3 3"/>',delete:'<path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/>'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths[kind]}</svg>`}
+
+const deptTree=document.getElementById('deptTree'),deptTitle=document.getElementById('deptTitle'),deptStatus=document.getElementById('deptStatus'),deptMeta=document.getElementById('deptMeta'),memberContent=document.getElementById('memberContent'),detailFoot=document.getElementById('detailFoot'),memberSearch=document.getElementById('memberSearch'),detailActions=document.getElementById('detailActions');
+function matchesDept(d){const q=state.deptSearch.toLowerCase(),statusOk=state.status==='全部状态'||d.status===state.status;return statusOk&&(!q||d.key.toLowerCase().includes(q))}
+function renderTree(){
+ const root=DEPARTMENTS[0],children=DEPARTMENTS.slice(1),searching=Boolean(state.deptSearch||state.status!=='全部状态');let visible=[];
+ const matchedChildren=children.filter(matchesDept);const rootMatches=matchesDept(root);
+ if(rootMatches||matchedChildren.length){if(rootMatches||matchedChildren.length)visible.push(root);if(state.expanded||searching)visible.push(...matchedChildren)}
+ if(!visible.length){deptTree.innerHTML='<div class="tree-empty">没有符合当前搜索与状态条件的部门</div>';return}
+ deptTree.innerHTML=visible.map((d,i)=>`<button class="dept-row ${d.parent?'child':'root'} ${d.key===state.active?'on':''}" data-dept="${esc(d.key)}" title="${esc(d.key)}">${d.parent?'<span class="tree-spacer"></span>':`<span class="tree-arrow ${state.expanded?'':'closed'}"></span>`}<span class="dept-icon">${deptIcon(d.key)}</span><span class="dept-name">${esc(d.key)}</span><span class="dept-count">${d.count}</span></button>`).join('');
+ deptTree.querySelectorAll('[data-dept]').forEach(btn=>btn.onclick=()=>{const key=btn.dataset.dept;if(key==='FansAI总部'&&state.active==='FansAI总部'&&!state.deptSearch){state.expanded=!state.expanded;paintCollapse()}state.active=key;state.memberSearch='';memberSearch.value='';renderTree();renderDetail()});
+}
+function paintCollapse(){const btn=document.getElementById('collapseBtn');btn.querySelector('span').textContent=state.expanded?'全部收起':'全部展开';btn.querySelector('svg').innerHTML=state.expanded?'<path d="M8 5l4 4 4-4M8 19l4-4 4 4"/>':'<path d="M8 9l4-4 4 4M8 15l4 4 4-4"/>'}
+function filteredMembers(){const q=state.memberSearch.toLowerCase();return MEMBERS[state.active].filter(m=>!q||`${m.name} ${m.email}`.toLowerCase().includes(q))}
+function opButton(kind,label,id,danger=''){return `<button class="opicon ${danger}" data-member-action="${esc(label)}" data-member-id="${id}" aria-label="${esc(label)}">${icon(kind)}<span class="tooltip">${esc(label)}</span></button>`}
+function renderDetail(){
+ if(!state.active){deptTitle.textContent='暂无符合条件的部门';deptStatus.hidden=true;deptMeta.textContent='调整搜索词或状态筛选后可恢复部门列表';detailActions.hidden=true;memberContent.innerHTML=`<div class="detail-empty"><div class="empty-icon">${deptIcon('FansAI总部')}</div><strong>没有符合当前条件的部门</strong><span>当前筛选没有命中已知状态的部门；未知状态不被推断为启用或停用。</span></div>`;detailFoot.textContent='状态筛选只使用源截图中明确可读取的部门状态，不推断未展示状态。';return}
+ const dept=DEPARTMENTS.find(d=>d.key===state.active)||DEPARTMENTS[0],all=MEMBERS[dept.key],rows=filteredMembers();deptTitle.textContent=dept.key;deptStatus.hidden=false;detailActions.hidden=false;
+ if(dept.status){deptStatus.className='status-pill';deptStatus.innerHTML='<i></i>'+dept.status}else{deptStatus.className='status-pill unknown';deptStatus.innerHTML='<i></i>状态未提供'}
+ const meta=[`共 ${dept.count} 人`,dept.owner?`负责人 ${dept.owner}`:'',dept.parent?`上级部门 ${dept.parent}`:'',dept.order!=null?`排序 ${dept.order}`:'','仅显示你有权限管理的人员'].filter(Boolean);deptMeta.textContent=meta.join(' · ');
+ if(!all.length){memberContent.innerHTML=`<div class="detail-empty"><div class="empty-icon">${deptIcon(dept.key)}</div><strong>源截图未提供此部门的成员明细</strong><span>已保留「${esc(dept.key)}」及成员数 ${dept.count}，不为不可见人员编造姓名、邮箱、角色或状态。</span></div>`;detailFoot.textContent=`源页面仅提供「${dept.key}」的部门名称与人数，本次无可读取成员行。`;return}
+ const body=rows.length?rows.map(m=>`<tr><td><div class="member-cell"><span class="member-avatar" style="--avatar:${AVATARS[hash(m.email)%AVATARS.length]}">${esc(avatarText(m.name))}</span><span class="member-copy"><span class="member-name">${esc(m.name)}</span><span class="member-email">${esc(m.email)}</span></span></div></td><td><div class="role-list">${m.roles.map(r=>`<span class="role ${r==='超级管理员'?'admin':''}">${esc(r)}</span>`).join('')}</div></td><td><span class="member-status"><i></i>${esc(m.status)}</span></td><td><span class="opgroup">${opButton('mail','发送邮件',m.id)}${opButton('key','重置密码',m.id)}${opButton('power','停用成员',m.id)}${opButton('edit','编辑成员',m.id)}${opButton('delete','删除成员',m.id,'danger')}</span></td></tr>`).join(''):`<tr><td colspan="4"><div class="detail-empty" style="min-height:280px"><strong>没有符合搜索条件的成员</strong><span>清空姓名或邮箱搜索后可恢复全部可读取成员。</span></div></td></tr>`;
+ memberContent.innerHTML=`<div class="table-wrap"><table class="member-table"><thead><tr><th>成员</th><th>角色</th><th>状态</th><th>操作</th></tr></thead><tbody>${body}</tbody></table></div>`;
+ memberContent.querySelectorAll('[data-member-action]').forEach(btn=>btn.onclick=()=>{const member=all.find(m=>m.id===Number(btn.dataset.memberId)),action=btn.dataset.memberAction;if(action==='发送邮件')toast(`已定位到 ${member.email}。原型演示，不会发送实际邮件。`);else if(action==='重置密码'||action==='停用成员'||action==='删除成员')toast(`${action}「${member.name}」需要二次确认。原型演示，不会写入实际系统。`);else toast(`源截图未提供“${action}”表单字段，不做编造展示。`) });
+ detailFoot.textContent=`源截图可完整读取「${dept.key}」的 ${all.length} 位成员；头像使用确定性首字渐变，不误配真人照片。`;
+}
+
+const STATUS_OPTIONS=[{label:'全部状态',dot:'#94a3b8'},{label:'启用',dot:'#1a9e4b'},{label:'停用',dot:'#94a3b8'}],statusSelect=document.getElementById('statusSelect'),statusValue=document.getElementById('statusValue'),statusPop=document.getElementById('statusPop');
+function renderStatus(){statusValue.textContent=state.status;statusPop.innerHTML=STATUS_OPTIONS.map(o=>`<button class="status-opt ${o.label===state.status?'on':''}" data-status="${o.label}"><i class="status-dot" style="--dot:${o.dot}"></i>${o.label}</button>`).join('');statusPop.querySelectorAll('[data-status]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();state.status=btn.dataset.status;statusSelect.classList.remove('open');const visible=DEPARTMENTS.filter(matchesDept);if(!visible.some(d=>d.key===state.active))state.active=visible[0]?.key||null;state.memberSearch='';memberSearch.value='';renderStatus();renderTree();renderDetail()})}
+statusSelect.querySelector('.status-trigger').onclick=e=>{e.stopPropagation();statusSelect.classList.toggle('open')};renderStatus();
+document.getElementById('deptSearch').oninput=e=>{state.deptSearch=e.target.value.trim();renderTree()};
+memberSearch.oninput=e=>{state.memberSearch=e.target.value.trim();renderDetail()};
+document.getElementById('collapseBtn').onclick=()=>{state.expanded=!state.expanded;paintCollapse();renderTree()};
+document.getElementById('newDeptBtn').onclick=()=>toast('源截图未提供“新建部门”表单字段，不做编造展示。');
+document.getElementById('addMemberBtn').onclick=()=>toast('源截图未提供“新增成员”表单字段，不做编造展示。');
+document.querySelectorAll('[data-dept-action]').forEach(btn=>btn.onclick=()=>{const action=btn.dataset.deptAction;if(action==='停用部门'||action==='删除部门')toast(`${action}「${state.active}」需要二次确认。原型演示，不会写入实际系统。`);else toast(`源截图未提供“${action}”表单字段，不做编造展示。`)});
+document.getElementById('bellBtn').onclick=()=>toast('当前截图未提供消息内容，不做编造展示。');document.getElementById('userBtn').onclick=()=>toast('当前账号：Kora');
+document.addEventListener('click',e=>{if(!e.target.closest('.status-select'))statusSelect.classList.remove('open')});
+paintCollapse();renderTree();renderDetail();
+</script>
+</body>
+</html>
