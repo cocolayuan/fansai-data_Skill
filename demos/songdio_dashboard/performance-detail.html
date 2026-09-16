@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>收支差额&amp;ROI分析 · fansAI</title>
+  <link rel="stylesheet" href="performance-fonts.css">
+  <link rel="stylesheet" href="performance-detail.css">
+  <script defer src="performance-data.js"></script>
+  <script defer src="performance-core.js"></script>
+  <script defer src="performance-detail.js"></script>
+</head>
+<body class="perf-detail-page">
+  <main class="perf-detail-shell">
+    <header class="perf-detail-header">
+      <nav class="perf-detail-breadcrumb" aria-label="面包屑">
+        <a href="redesign.html" id="perf-detail-back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>运营数据看板</a>
+        <span aria-hidden="true">/</span><span id="perf-detail-crumb">收支差额&amp;ROI分析</span>
+      </nav>
+      <span class="perf-detail-brand">fansAI</span>
+    </header>
+
+    <section class="perf-detail-intro" aria-labelledby="perf-detail-title">
+      <div>
+        <p class="perf-detail-eyebrow">经营分析 <span>PERFORMANCE DETAILS</span></p>
+        <h1 id="perf-detail-title">收支差额&amp;ROI分析</h1>
+        <p class="perf-detail-intro-note" id="perf-detail-formula">按渠道或国家 / 地区查看完整经营数据</p>
+      </div>
+      <div class="perf-detail-metric-control">
+        <span class="perf-detail-control-label">分析指标</span>
+        <nav class="perf-detail-metric-switch" aria-label="分析指标">
+          <a id="perf-detail-all-link" href="?metric=all" data-perf-detail-metric="all"><span class="perf-detail-tag-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></svg></span>全部指标</a>
+          <a id="perf-detail-profit-link" href="?metric=profit" data-perf-detail-metric="profit"><span class="perf-detail-tag-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 5-6 4 3 7-9M14 5h6v6"/></svg></span>收支差额</a>
+          <a id="perf-detail-roi-link" href="?metric=roi" data-perf-detail-metric="roi"><span class="perf-detail-tag-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m7 14 3-4 3 3 4-5"/></svg></span>ROI</a>
+        </nav>
+      </div>
+    </section>
+
+    <section class="perf-detail-scope" aria-label="当前筛选与汇总">
+      <div class="perf-detail-scope-top">
+        <div class="perf-detail-scope-copy">
+          <span class="perf-detail-scope-label">当前筛选</span>
+          <p id="perf-detail-scope-text"></p>
+        </div>
+        <a id="perf-detail-adjust" class="perf-detail-text-link" href="redesign.html">返回看板调整筛选<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+      </div>
+      <div class="perf-detail-metrics" aria-label="筛选范围总体数据">
+        <div class="perf-detail-metric">
+          <div class="perf-detail-metric-label"><span id="perf-detail-revenue-label">新用户收入</span><small>REVENUE</small></div>
+          <div class="perf-detail-metric-value"><strong id="perf-detail-revenue">—</strong></div>
+          <p id="perf-detail-basis">原收入参考口径</p>
+        </div>
+        <div class="perf-detail-metric">
+          <div class="perf-detail-metric-label">总成本<small>TOTAL COST</small></div>
+          <div class="perf-detail-metric-value"><strong id="perf-detail-cost">—</strong></div>
+          <p id="perf-detail-cost-caption">营销支出 + 算力支出</p>
+        </div>
+        <div class="perf-detail-metric">
+          <div class="perf-detail-metric-label"><span id="perf-detail-summary-label">收支差额</span><small>BALANCE</small></div>
+          <div class="perf-detail-metric-value"><strong id="perf-detail-summary-value">—</strong></div>
+          <p>收入减去营销支出与算力支出</p>
+        </div>
+        <div class="perf-detail-metric">
+          <div class="perf-detail-metric-label">投资回报<small>ROI</small></div>
+          <div class="perf-detail-metric-value"><strong id="perf-detail-roi">—</strong></div>
+          <p id="perf-detail-roi-caption">每投入 $1 成本产生的收入</p>
+        </div>
+      </div>
+      <div class="perf-detail-mix" aria-labelledby="perf-detail-mix-title">
+        <div class="perf-detail-mix-heading">
+          <h2 id="perf-detail-mix-title">收支表现分布<span>BALANCE MIX</span></h2>
+          <span id="perf-detail-mix-count"></span>
+        </div>
+        <div class="perf-detail-mix-bar" id="perf-detail-mix-bar" role="img" aria-label="收支表现分布"></div>
+        <ul class="perf-detail-mix-legend" id="perf-detail-mix-legend" aria-label="收支表现分类"></ul>
+      </div>
+    </section>
+
+    <section class="perf-detail-panel" aria-labelledby="perf-detail-list-title">
+      <div class="perf-detail-toolbar">
+        <div class="perf-detail-list-heading"><h2 id="perf-detail-list-title">按渠道拆分</h2><span id="perf-detail-count" aria-live="polite"></span></div>
+        <div class="perf-detail-tools">
+          <div class="perf-detail-dimensions" role="group" aria-label="拆分维度">
+            <button type="button" data-perf-detail-dimension="channel" aria-pressed="true"><span class="perf-detail-tag-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19v-5m7 5V5m7 14v-9"/></svg></span>渠道</button>
+            <button type="button" data-perf-detail-dimension="country" aria-pressed="false"><span class="perf-detail-tag-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.5" ry="8.5"/><path d="M3.5 12h17"/></svg></span>国家 / 地区</button>
+          </div>
+          <label class="perf-detail-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="perf-detail-search" type="search" placeholder="搜索名称或 ID" aria-label="搜索名称或 ID" autocomplete="off"></label>
+          <button class="perf-detail-export" id="perf-detail-export" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v5h14v-5"/></svg>导出数据</button>
+        </div>
+      </div>
+      <div class="perf-detail-table-scroll" tabindex="0" role="region" aria-label="经营数据明细表，可横向滚动">
+        <table class="perf-detail-table">
+          <caption class="perf-detail-sr-only" id="perf-detail-table-caption">按渠道拆分的收支差额与 ROI 明细，金额单位 USD</caption>
+          <thead><tr>
+            <th scope="col" data-perf-detail-column="name"><button type="button" data-perf-detail-sort="name"><span id="perf-detail-dimension-heading">渠道</span><span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-perf-detail-column="downloads"><button type="button" data-perf-detail-sort="downloads">下载<span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-perf-detail-column="payers"><button type="button" data-perf-detail-sort="payers">付费人数<span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-perf-detail-column="payRate"><button type="button" data-perf-detail-sort="payRate">付费率<span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-perf-detail-column="revenue"><button type="button" data-perf-detail-sort="revenue"><span id="perf-detail-revenue-heading">新用户收入</span><span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-perf-detail-column="taxRevenue"><button type="button" data-perf-detail-sort="taxRevenue"><span id="perf-detail-tax-heading">税后收入</span><span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-perf-detail-column="marketing"><button type="button" data-perf-detail-sort="marketing">营销支出<span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-perf-detail-column="compute"><button type="button" data-perf-detail-sort="compute">算力支出<span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-perf-detail-column="cost"><button type="button" data-perf-detail-sort="cost">总成本<span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-perf-detail-column="profit"><button type="button" data-perf-detail-sort="profit">收支差额<span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-perf-detail-column="roi"><button type="button" data-perf-detail-sort="roi">ROI<span class="perf-detail-sort-icon" aria-hidden="true">↕</span></button></th>
+          </tr></thead>
+          <tbody id="perf-detail-table-body"></tbody>
+        </table>
+      </div>
+      <footer class="perf-detail-table-footer"><span id="perf-detail-footer-count"></span><span>金额单位 USD · 总成本含营销支出与算力支出</span></footer>
+    </section>
+
+    <aside class="perf-detail-note" aria-label="数据说明">
+      <span class="perf-detail-info" aria-hidden="true">i</span>
+      <div><strong>数据口径说明</strong><p id="perf-detail-basis-note"></p><p>ROI 按收入 ÷ 总成本 × 100% 计算，100% 为回本线；零成本时显示「—」。收支差额包含算力支出，与投放明细中未扣算力的广告利润不同。</p></div>
+    </aside>
+    <p class="perf-detail-live perf-detail-sr-only" id="perf-detail-live" aria-live="polite"></p>
+  </main>
+</body>
+</html>

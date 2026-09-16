@@ -1,0 +1,79 @@
+/* Metric drilldowns share the existing FansAI glass dialog family. */
+.metric-header-actions{display:flex;align-items:center;gap:9px}
+#metrics .metric-hotspot{padding:0;width:100%;text-align:left;border-radius:10px;transition:background .18s,box-shadow .18s}
+#metrics .metric-hotspot:hover{background:#49b6d80b;box-shadow:0 0 0 6px #49b6d80b}
+#metrics .metric-hotspot:focus-visible{outline:2px solid #49b6d8;outline-offset:6px}
+#metrics .download-meta.metric-hotspot{padding-top:17px}
+#metrics .metric-download-trigger{width:auto;min-width:0;flex:1}
+#metrics .metric-download-trigger .big{display:block}
+#metrics button.ring-small{padding:0;flex:none;border-radius:50%;text-align:center;transition:box-shadow .18s}
+#metrics button.ring-small:hover{box-shadow:0 0 0 5px #49b6d812}
+.distribution-card .dist-footer .metric-country-entry{font:inherit;color:#658d7d;padding:4px 0;text-decoration:underline;text-underline-offset:4px;text-decoration-color:#bed7cd}
+.distribution-card .dist-footer .metric-country-entry:hover{color:#008aa8;text-decoration-color:#49b6d8}
+.metric-distribution-dialog.ov-modal{width:min(1100px,calc(100vw - 48px));max-height:calc(100dvh - 48px);background:linear-gradient(145deg,#fafffef5,#edf8f6f5)}
+.metric-distribution-dialog .mhead{align-items:flex-start;padding-bottom:20px}
+.metric-distribution-dialog .mhead h2{font-weight:650;font-size:22px;letter-spacing:-.4px}
+.metric-distribution-dialog .mhead p{font-size:11px;max-width:880px;color:#7e998f}
+.metric-distribution-dialog .mmd-body{padding-top:0;min-height:240px}
+.metric-distribution-dialog .mmd-toolbar{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:0 0 22px;flex-wrap:wrap}
+.metric-distribution-dialog .mmd-tabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.metric-distribution-dialog .mmd-tabs>span{color:#8aa295;font-size:11px;margin-right:4px}
+.metric-distribution-dialog .mmd-tabs button{display:inline-flex;align-items:center;gap:7px;justify-content:center;min-height:40px;padding:7px 13px;border:1px solid #dce8e1;border-radius:12px;background:#ffffff80;color:#7c9588;font-size:12px;white-space:nowrap;transition:.18s}
+.metric-distribution-dialog .mmd-tabs button:hover{border-color:#acd0cf;background:#fff}
+.metric-distribution-dialog .mmd-tabs button[aria-pressed=true]{color:#08768d;border-color:#49b6d8;background:#eaf8fa;box-shadow:0 8px 16px -14px #168dab;font-weight:600}
+.metric-distribution-dialog .mmd-tabs svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.metric-distribution-dialog .mmd-panels{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+.metric-distribution-dialog .mmd-panels.is-dual{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+.metric-distribution-dialog .mmd-panel{min-width:0;display:flex;flex-direction:column;border:1px solid #dfece6;border-radius:22px;background:#ffffff60;padding:23px 24px}
+.metric-distribution-dialog .mmd-panel-header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:20px}
+.metric-distribution-dialog .mmd-panel-header h3{margin:0;font-size:13px;font-weight:600;color:#294238}
+.metric-distribution-dialog .mmd-panel-header span{font-size:10px;color:#8ca49b;white-space:nowrap}
+.metric-distribution-dialog .mmd-chart-layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:36px;align-items:center;flex:1}
+.metric-distribution-dialog .mmd-figure{margin:0;min-width:0;text-align:center}
+.metric-distribution-dialog .mmd-pie{display:block;width:100%;max-width:252px;margin:0 auto;overflow:visible}
+.metric-distribution-dialog .mmd-pie-slice{stroke:#f7fcfa;stroke-width:1.1;stroke-linejoin:round;transition:opacity .16s;outline:none}
+.metric-distribution-dialog .mmd-pie-slice.is-dimmed{opacity:.22}
+.metric-distribution-dialog .mmd-chart-total{margin-top:20px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:6px 10px;font-size:11px;color:#8aa094}
+.metric-distribution-dialog .mmd-chart-total strong{font:600 19px/1.2 Outfit,sans-serif;color:#263b32;font-variant-numeric:tabular-nums}
+.metric-distribution-dialog .mmd-empty-label{margin-top:10px;font-size:11px;line-height:1.7;color:#91a69e}
+.metric-distribution-dialog .mmd-list-wrap{min-width:0;max-height:384px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#c1d8ce transparent}
+.metric-distribution-dialog .mmd-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-variant-numeric:tabular-nums}
+.metric-distribution-dialog .mmd-table th{position:sticky;top:0;z-index:1;background:#f1f8f5;border-bottom:1px solid #dfebe5;font-size:10px;font-weight:500;color:#8aa399;padding:11px 10px;text-align:right}
+.metric-distribution-dialog .mmd-table th:first-child{width:52%;text-align:left;border-radius:10px 0 0 0}
+.metric-distribution-dialog .mmd-table th:last-child{width:22%;border-radius:0 10px 0 0}
+.metric-distribution-dialog .mmd-table td{border-bottom:1px solid #e4eee8;padding:20px 10px;text-align:right;color:#2b4036;font:600 15px/1.4 Outfit,'PingFang SC',sans-serif;vertical-align:middle}
+.metric-distribution-dialog .mmd-table td:first-child{text-align:left}
+.metric-distribution-dialog .mmd-table td:last-child{color:#849b8e;font-size:13px}
+.metric-distribution-dialog .mmd-table tr:last-child td{border-bottom:0}
+.metric-distribution-dialog .mmd-table tbody tr:hover td,.metric-distribution-dialog .mmd-table tbody tr:focus-visible td{background:#e9f5f080}
+.metric-distribution-dialog .mmd-table tbody tr:focus-visible{outline:2px solid #49b6d8;outline-offset:-2px}
+.metric-distribution-dialog .mmd-entity{display:flex;align-items:center;gap:9px;min-width:0}
+.metric-distribution-dialog .mmd-dot{width:7px;height:7px;border-radius:50%;background:var(--mmd-color);flex:none}
+.metric-distribution-dialog .mmd-logo{display:grid;place-items:center;width:29px;height:29px;background:#ffffffbf;border-radius:9px;flex:none;color:#36ad68;font-size:19px;overflow:hidden}
+.metric-distribution-dialog .mmd-logo img{width:100%;height:100%;object-fit:cover}
+.metric-distribution-dialog .mmd-logo svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.metric-distribution-dialog .mmd-name{min-width:0;font:500 12px/1.65 Jakarta,'PingFang SC',sans-serif;color:#526f61;overflow-wrap:anywhere}
+.metric-distribution-dialog .mmd-code{font:400 10px Outfit,sans-serif;color:#9aafa3;margin-left:6px}
+.metric-distribution-dialog .mmd-value{white-space:nowrap}
+.metric-distribution-dialog .mmd-missing{color:#9eafa6!important}
+.metric-distribution-dialog .mmd-rate-table th:first-child{width:65%}
+.metric-distribution-dialog .mmd-rate-table td:last-child{color:#263b33}
+.metric-distribution-dialog .mmd-rate-table strong{font:600 19px Outfit,sans-serif}
+.metric-distribution-dialog .mmd-rate-table small{display:block;margin-top:5px;color:#91a69c;font:500 11px Outfit,sans-serif}
+.metric-distribution-dialog .mmd-rate-overview{display:flex;align-items:baseline;gap:12px;padding:0 0 20px;color:#839b8e;font-size:11px}
+.metric-distribution-dialog .mmd-rate-overview strong{font:650 30px Outfit,sans-serif;color:#1b2833}
+.metric-distribution-dialog .mmd-rate-overview small{margin-left:auto;font:500 12px Outfit,sans-serif;color:#839b8e}
+.metric-distribution-dialog .mmd-note{font-size:11px;line-height:1.85;color:#829b8e;margin:0 0 18px}
+.metric-distribution-dialog .mmd-note p{font-size:11px;line-height:1.85;color:inherit}
+.metric-distribution-dialog .mmd-note small{display:block;margin-top:7px;font-size:10px;color:#9aada2}
+.metric-distribution-dialog .mmd-context-note{margin-top:18px;margin-bottom:0;font-size:10px;color:#8fa397;line-height:1.8}
+.metric-distribution-dialog .is-dual .mmd-chart-layout{grid-template-columns:minmax(0,1fr);gap:23px;align-items:stretch}
+.metric-distribution-dialog .is-dual .mmd-pie{max-width:185px}
+.metric-distribution-dialog .is-dual .mmd-list-wrap{margin-top:auto;max-height:320px}
+.metric-distribution-dialog .is-dual .mmd-chart-total{margin-top:15px}
+.metric-distribution-dialog .mfoot-note{max-width:55%}
+.metric-distribution-dialog .mmd-detail-link{font-size:12px;display:inline-flex;align-items:center;gap:7px;color:#658a78;white-space:nowrap;margin-left:auto}
+.metric-distribution-dialog .mmd-detail-link:hover{color:#008aa8}
+@media(max-width:800px){.metric-distribution-dialog.ov-modal{width:calc(100vw - 24px);max-height:calc(100dvh - 24px)}.metric-distribution-dialog .mhead{padding:24px 22px 20px}.metric-distribution-dialog .mmd-body{padding-left:22px;padding-right:22px}.metric-distribution-dialog .mmd-chart-layout{grid-template-columns:190px minmax(0,1fr);gap:20px}.metric-distribution-dialog .mmd-panels.is-dual{grid-template-columns:minmax(0,1fr)}.metric-distribution-dialog .is-dual .mmd-chart-layout{grid-template-columns:190px minmax(0,1fr);align-items:center}.metric-distribution-dialog .mmd-panel{padding:20px}.metric-distribution-dialog .mmd-table th:first-child{width:48%}.metric-distribution-dialog .mmd-table td{padding:17px 6px;font-size:13px}.metric-distribution-dialog .mmd-table th{padding:10px 6px}.metric-distribution-dialog .mmd-table td:last-child{font-size:12px}.metric-distribution-dialog .mmd-entity{gap:6px}.metric-distribution-dialog .mfoot{padding:17px 22px}}
+@media(max-width:600px){.metric-distribution-dialog .mhead h2{font-size:19px}.metric-distribution-dialog .mmd-chart-layout,.metric-distribution-dialog .is-dual .mmd-chart-layout{grid-template-columns:minmax(0,1fr);gap:24px}.metric-distribution-dialog .mmd-pie{max-width:205px}.metric-distribution-dialog .mmd-toolbar{gap:13px;padding-bottom:18px}.metric-distribution-dialog .mmd-tabs{gap:6px}.metric-distribution-dialog .mmd-tabs button{font-size:11px;padding:7px 10px}.metric-distribution-dialog .mmd-table th:first-child{width:51%}.metric-distribution-dialog .mmd-table th:last-child{width:22%}.metric-distribution-dialog .mmd-panel-header{flex-wrap:wrap;margin-bottom:20px;gap:5px}.metric-distribution-dialog .mmd-rate-table th:first-child{width:60%}.metric-distribution-dialog .mmd-rate-overview{flex-wrap:wrap;gap:7px}.metric-distribution-dialog .mmd-rate-overview small{width:100%;margin-left:0}.metric-distribution-dialog .mmd-logo{width:25px;height:25px}.metric-distribution-dialog .mmd-name{font-size:11px}.metric-distribution-dialog .mmd-code{display:block;margin:0}.metric-distribution-dialog .mmd-list-wrap{max-height:340px}.metric-distribution-dialog .mfoot-note{max-width:100%;flex-basis:100%}.metric-distribution-dialog .mmd-detail-link{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.metric-distribution-dialog[open]{animation:none}.metric-distribution-dialog::backdrop{animation:none}.metric-distribution-dialog *{transition:none!important}}

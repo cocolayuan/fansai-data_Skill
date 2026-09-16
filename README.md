@@ -10,6 +10,7 @@ FansAI 数据中台页面系统 Skill —— 薄荷液态玻璃 clean-SaaS 风�
 
 | Demo | 在线预览 | 简单说明 |
 |---|---|---|
+| songdio数据看板（update） | [打开 songdio 数据看板](https://cocolayuan.github.io/fansai-data_Skill/demos/songdio_dashboard/redesign.html) | 经营速览、下载与税后收入趋势、收支差额与 ROI 分析，以及国家、渠道和投放明细 |
 | 数据看板 · 管理层看板 | [打开管理层看板](https://cocolayuan.github.io/fansai-data_Skill/demos/management_dashboard_redesign.html) | 全公司经营目标、团队推进、线索转化、客户与现金流洞察 |
 | 客户资料 | [打开客户资料](https://cocolayuan.github.io/fansai-data_Skill/demos/customer_profile_redesign.html) | 客户库与线索池、节奏与表格双视图、独立时间轴及统一业务弹窗 |
 | 部门管理 | [打开部门管理](https://cocolayuan.github.io/fansai-data_Skill/demos/department_management_redesign.html) | 部门树、成员列表、负责人及启停状态的一体化管理 |

@@ -1,0 +1,59 @@
+/* Scoped additions only: the existing dashboard theme and modules stay untouched. */
+#performance-section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:stretch;margin-top:20px;scroll-margin-top:calc(var(--global-filter-top,12px) + var(--global-filter-height,112px) + 18px)}
+.perf-card{display:flex;flex-direction:column;min-width:0;padding:24px 26px 18px}
+.perf-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px}
+.perf-head h2{font-size:17px;font-weight:600;letter-spacing:-.3px;white-space:nowrap}
+.perf-head h2 small{display:block;margin-top:3px;font:500 9px/1.4 Outfit,sans-serif;letter-spacing:1.25px;color:#92a59b}
+.perf-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.perf-tabs{display:flex;gap:2px;padding:3px;border:1px solid #deebe6;border-radius:11px;background:#e9f2ef}
+.perf-tabs button{min-height:29px;padding:4px 11px;border-radius:8px;font-size:11px;white-space:nowrap;color:#8a9b94;transition:background .18s,color .18s}
+.perf-tabs button[aria-selected=true]{background:#fff;color:#31574f;box-shadow:0 3px 9px -5px #35615340}
+.perf-tabs button:hover{color:#0c7074}
+.perf-actions .iconbtn{width:32px;height:32px;border-radius:11px;flex:none}
+.perf-context{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:19px;padding-bottom:14px;border-bottom:1px solid #e2ece7;font-size:11px;color:#8b9c93}
+.perf-context>span:first-child{display:inline-flex;align-items:baseline;gap:9px}
+.perf-context strong{font:600 17px/1.25 Outfit,'PingFang SC',sans-serif;letter-spacing:-.3px;color:#456158;font-variant-numeric:tabular-nums}
+.perf-context .perf-context-note{font-size:10px;color:#95a69b}
+.perf-context strong.is-negative{color:#D6455B}
+.perf-chart{flex:1;min-height:254px;padding:16px 0 13px;min-width:0}
+.perf-chart-grid{display:grid;grid-template-columns:118px minmax(0,1fr) 103px;gap:11px;min-width:0;--perf-rows:4}
+.perf-col-heading{height:25px;font-size:10px;line-height:16px;color:#96a59d;white-space:nowrap}
+.perf-col-heading.is-value{text-align:right}
+.perf-chart-labels,.perf-chart-values,.perf-chart-plot{min-width:0}
+.perf-row-stack{display:grid;grid-template-rows:repeat(var(--perf-rows),minmax(31px,1fr));min-height:212px}
+.perf-name{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:#5b7368}
+.perf-name .perf-name-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.perf-identity{display:grid;place-items:center;width:23px;height:23px;flex:none;border-radius:7px;overflow:hidden;background:#ffffff99;font-size:16px}
+.perf-identity img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.perf-identity svg{width:15px;height:15px;color:#3FB36A}
+.perf-value{display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;font:500 14px/1.25 Outfit,'PingFang SC',sans-serif;font-variant-numeric:tabular-nums;color:#7b9286}
+.perf-value.is-leader{color:#1F6F4A;font-weight:650}
+.perf-value.is-negative{color:#D6455B;font-weight:600}
+.perf-value.is-missing{color:#a5b2aa}
+.perf-axis{position:relative;height:25px;font:500 10px/16px Outfit,'PingFang SC',sans-serif;color:#9aaba0}
+.perf-axis span{position:absolute;top:0;white-space:nowrap;transform:translateX(-50%)}
+.perf-axis span:first-child{transform:none}
+.perf-axis span:last-child{transform:translateX(-100%)}
+.perf-plot-body{position:relative;min-height:212px}
+.perf-line{position:absolute;top:0;bottom:0;width:0;border-left:1px solid #c7d8cd;z-index:2;pointer-events:none}
+.perf-line.is-reference{border-left:1px dashed #759c91}
+.perf-line.is-grid{border-left:1px dashed #e2ece5;z-index:0}
+.perf-lane{display:flex;align-items:center;position:relative;min-width:0}
+.perf-track{width:100%;height:9px;background:#eaf1ef;border-radius:5px;position:relative}
+.perf-fill{position:absolute;top:0;height:9px;max-width:100%;border-radius:5px;background:linear-gradient(90deg,#E4EBE9,#C2CFCA);transform-origin:var(--perf-origin,left);animation:perf-fill-in .45s cubic-bezier(.22,1,.36,1) both}
+.perf-fill.is-leader{background:linear-gradient(90deg,#A7E885,#34A85E)}
+.perf-lane:focus-visible{outline:2px solid #49b6d8;outline-offset:4px;border-radius:5px}
+.perf-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;padding-top:13px;border-top:1px solid #e0eae4;font-size:10px;color:#8a9e91;line-height:1.6}
+.perf-footer-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.perf-footer a{white-space:nowrap;color:#6e8d7d;font-size:10px}
+.perf-footer a:hover{color:#008aa8}
+.perf-key{display:inline-flex;align-items:center;gap:5px}
+.perf-key i{height:10px;width:0;border-left:1px dashed #759c91}
+.perf-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:225px;padding:18px;text-align:center;gap:9px;font-size:11px;color:#9aaaa0;line-height:1.75}
+.perf-empty strong{font-size:13px;font-weight:500;color:#6c8879}
+.perf-empty svg{width:25px;height:25px;stroke:#adc5b6;fill:none;margin-bottom:4px}
+@keyframes perf-fill-in{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media(max-width:1180px){.perf-card{padding:22px 20px 17px}.perf-head{align-items:flex-start;flex-wrap:wrap;gap:11px}.perf-actions{margin-left:auto}.perf-chart-grid{grid-template-columns:106px minmax(0,1fr) 92px;gap:9px}.perf-tabs button{padding:4px 9px}}
+@media(max-width:940px){#performance-section{grid-template-columns:1fr;gap:16px}.perf-head{align-items:center;flex-wrap:nowrap}.perf-chart-grid{grid-template-columns:125px minmax(0,1fr) 110px}}
+@media(max-width:520px){.perf-card{padding:19px 16px 16px}.perf-head{flex-wrap:wrap}.perf-head h2{font-size:16px}.perf-actions{gap:8px}.perf-tabs button{font-size:10px;padding:4px 9px}.perf-chart-grid{grid-template-columns:95px minmax(0,1fr) 85px;gap:7px}.perf-name{font-size:11px;gap:5px}.perf-identity{width:20px;height:20px}.perf-value{font-size:12px}.perf-context{margin-top:15px}.perf-context strong{font-size:16px}.perf-footer{gap:8px}.perf-footer-meta{gap:6px}.perf-col-heading{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.perf-fill{animation:none}}
