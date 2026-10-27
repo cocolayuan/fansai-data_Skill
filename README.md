@@ -1,20 +1,8 @@
 # fansai-data_Skill
 
-FansAI 数据中台页面系统 Skill —— 薄荷液态玻璃 clean-SaaS 风格、Apple 式数据可视化，覆盖一级/二级/三级页面、列表、表单弹窗、图表与数字布局的统一规范。**线上基线 V2.1 保留；新增 V3 迭代规范 = V2.1 完整基线 + 审批交互优化 + V15 品牌展示图标。** 规范升级不代表线上业务系统已同步部署。
-
-> [下载 V3 完整 Skill 包](fansai-data-system_Skill_V3.skill) · [查看 V3 主规范](fansai-data-system_Skill_V3/SKILL.md) · [V2.1 → V3 关键信息](docs/V3-升级说明.md)
+FansAI 数据中台页面系统 Skill —— 薄荷液态玻璃 clean-SaaS 风格、Apple 式数据可视化，覆盖一级/二级/三级页面、列表、表单弹窗、图表与数字布局的统一规范。线上基线 **V2.1 = V2 完整基线 + 全系统工作台与复合数据页增量**。
 
 > [下载线上基线 V2.1 Skill 包](fansai-data-system_Skill_V2.1.skill) · [查看 V2.1 主规范](fansai-data-system_Skill_V2.1/SKILL.md) · [查看飞书知识库](https://ycnlw8azhiz2.feishu.cn/wiki/P9FWwJHEXi8zHMkIUfOcasnwnZc?fromScene=spaceOverview)
-
-## V3 关键更新
-
-- 审批弹窗局部浅灰蓝绿底层、纯白前景模块；保留平台整体薄荷弥散背景。
-- 面性下拉与标签、紧凑目录、线与行面结合的表格、清楚的业务标题层级。
-- 转交确认紧邻同事选择，局部确认与底部审批操作分层；评论、附件与文档示意更清楚。
-- 新增九类 V15 静态融合像素展示图与完整 SVG/PNG 资源，面向大面积展示；功能小图标继续用 IconPark。
-- 九类入口白卡、功能说明与较大间距；“发起审批”局部轻微弱化。
-
-新增规范与资源见 [V3 目录](fansai-data-system_Skill_V3/)。历史 Demo 保留原样，尚未逐页迁移 V3，不作为新组件外观的验收样本。
 
 ## 🆕 New Demo Preview
 
@@ -54,10 +42,16 @@ FansAI 数据中台页面系统 Skill —— 薄荷液态玻璃 clean-SaaS 风�
 - <kbd>UPDATE · V2</kbd> **列表页系统化** —— 表格 / 卡片 / 主从双栏三类页型；三段式操作列、组织首标、确定性人名头像、日期适用边界与长文本截断
 - <kbd>UPDATE · V2</kbd> **布局与交互底线** —— 单层弥散背景，并排面板等高且底边对齐；筛选、排序、展开、联动真实可用；本地原型操作必须明确说明仅本地生效
 - <kbd>NEW · V2.1</kbd> **全系统工作台与复合数据页** —— 主从实体层级、默认/审计双视图、局部时间轴、固定操作列、分组菜单与统一弹窗家族；客户资料是完整范例
+- <kbd>NEW · V3</kbd> **品牌展示图标** —— 九类静态融合像素图用于大面积业务入口；导航、按钮等小图标继续用 IconPark
+- <kbd>UPDATE · V3</kbd> **审批表面与组件** —— 弹窗浅灰蓝绿底、纯白前景；面性下拉与标签、紧凑目录、轻分隔与柔和行面
+- <kbd>UPDATE · V3</kbd> **审批操作分层** —— 转交确认紧邻同事选择，与底部审批操作分层，当前步骤只有一个强主操作
+- <kbd>UPDATE · V3</kbd> **评论与附件** —— 评论阅读层级清晰，输入区固定；回复、删除与附件预览保持上下文
 - **设计令牌与排版** —— 墨色 `#1b2430`、teal `#008aa8`、蓝 `#49B6D8`；页面左右边距 36px；中文以 Noto Sans SC 500 为基准，数字与英文用 Outfit
 - **数字与表单** —— 数字前缀 / 数值 / 单位基线对齐；自定义瓦片下拉替代原生 `select`；标签 chips、多指标状态锁定与必填校验
 - **图标与头像** —— IconPark 内联 SVG；头像圆形并按 `hash(id) % N` 确定性分配，上传后覆盖
 - **交付链路** —— HTML 高保真 → cairosvg 自检 → Figma 导入版 SVG；真实数据不清洗，示意数据明确标记
+
+![FansAI 品牌展示图标使用规范（2×）](docs/images/fansai-brand-display-icons-guide@2x.png)
 
 ## 版本演进 V1.0 → V3
 
@@ -69,21 +63,11 @@ FansAI 数据中台页面系统 Skill —— 薄荷液态玻璃 clean-SaaS 风�
 | **V1.3** | 新增默认头像库、`hash(id) % N` 确定性分配与上传覆盖 |
 | **V2** | 完整继承 V1.3，再新增数据诚实、图表选型决策、列表页系统、单层背景、等高面板、语义色注册表、交互底线与代码卫生 |
 | **V2.1** | 完整继承 V2，新增全系统主从层级、双视图、局部时间轴、固定操作、菜单与统一弹窗家族；客户资料为首个完整业务映射 |
-| **V3** | 完整继承线上 V2.1；整合审批中心关键 UX、面性组件、评论附件与 V15 大面积品牌展示图标；V2.1 文件保持原样 |
-
-## Skill 明细（V3，迭代版）
-
-| 文件 | 说明 |
-|---|---|
-| [SKILL.md](fansai-data-system_Skill_V3/SKILL.md) | 自包含主规范、按任务读取与覆盖范围 |
-| [审批与交互](fansai-data-system_Skill_V3/references/approval-and-interaction.md) | 局部底色、白卡、表格、导航、标题、分层操作、评论与验收 |
-| [品牌展示图标](fansai-data-system_Skill_V3/references/brand-display-icons.md) | 风格解构、适用范围、尺寸、九类映射和延展约束 |
-| [资源目录](fansai-data-system_Skill_V3/assets/catalog.json) | 45份资产的路径、尺寸、来源版本与SHA-256 |
-| [V3组件参考](fansai-data-system_Skill_V3/references/v3-components-reference.html) | 九类入口卡、面性下拉与局部确认的可运行示例（非完整业务页） |
-| [表单与下拉](fansai-data-system_Skill_V3/references/forms-and-modals.md) | 面性瓦片、键盘访问、浮层限位与居中模态配方 |
-| [V3打包文件](fansai-data-system_Skill_V3.skill) | 内含V2.1完整继承资料，可独立导入 |
+| **V3** | 继承 V2.1，新增品牌展示图标、面性组件与审批交互优化 |
 
 ## Skill 明细（V2.1，线上基线）
+
+V3：[下载完整 Skill 包](fansai-data-system_Skill_V3.skill) · [查看主规范](fansai-data-system_Skill_V3/SKILL.md)。
 
 V2.1 在 V2 基线上收纳全系统工作台与复合数据页规则，并附客户资料完整交互范例，可独立安装，不依赖旧版本目录。
 
