@@ -1,8 +1,8 @@
 # fansai-data_Skill
 
-FansAI 数据中台页面系统 Skill —— 薄荷液态玻璃 clean-SaaS 风格、Apple 式数据可视化，覆盖一级/二级/三级页面、列表、表单弹窗、图表与数字布局的统一规范。线上基线 **V2.1 = V2 完整基线 + 全系统工作台与复合数据页增量**。
+FansAI 数据中台页面系统 Skill —— 薄荷液态玻璃 clean-SaaS 风格、Apple 式数据可视化，覆盖一级/二级/三级页面、列表、表单弹窗、图表与数字布局的统一规范。当前版本 **V3 = V2.1 完整基线 + 审批交互优化 + 品牌展示图标**。
 
-> [下载线上基线 V2.1 Skill 包](fansai-data-system_Skill_V2.1.skill) · [查看 V2.1 主规范](fansai-data-system_Skill_V2.1/SKILL.md) · [查看飞书知识库](https://ycnlw8azhiz2.feishu.cn/wiki/P9FWwJHEXi8zHMkIUfOcasnwnZc?fromScene=spaceOverview)
+> [下载 V3 Skill 包](fansai-data-system_Skill_V3.skill) · [查看 V3 主规范](fansai-data-system_Skill_V3/SKILL.md) · [查看飞书知识库](https://ycnlw8azhiz2.feishu.cn/wiki/P9FWwJHEXi8zHMkIUfOcasnwnZc?fromScene=spaceOverview)
 
 ## Demo 归档
 
@@ -38,20 +38,18 @@ FansAI 数据中台页面系统 Skill —— 薄荷液态玻璃 clean-SaaS 风�
 | **V2.1** | 完整继承 V2，新增全系统主从层级、双视图、局部时间轴、固定操作、菜单与统一弹窗家族；客户资料为首个完整业务映射 |
 | **V3** | 继承 V2.1，新增品牌展示图标、面性组件与审批交互优化 |
 
-## Skill 明细（V2.1，线上基线）
+## Skill 明细（V3，当前版本）
 
-V3：[下载完整 Skill 包](fansai-data-system_Skill_V3.skill) · [查看主规范](fansai-data-system_Skill_V3/SKILL.md)。
-
-V2.1 在 V2 基线上收纳全系统工作台与复合数据页规则，并附客户资料完整交互范例，可独立安装，不依赖旧版本目录。
+V3 完整继承 V2.1，新增审批交互规范与九类品牌展示图标，可独立安装使用。
 
 | 文件 | 说明 |
 |---|---|
-| [`SKILL.md`](fansai-data-system_Skill_V2.1/SKILL.md) | V2.1 主规范：完整 V2 基线 + 全系统工作台与复合数据页入口与铁律 |
-| [`references/system-workbench-patterns.md`](fansai-data-system_Skill_V2.1/references/system-workbench-patterns.md) | 全系统主从层级、双视图、局部时间轴、固定操作、菜单、弹窗与场景选择规则 |
-| [`references/customer_workbench_reference.html`](fansai-data-system_Skill_V2.1/references/customer_workbench_reference.html) | 客户资料完整交互范例：展示双视图、时间轴、菜单、下拉、日历和弹窗的实际组合 |
-| [`references/`](fansai-data-system_Skill_V2.1/references/) | V2 数字、图表、列表、表单及 V1.3 完整基线参考 |
-| [`assets/avatars/`](fansai-data-system_Skill_V2.1/assets/avatars/) | 默认头像库（5 个抽象渐变头像） |
-| [`agents/openai.yaml`](fansai-data-system_Skill_V2.1/agents/openai.yaml) | V2.1 Skill 列表显示名称、简介与默认调用提示 |
-| [`fansai-data-system_Skill_V2.1.skill`](fansai-data-system_Skill_V2.1.skill) | V2.1 自包含打包版，可直接下载导入 |
+| [`SKILL.md`](fansai-data-system_Skill_V3/SKILL.md) | V3 主规范与任务入口 |
+| [`references/approval-and-interaction.md`](fansai-data-system_Skill_V3/references/approval-and-interaction.md) | 审批组件、操作分层、评论与附件 |
+| [`references/brand-display-icons.md`](fansai-data-system_Skill_V3/references/brand-display-icons.md) | 品牌展示图标的使用边界、尺寸与配色 |
+| [`references/`](fansai-data-system_Skill_V3/references/) | V3 组件示例与完整继承的基础规范 |
+| [`assets/`](fansai-data-system_Skill_V3/assets/) | 九类展示图标、默认头像与组件资源 |
+| [`agents/openai.yaml`](fansai-data-system_Skill_V3/agents/openai.yaml) | V3 Skill 显示名称、简介与调用提示 |
+| [`fansai-data-system_Skill_V3.skill`](fansai-data-system_Skill_V3.skill) | V3 完整安装包，可直接下载导入 |
 
-历史版本仍保留在 [`fansai-data-system_Skill_V1.3/`](fansai-data-system_Skill_V1.3/)。
+历史版本：[V2.1](fansai-data-system_Skill_V2.1/) · [V2](fansai-data-system_Skill_V2/) · [V1.3](fansai-data-system_Skill_V1.3/)。
