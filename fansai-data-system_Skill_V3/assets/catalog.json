@@ -1,0 +1,561 @@
+{
+  "schemaVersion": 1,
+  "skillVersion": "3.0.0",
+  "sourceEdition": "V15-static",
+  "sourceFolder": "FansAI-融合像素图标-静态版",
+  "sourceDate": "2026-10-27",
+  "pathBase": "skill-root",
+  "usageRole": "brand-display-only",
+  "assets": [
+    {
+      "number": "01",
+      "id": "project-initiation",
+      "name": "立项审批",
+      "category": "项目流程",
+      "description": "创建项目并提交立项资料",
+      "palette": "azure",
+      "approvalPrototypeType": "initiation",
+      "files": {
+        "banner-svg": {
+          "path": "assets/banner-svg/01-project-initiation.svg",
+          "size": [
+            360,
+            144
+          ],
+          "bytes": 450146,
+          "sha256": "b27bed27e804bb1789adcb8769c19ffa2931a6177e87338cd723f5df706fb728",
+          "numberBakedIn": true
+        },
+        "banner-png-2x": {
+          "path": "assets/banner-png-2x/01-project-initiation.png",
+          "size": [
+            720,
+            288
+          ],
+          "bytes": 145863,
+          "sha256": "b282982d3bcb1da14584db9abea6f8135cdbba5939373396feb03e1d8fe6fae7",
+          "numberBakedIn": true
+        },
+        "banner-png-4x": {
+          "path": "assets/banner-png-4x/01-project-initiation.png",
+          "size": [
+            1440,
+            576
+          ],
+          "bytes": 322952,
+          "sha256": "f71c4ec6a7eb989348bc4e8d3ac1b2032af9c14605a40f2a2788b459b0017f55",
+          "numberBakedIn": true
+        },
+        "square-svg": {
+          "path": "assets/square-svg/01-project-initiation.svg",
+          "size": [
+            128,
+            128
+          ],
+          "bytes": 142000,
+          "sha256": "621f8d492c8ab988646e2abd0e656bce735943216032adae9258065d98ca15dc",
+          "numberBakedIn": false
+        },
+        "square-png-4x": {
+          "path": "assets/square-png-4x/01-project-initiation.png",
+          "size": [
+            512,
+            512
+          ],
+          "bytes": 116047,
+          "sha256": "b32328f3e6a89c8ad420c6393b3c8ef2b27507449704335dbffabcd48893ec55",
+          "numberBakedIn": false
+        }
+      }
+    },
+    {
+      "number": "02",
+      "id": "contract-approval",
+      "name": "合同审批",
+      "category": "项目流程",
+      "description": "选择项目并提交合同与用章信息",
+      "palette": "lime",
+      "approvalPrototypeType": "contract",
+      "files": {
+        "banner-svg": {
+          "path": "assets/banner-svg/02-contract-approval.svg",
+          "size": [
+            360,
+            144
+          ],
+          "bytes": 445291,
+          "sha256": "3ed5ccbc4c098f7409eff930507bf162154536ee081845477d2a185cd408e36e",
+          "numberBakedIn": true
+        },
+        "banner-png-2x": {
+          "path": "assets/banner-png-2x/02-contract-approval.png",
+          "size": [
+            720,
+            288
+          ],
+          "bytes": 158831,
+          "sha256": "8d3213ec391803a371f1f2aec0bae66cbd921650d26d09db7d3d706f91e0d175",
+          "numberBakedIn": true
+        },
+        "banner-png-4x": {
+          "path": "assets/banner-png-4x/02-contract-approval.png",
+          "size": [
+            1440,
+            576
+          ],
+          "bytes": 350770,
+          "sha256": "79d0fb7c5ec5e6aa819fe6c1e0459cb2ef50001226a0f7393352dbdfbc7afcc1",
+          "numberBakedIn": true
+        },
+        "square-svg": {
+          "path": "assets/square-svg/02-contract-approval.svg",
+          "size": [
+            128,
+            128
+          ],
+          "bytes": 140212,
+          "sha256": "0315fed9c801cdb183f9ac4af809a246adeaf37e9a40f3a8481a478eae17bf8c",
+          "numberBakedIn": false
+        },
+        "square-png-4x": {
+          "path": "assets/square-png-4x/02-contract-approval.png",
+          "size": [
+            512,
+            512
+          ],
+          "bytes": 120724,
+          "sha256": "e119d3b26b4865183a585890e74313ec59f9e71fe2fb7185cad6a4881ba57d1c",
+          "numberBakedIn": false
+        }
+      }
+    },
+    {
+      "number": "03",
+      "id": "delivery-approval",
+      "name": "交付审批",
+      "category": "项目流程",
+      "description": "登记交付内容与客户评价",
+      "palette": "cyan",
+      "approvalPrototypeType": "acceptance",
+      "files": {
+        "banner-svg": {
+          "path": "assets/banner-svg/03-delivery-approval.svg",
+          "size": [
+            360,
+            144
+          ],
+          "bytes": 492332,
+          "sha256": "c0d7069df5cae4b753dee34b6544f9aa909a0ff8631d01cecb86afde0d62c26a",
+          "numberBakedIn": true
+        },
+        "banner-png-2x": {
+          "path": "assets/banner-png-2x/03-delivery-approval.png",
+          "size": [
+            720,
+            288
+          ],
+          "bytes": 157982,
+          "sha256": "af3c853700d24dc704fddfe980e97fc5d84c236e6be73d5d8ff24be25d0c289b",
+          "numberBakedIn": true
+        },
+        "banner-png-4x": {
+          "path": "assets/banner-png-4x/03-delivery-approval.png",
+          "size": [
+            1440,
+            576
+          ],
+          "bytes": 350810,
+          "sha256": "05698ce5bdd1e73ea3099023fec91de6ab36a4aa38a40c7a4e19aad96e591ca6",
+          "numberBakedIn": true
+        },
+        "square-svg": {
+          "path": "assets/square-svg/03-delivery-approval.svg",
+          "size": [
+            128,
+            128
+          ],
+          "bytes": 148714,
+          "sha256": "2b2d7dfef4701b7113829445d2fe290d9a733f4ff5b974b2fb72541b5455fbe7",
+          "numberBakedIn": false
+        },
+        "square-png-4x": {
+          "path": "assets/square-png-4x/03-delivery-approval.png",
+          "size": [
+            512,
+            512
+          ],
+          "bytes": 123058,
+          "sha256": "6827b4462b2eb09ef3661115f25030f8070d12b7801df757f3063c52bc603875",
+          "numberBakedIn": false
+        }
+      }
+    },
+    {
+      "number": "04",
+      "id": "invoice-request",
+      "name": "开票申请",
+      "category": "结算与付款",
+      "description": "选择已签约项目并填写开票信息",
+      "palette": "cyan",
+      "approvalPrototypeType": "settlement_invoice",
+      "files": {
+        "banner-svg": {
+          "path": "assets/banner-svg/04-invoice-request.svg",
+          "size": [
+            360,
+            144
+          ],
+          "bytes": 461774,
+          "sha256": "6bf2fea8f0e6df4386ae23e41dcf9fd78a88db5d46d0c4e15b83afc3fdb3fc6d",
+          "numberBakedIn": true
+        },
+        "banner-png-2x": {
+          "path": "assets/banner-png-2x/04-invoice-request.png",
+          "size": [
+            720,
+            288
+          ],
+          "bytes": 155966,
+          "sha256": "e2dc58f41f20f279f2d155ae3e1251bf08347cd1775bab4823e6fac96240b537",
+          "numberBakedIn": true
+        },
+        "banner-png-4x": {
+          "path": "assets/banner-png-4x/04-invoice-request.png",
+          "size": [
+            1440,
+            576
+          ],
+          "bytes": 345870,
+          "sha256": "d3cfc3097a9bfd24babd66bbeff031585cbda114ea67a3d890a3a9f36e837ff5",
+          "numberBakedIn": true
+        },
+        "square-svg": {
+          "path": "assets/square-svg/04-invoice-request.svg",
+          "size": [
+            128,
+            128
+          ],
+          "bytes": 143640,
+          "sha256": "e894d44fca23bcb8c04acccedf68ef23666da6f07d750d76a4c3a72caad421c1",
+          "numberBakedIn": false
+        },
+        "square-png-4x": {
+          "path": "assets/square-png-4x/04-invoice-request.png",
+          "size": [
+            512,
+            512
+          ],
+          "bytes": 124218,
+          "sha256": "bca80d4df66cefe03da515decf61687f18e06a57aab949c56ecfa7393467bc46",
+          "numberBakedIn": false
+        }
+      }
+    },
+    {
+      "number": "05",
+      "id": "external-payment",
+      "name": "对外付款",
+      "category": "结算与付款",
+      "description": "选择项目和收款方，发起付款",
+      "palette": "azure",
+      "approvalPrototypeType": "settlement_payment",
+      "files": {
+        "banner-svg": {
+          "path": "assets/banner-svg/05-external-payment.svg",
+          "size": [
+            360,
+            144
+          ],
+          "bytes": 430746,
+          "sha256": "87dc963e0be367c95e319a3348b68fd2e2774974ccf818da37c54e740b0bb735",
+          "numberBakedIn": true
+        },
+        "banner-png-2x": {
+          "path": "assets/banner-png-2x/05-external-payment.png",
+          "size": [
+            720,
+            288
+          ],
+          "bytes": 146774,
+          "sha256": "82d3113747aa675e4acec8e074f74282c199697fc6ac020e4a68ed0fe3dba31f",
+          "numberBakedIn": true
+        },
+        "banner-png-4x": {
+          "path": "assets/banner-png-4x/05-external-payment.png",
+          "size": [
+            1440,
+            576
+          ],
+          "bytes": 323107,
+          "sha256": "bee9f1c075f30a459365043e01f31e0d4ef75ba86db3edc3cb7883f610a52be8",
+          "numberBakedIn": true
+        },
+        "square-svg": {
+          "path": "assets/square-svg/05-external-payment.svg",
+          "size": [
+            128,
+            128
+          ],
+          "bytes": 137594,
+          "sha256": "3d91dbefae4447424f08c7055cf11d65e44c9cee65457f521ed12a85e034167b",
+          "numberBakedIn": false
+        },
+        "square-png-4x": {
+          "path": "assets/square-png-4x/05-external-payment.png",
+          "size": [
+            512,
+            512
+          ],
+          "bytes": 113851,
+          "sha256": "a72af3f6b52b3c51ebd77fcba720450a7996ae066f582c626d8b13520b8728b8",
+          "numberBakedIn": false
+        }
+      }
+    },
+    {
+      "number": "06",
+      "id": "supplier-contract",
+      "name": "供应商合同",
+      "category": "合作与采购",
+      "description": "为项目外部团队提交合同",
+      "palette": "lime",
+      "approvalPrototypeType": "supplier_contract",
+      "files": {
+        "banner-svg": {
+          "path": "assets/banner-svg/06-supplier-contract.svg",
+          "size": [
+            360,
+            144
+          ],
+          "bytes": 463764,
+          "sha256": "f98d417880686f7a5dc5da0bd968bf85be4678ded6af6fceeb33295749f177fe",
+          "numberBakedIn": true
+        },
+        "banner-png-2x": {
+          "path": "assets/banner-png-2x/06-supplier-contract.png",
+          "size": [
+            720,
+            288
+          ],
+          "bytes": 155220,
+          "sha256": "83f4eaa93bc1d8e3360c8a3f893f43594519d8f2ef03ba4477aaffa904084134",
+          "numberBakedIn": true
+        },
+        "banner-png-4x": {
+          "path": "assets/banner-png-4x/06-supplier-contract.png",
+          "size": [
+            1440,
+            576
+          ],
+          "bytes": 341351,
+          "sha256": "55dbc1300c04f540ba16b5a35bd82550c8108b774392d59a9571cab984820fbf",
+          "numberBakedIn": true
+        },
+        "square-svg": {
+          "path": "assets/square-svg/06-supplier-contract.svg",
+          "size": [
+            128,
+            128
+          ],
+          "bytes": 142255,
+          "sha256": "c96b8bc23829ced7a5da0afa9316134c05891638fd77162c36d1fa463ef31e3b",
+          "numberBakedIn": false
+        },
+        "square-png-4x": {
+          "path": "assets/square-png-4x/06-supplier-contract.png",
+          "size": [
+            512,
+            512
+          ],
+          "bytes": 118541,
+          "sha256": "a9c8d7ab63ef0629a4d51bb37da39132955a89b0a8af746ec9c2fe377bfdec56",
+          "numberBakedIn": false
+        }
+      }
+    },
+    {
+      "number": "07",
+      "id": "outsourcing-contract",
+      "name": "外包合同",
+      "category": "合作与采购",
+      "description": "选择外包需求并提交合同",
+      "palette": "azure",
+      "approvalPrototypeType": "outsourcing_contract",
+      "files": {
+        "banner-svg": {
+          "path": "assets/banner-svg/07-outsourcing-contract.svg",
+          "size": [
+            360,
+            144
+          ],
+          "bytes": 466442,
+          "sha256": "f9d27979fdd205da590ff77c6a77f96039fd205adb8de3f85cf7fccc391944f4",
+          "numberBakedIn": true
+        },
+        "banner-png-2x": {
+          "path": "assets/banner-png-2x/07-outsourcing-contract.png",
+          "size": [
+            720,
+            288
+          ],
+          "bytes": 146863,
+          "sha256": "cc8f87f028248fb017295b28ad1f1d563c8969fae7853e333cf55a5e8b447c83",
+          "numberBakedIn": true
+        },
+        "banner-png-4x": {
+          "path": "assets/banner-png-4x/07-outsourcing-contract.png",
+          "size": [
+            1440,
+            576
+          ],
+          "bytes": 326381,
+          "sha256": "b3db1d9ce400d07507b53bcc4dd6115c030c4acc05adfc7786b7f82ffa28f302",
+          "numberBakedIn": true
+        },
+        "square-svg": {
+          "path": "assets/square-svg/07-outsourcing-contract.svg",
+          "size": [
+            128,
+            128
+          ],
+          "bytes": 139788,
+          "sha256": "776efc38acbbe165b13c7a73d157d74a35edacf79770b959f64a199b0d112875",
+          "numberBakedIn": false
+        },
+        "square-png-4x": {
+          "path": "assets/square-png-4x/07-outsourcing-contract.png",
+          "size": [
+            512,
+            512
+          ],
+          "bytes": 116029,
+          "sha256": "e3bb6d4d657e64660a80f7a9ee75425f2ace04107fd87541873ffa71081ccb4b",
+          "numberBakedIn": false
+        }
+      }
+    },
+    {
+      "number": "08",
+      "id": "outsourcing-payment",
+      "name": "外包付款",
+      "category": "结算与付款",
+      "description": "针对外包需求发起付款",
+      "palette": "bluegray",
+      "approvalPrototypeType": "outsourcing_payment",
+      "files": {
+        "banner-svg": {
+          "path": "assets/banner-svg/08-outsourcing-payment.svg",
+          "size": [
+            360,
+            144
+          ],
+          "bytes": 458475,
+          "sha256": "cd774197266b5266cf260b9586662d4f2cccc30368db7ddb8f748e6a21abdc2a",
+          "numberBakedIn": true
+        },
+        "banner-png-2x": {
+          "path": "assets/banner-png-2x/08-outsourcing-payment.png",
+          "size": [
+            720,
+            288
+          ],
+          "bytes": 157742,
+          "sha256": "c369226ad1508196c24e7673e9078b28ae1ec50988f7bd0e39590190babae08c",
+          "numberBakedIn": true
+        },
+        "banner-png-4x": {
+          "path": "assets/banner-png-4x/08-outsourcing-payment.png",
+          "size": [
+            1440,
+            576
+          ],
+          "bytes": 344778,
+          "sha256": "82a2036ec205c8c84127d68272146173668007291903193c63bdb69b9de59739",
+          "numberBakedIn": true
+        },
+        "square-svg": {
+          "path": "assets/square-svg/08-outsourcing-payment.svg",
+          "size": [
+            128,
+            128
+          ],
+          "bytes": 145945,
+          "sha256": "c7802b53a776466895ca9da178ee63ab5d3aaeb44f32618d45771eae14701017",
+          "numberBakedIn": false
+        },
+        "square-png-4x": {
+          "path": "assets/square-png-4x/08-outsourcing-payment.png",
+          "size": [
+            512,
+            512
+          ],
+          "bytes": 122088,
+          "sha256": "153f40d69041591364be2a440a542f341f37e195e0a7b7d2a8691381212bdaee",
+          "numberBakedIn": false
+        }
+      }
+    },
+    {
+      "number": "09",
+      "id": "pre-project-agreement",
+      "name": "项目前置协议",
+      "category": "客户协议",
+      "description": "与客户签署正式立项前协议",
+      "palette": "cyan",
+      "approvalPrototypeType": "customer_pre_agreement",
+      "files": {
+        "banner-svg": {
+          "path": "assets/banner-svg/09-pre-project-agreement.svg",
+          "size": [
+            360,
+            144
+          ],
+          "bytes": 473947,
+          "sha256": "ed24ab1758f2b994ed72989f1f4a62d071e481d82e25d02d2704e8af4b9f42b9",
+          "numberBakedIn": true
+        },
+        "banner-png-2x": {
+          "path": "assets/banner-png-2x/09-pre-project-agreement.png",
+          "size": [
+            720,
+            288
+          ],
+          "bytes": 154094,
+          "sha256": "ac3cf29c12d4343fb3dc0a14a13866af4c8048ee4b2d2ef9d8c3575245f790f2",
+          "numberBakedIn": true
+        },
+        "banner-png-4x": {
+          "path": "assets/banner-png-4x/09-pre-project-agreement.png",
+          "size": [
+            1440,
+            576
+          ],
+          "bytes": 339206,
+          "sha256": "41e8229d0e72aaf2ff22c7adbe1ead7dac00c9757a1041bf21ee1a82465c7c9c",
+          "numberBakedIn": true
+        },
+        "square-svg": {
+          "path": "assets/square-svg/09-pre-project-agreement.svg",
+          "size": [
+            128,
+            128
+          ],
+          "bytes": 148840,
+          "sha256": "69366f24362b25530a9e7df5bbabb78b84228f1587c39dcb3ccd3eb67d5b28cc",
+          "numberBakedIn": false
+        },
+        "square-png-4x": {
+          "path": "assets/square-png-4x/09-pre-project-agreement.png",
+          "size": [
+            512,
+            512
+          ],
+          "bytes": 119463,
+          "sha256": "82770f56cd53ad1ee3c0599132726156d3a3e82ce9fe977db0b138ce7f5ea2af",
+          "numberBakedIn": false
+        }
+      }
+    }
+  ],
+  "sourceIconSkillVersion": "1.0.0"
+}

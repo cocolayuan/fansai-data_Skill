@@ -1,0 +1,263 @@
+[
+  {
+    "number": "01",
+    "id": "project-initiation",
+    "name": "立项审批",
+    "category": "项目流程",
+    "description": "创建项目并提交立项资料",
+    "palette": "azure",
+    "bannerSize": [
+      360,
+      144
+    ],
+    "squareSize": [
+      128,
+      128
+    ],
+    "version": 15,
+    "gridStep": 2.4,
+    "composition": "single micro-symbol field",
+    "foregroundLayer": false,
+    "motion": {
+      "enabled": false
+    },
+    "baseVersion": 15,
+    "numberBadge": {
+      "fontSize": 21,
+      "size": 32
+    },
+    "edition": "static"
+  },
+  {
+    "number": "02",
+    "id": "contract-approval",
+    "name": "合同审批",
+    "category": "项目流程",
+    "description": "选择项目并提交合同与用章信息",
+    "palette": "lime",
+    "bannerSize": [
+      360,
+      144
+    ],
+    "squareSize": [
+      128,
+      128
+    ],
+    "version": 15,
+    "gridStep": 2.4,
+    "composition": "single micro-symbol field",
+    "foregroundLayer": false,
+    "motion": {
+      "enabled": false
+    },
+    "baseVersion": 15,
+    "numberBadge": {
+      "fontSize": 21,
+      "size": 32
+    },
+    "edition": "static"
+  },
+  {
+    "number": "03",
+    "id": "delivery-approval",
+    "name": "交付审批",
+    "category": "项目流程",
+    "description": "登记交付内容与客户评价",
+    "palette": "cyan",
+    "bannerSize": [
+      360,
+      144
+    ],
+    "squareSize": [
+      128,
+      128
+    ],
+    "version": 15,
+    "gridStep": 2.4,
+    "composition": "single micro-symbol field",
+    "foregroundLayer": false,
+    "motion": {
+      "enabled": false
+    },
+    "baseVersion": 15,
+    "numberBadge": {
+      "fontSize": 21,
+      "size": 32
+    },
+    "edition": "static"
+  },
+  {
+    "number": "04",
+    "id": "invoice-request",
+    "name": "开票申请",
+    "category": "结算与付款",
+    "description": "选择已签约项目并填写开票信息",
+    "palette": "cyan",
+    "bannerSize": [
+      360,
+      144
+    ],
+    "squareSize": [
+      128,
+      128
+    ],
+    "version": 15,
+    "gridStep": 2.4,
+    "composition": "single micro-symbol field",
+    "foregroundLayer": false,
+    "motion": {
+      "enabled": false
+    },
+    "baseVersion": 15,
+    "numberBadge": {
+      "fontSize": 21,
+      "size": 32
+    },
+    "edition": "static"
+  },
+  {
+    "number": "05",
+    "id": "external-payment",
+    "name": "对外付款",
+    "category": "结算与付款",
+    "description": "选择项目和收款方，发起付款",
+    "palette": "azure",
+    "bannerSize": [
+      360,
+      144
+    ],
+    "squareSize": [
+      128,
+      128
+    ],
+    "version": 15,
+    "gridStep": 2.4,
+    "composition": "single micro-symbol field",
+    "foregroundLayer": false,
+    "motion": {
+      "enabled": false
+    },
+    "baseVersion": 15,
+    "numberBadge": {
+      "fontSize": 21,
+      "size": 32
+    },
+    "edition": "static"
+  },
+  {
+    "number": "06",
+    "id": "supplier-contract",
+    "name": "供应商合同",
+    "category": "合作与采购",
+    "description": "为项目外部团队提交合同",
+    "palette": "lime",
+    "bannerSize": [
+      360,
+      144
+    ],
+    "squareSize": [
+      128,
+      128
+    ],
+    "version": 15,
+    "gridStep": 2.4,
+    "composition": "single micro-symbol field",
+    "foregroundLayer": false,
+    "motion": {
+      "enabled": false
+    },
+    "baseVersion": 15,
+    "numberBadge": {
+      "fontSize": 21,
+      "size": 32
+    },
+    "edition": "static"
+  },
+  {
+    "number": "07",
+    "id": "outsourcing-contract",
+    "name": "外包合同",
+    "category": "合作与采购",
+    "description": "选择外包需求并提交合同",
+    "palette": "azure",
+    "bannerSize": [
+      360,
+      144
+    ],
+    "squareSize": [
+      128,
+      128
+    ],
+    "version": 15,
+    "gridStep": 2.4,
+    "composition": "single micro-symbol field",
+    "foregroundLayer": false,
+    "motion": {
+      "enabled": false
+    },
+    "baseVersion": 15,
+    "numberBadge": {
+      "fontSize": 21,
+      "size": 32
+    },
+    "edition": "static"
+  },
+  {
+    "number": "08",
+    "id": "outsourcing-payment",
+    "name": "外包付款",
+    "category": "结算与付款",
+    "description": "针对外包需求发起付款",
+    "palette": "bluegray",
+    "bannerSize": [
+      360,
+      144
+    ],
+    "squareSize": [
+      128,
+      128
+    ],
+    "version": 15,
+    "gridStep": 2.4,
+    "composition": "single micro-symbol field",
+    "foregroundLayer": false,
+    "motion": {
+      "enabled": false
+    },
+    "baseVersion": 15,
+    "numberBadge": {
+      "fontSize": 21,
+      "size": 32
+    },
+    "edition": "static"
+  },
+  {
+    "number": "09",
+    "id": "pre-project-agreement",
+    "name": "项目前置协议",
+    "category": "客户协议",
+    "description": "与客户签署正式立项前协议",
+    "palette": "cyan",
+    "bannerSize": [
+      360,
+      144
+    ],
+    "squareSize": [
+      128,
+      128
+    ],
+    "version": 15,
+    "gridStep": 2.4,
+    "composition": "single micro-symbol field",
+    "foregroundLayer": false,
+    "motion": {
+      "enabled": false
+    },
+    "baseVersion": 15,
+    "numberBadge": {
+      "fontSize": 21,
+      "size": 32
+    },
+    "edition": "static"
+  }
+]
