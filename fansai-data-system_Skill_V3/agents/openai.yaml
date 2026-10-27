@@ -1,0 +1,4 @@
+interface:
+  display_name: "FansAI 数据中台 V3"
+  short_description: "继承 V2.1，整合审批交互、面性组件与新品牌展示图标"
+  default_prompt: "使用 $fansai-data-system-v3 按 V3 规范设计或优化这个 FansAI 数据中台页面，保留完整业务字段。"

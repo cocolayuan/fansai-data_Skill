@@ -1,0 +1,34 @@
+{
+  "azure": {
+    "bg": "#EDF7FF",
+    "light": "#8FD4FF",
+    "mid": "#159CFA",
+    "dark": "#004F8F",
+    "ink": "#153E70",
+    "fill": "#247EC8"
+  },
+  "cyan": {
+    "bg": "#EAFBFE",
+    "light": "#79E6F3",
+    "mid": "#02BEDB",
+    "dark": "#006B92",
+    "ink": "#075273",
+    "fill": "#0784AE"
+  },
+  "lime": {
+    "bg": "#F7FAEB",
+    "light": "#D7E89B",
+    "mid": "#A2CF01",
+    "dark": "#607D12",
+    "ink": "#475E10",
+    "fill": "#8AAA24"
+  },
+  "bluegray": {
+    "bg": "#EEF3F6",
+    "light": "#B7C8D6",
+    "mid": "#7D97AF",
+    "dark": "#3F5871",
+    "ink": "#334B63",
+    "fill": "#6887A3"
+  }
+}

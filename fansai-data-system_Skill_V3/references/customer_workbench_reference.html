@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>客户资料 · Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&amp;family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b2430;--ink2:#0f3132;--muted:#64748b;--muted2:#94a3b8;
+  --teal:#008aa8;--teal2:#0c7074;--blue:#49B6D8;--green:#8BD98C;
+  --line:#e8efef;--ok:#1A9E4B;--warn:#C77B26;--err:#D6455B;--info:#2563EB;
+  --micro:10.5px;
+  --cn:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --en:"Outfit","Noto Sans SC",sans-serif;
+  --glass:inset 0 1px 0 rgba(255,255,255,.68);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{min-height:100vh;color:var(--ink);font-family:var(--cn);font-weight:500;-webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(900px 520px at 12% -6%,rgba(154,220,203,.42),transparent 62%),
+    radial-gradient(760px 480px at 88% 4%,rgba(73,182,216,.30),transparent 60%),
+    radial-gradient(820px 520px at 62% 104%,rgba(0,138,168,.10),transparent 62%),
+    #ECF4F2;background-attachment:fixed}
+button,input,textarea,select{font:inherit}
+button{color:inherit}
+.tnum{font-family:var(--en);font-variant-numeric:tabular-nums}
+.wrap{max-width:1680px;margin:0 auto;padding:26px 36px 58px}
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.76),rgba(255,255,255,.53));backdrop-filter:blur(24px) saturate(155%);-webkit-backdrop-filter:blur(24px) saturate(155%);border:1px solid rgba(255,255,255,.8);box-shadow:var(--glass)}
+.glass-lite{background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid rgba(255,255,255,.7)}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.rv{animation:up .48s cubic-bezier(.2,.7,.2,1) both}
+
+/* header: align with the accepted dashboard family */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:16px}
+.bcrumb{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;border:2px solid #f5fffe;box-shadow:0 6px 18px -10px rgba(15,49,50,.18)}
+.bdot{width:12px;height:12px;border-radius:50%;background:linear-gradient(140deg,#9ADCCB,#49B6D8);flex:0 0 auto}
+.bmain{font-family:var(--en);font-weight:700;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.bsub{font-family:var(--en);font-weight:300;font-size:18px;letter-spacing:1.08px;line-height:24px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.bellbtn{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px -10px rgba(15,49,50,.18);cursor:pointer;transition:.2s}
+.bellbtn:hover{transform:translateY(-1px)}
+.me{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid #f5fffe;color:#04312f;background:linear-gradient(140deg,#A7E885,#49B6D8);font-family:var(--en);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.mename{font-family:var(--en);font-weight:500;font-size:18px}.chev{width:7px;height:7px;border-right:1.8px solid var(--muted);border-bottom:1.8px solid var(--muted);transform:rotate(45deg);margin:-3px 4px 0}
+
+.navrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.tabs{display:flex;align-items:center;gap:6px;padding:6px;border-radius:18px;width:fit-content}
+.tab{border:0;background:none;padding:9px 18px;border-radius:13px;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;transition:.18s;white-space:nowrap;display:flex;align-items:baseline;gap:7px}
+.tab .ten{font-family:var(--en);font-size:9.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2)}
+.tab.on{background:var(--ink);color:#fff;font-weight:600;box-shadow:0 10px 22px -10px rgba(15,49,50,.4)}.tab.on .ten{color:rgba(255,255,255,.62)}
+.tab:not(.on):hover{color:var(--ink);background:rgba(255,255,255,.6)}
+.ctrlrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.datepill{display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid var(--line);font-size:12.5px;color:var(--muted)}.datepill b{font-family:var(--en);font-weight:600;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}.datepill small{padding-left:8px;border-left:1px solid var(--line);font-size:10.5px;font-weight:600;color:var(--muted2);white-space:nowrap}
+.viewbar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}.viewbar h1{font-size:21px;font-weight:700;display:flex;align-items:baseline;gap:9px}.viewbar h1 .ven{font-family:var(--en);font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted2)}.viewbar .vd{font-size:12.5px;color:var(--muted2);margin-top:5px;line-height:1.6}.viewmeta{font-size:11.5px;color:var(--muted2)}
+
+/* KPI overview */
+.overview{border-radius:24px;padding:25px 26px 24px;margin-bottom:18px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr)}
+.kpi{min-height:122px;padding:2px 28px;position:relative;display:flex;flex-direction:column}
+.kpi:first-child{padding-left:4px}.kpi+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,#d7e4e2 12%,#d7e4e2 88%,transparent)}
+.klabel{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.kname{font-size:13px;font-weight:700;color:var(--ink)}.ken{font-family:var(--en);font-size:9.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2)}
+.kvalue{display:flex;align-items:baseline;gap:7px;margin-top:15px}.knum{font-family:var(--en);font-size:41px;line-height:1;font-weight:700;color:var(--kc)}.kunit{font-size:12px;font-weight:700;color:var(--muted2)}
+.kcap{font-size:11.5px;color:var(--muted2);line-height:1.55;margin-top:auto;padding-top:12px;max-width:285px}
+
+/* toolbar */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:13px}
+.search{height:46px;min-width:320px;flex:1;display:flex;align-items:center;gap:10px;padding:0 15px;border-radius:14px;background:rgba(255,255,255,.66);border:1px solid var(--line)}
+.toolbar.lead-mode .search{flex:1 1 420px}.toolbar #ddLeadSource .dd-trig,.toolbar #ddLeadReason .dd-trig{min-width:126px}
+.search:focus-within{background:#fff;border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.14)}
+.search svg{width:16px;height:16px;color:var(--muted2);flex:0 0 auto}.search input{width:100%;border:0;outline:0;background:transparent;color:var(--ink);font-size:13px}.search input::placeholder{color:var(--muted2)}
+.dd{position:relative}.dd-trig,.ghost,.morebtn{height:46px;display:flex;align-items:center;gap:9px;padding:0 14px;border-radius:14px;background:rgba(255,255,255,.66);border:1px solid var(--line);font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.16s}
+.dd-trig{min-width:132px}.dd.open .dd-trig{background:#fff;border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.14)}
+.dd-trig .cv{width:7px;height:7px;border-right:1.8px solid var(--muted2);border-bottom:1.8px solid var(--muted2);transform:rotate(45deg);margin:-3px 0 0 auto;transition:.18s}.dd.open .dd-trig .cv{transform:rotate(225deg);margin-top:3px}
+.dd-pop{position:absolute;top:calc(100% + 8px);left:0;min-width:185px;z-index:30;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 48px -18px rgba(15,49,50,.35);padding:8px;display:none}.dd.open .dd-pop{display:block;animation:up .16s ease both}
+.dd-opt{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:10px;color:var(--muted);font-size:12.5px;cursor:pointer}.dd-opt:hover{background:rgba(0,138,168,.06)}.dd-opt.on{background:rgba(73,182,216,.1);color:var(--ink);font-weight:700}.odot{width:7px;height:7px;border-radius:50%}
+.ghost:hover,.morebtn:hover{background:#fff;border-color:#cfe0e0;color:var(--teal2)}.ghost svg{width:14px;height:14px}.morebtn.on{color:var(--teal2);background:rgba(0,138,168,.08);border-color:rgba(0,138,168,.25)}
+.viewtoggle{display:flex;height:46px;padding:3px;border-radius:14px;background:rgba(255,255,255,.66);border:1px solid var(--line)}
+.viewbtn{display:flex;align-items:center;gap:7px;padding:0 12px;border:0;background:transparent;border-radius:10px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer}.viewbtn svg{width:14px;height:14px}.viewbtn.on{background:var(--ink);color:#fff;box-shadow:0 8px 18px -12px rgba(27,36,48,.6)}
+.primary{height:46px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:14px;border:0;background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 14px 28px -14px rgba(27,36,48,.55);transition:.18s}.primary:hover{transform:translateY(-1px)}.primary svg{width:15px;height:15px}
+.morebar{display:none;grid-template-columns:repeat(4,minmax(180px,1fr));gap:16px 14px;margin:-2px 0 13px;padding:18px;border-radius:20px;background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.78)}.morebar.show{display:grid;animation:up .18s ease both}.morefield{min-width:0}.morefield .mlabel{display:block;margin:0 0 8px;font-size:11.5px;color:var(--ink2);font-weight:600}.morefield .dd,.morefield .dd-trig{width:100%}
+
+/* lead pool */
+.leadguide{display:grid;grid-template-columns:210px 1fr;gap:22px;align-items:center;margin:0 0 13px;padding:18px 20px;border-radius:20px}.leadguide-title{display:flex;align-items:center;gap:12px}.leadguide-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(73,182,216,.12);color:var(--teal2);flex:0 0 auto}.leadguide-icon svg{width:19px;height:19px}.leadguide-title h2{font-size:14px;font-weight:700;color:var(--ink2)}.leadguide-title p{margin-top:3px;font-family:var(--en);font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2)}.leadrules{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.leadrule{min-width:0;padding-left:13px;border-left:1px solid rgba(0,138,168,.14)}.leadrule strong{display:block;font-size:11.5px;color:var(--ink2);font-weight:650}.leadrule span{display:block;margin-top:3px;font-size:10.5px;line-height:1.55;color:var(--muted2)}
+.leadhead,.leadrow{display:grid;grid-template-columns:220px 230px 95px 110px minmax(260px,1fr) 180px 170px;min-width:1364px;padding-left:22px;padding-right:22px}.leadhead{height:58px;align-items:center;border-bottom:1px solid var(--line);font-size:11px;color:var(--muted2);font-weight:700;letter-spacing:.25px}.leadhead>span:last-child{text-align:right}.leadrow{min-height:102px;align-items:center;padding-top:20px;padding-bottom:20px;border-bottom:1px solid rgba(232,239,239,.9);transition:.15s}.leadrow:nth-child(even){background:rgba(255,255,255,.3)}.leadrow:hover{background:rgba(0,138,168,.045)}
+.leadnamecell{display:flex;align-items:center;gap:11px;min-width:0;padding-right:18px}.leadnamecell .orglogo{width:38px;height:38px;border-radius:12px}.leadnamecopy{min-width:0}.leadname{display:block;font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.leadsource{min-width:0;padding-right:18px}.leadsource strong{display:block;font-size:11.5px;font-weight:650;color:var(--ink2)}.leadsource span{display:-webkit-box;margin-top:4px;font-size:10.5px;line-height:1.55;color:var(--muted);-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.leadnote{padding-right:12px;font-size:11px;color:var(--muted)}.leaddate{font-family:var(--en);font-size:12px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}.returncell{min-width:0;padding-right:20px}.returnpill{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:4px 8px;border-radius:8px;background:#FDE9EC;color:#D6455B;font-size:10.5px;font-weight:700;white-space:nowrap}.returnpill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:0 0 auto}.returndesc{margin-top:5px;font-size:10.5px;line-height:1.55;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.leadhistory{padding-right:14px;font-size:10.5px;line-height:1.55;color:var(--muted)}.cooling{display:block;color:var(--muted2)}.cooling.fresh,.cooling.expired{color:#0C8C78;font-weight:650}.leadactions{display:flex;align-items:center;justify-content:flex-end;gap:7px}.leadhistorybtn,.leadclaim{height:36px;padding:0 11px;border-radius:11px;font-size:10.5px;font-weight:700;white-space:nowrap;cursor:pointer}.leadhistorybtn{border:1px solid var(--line);background:rgba(255,255,255,.72);color:var(--ink2)}.leadclaim{border:0;background:var(--ink);color:#fff}.leadhistorybtn:hover{border-color:rgba(0,138,168,.3);color:var(--teal2);background:#fff}.leadclaim:hover{transform:translateY(-1px)}.leadfoot{display:flex;align-items:center;justify-content:space-between;gap:16px;min-width:1364px;padding:15px 22px;color:var(--muted2);font-size:10.5px}.leadfoot b{font-family:var(--en);color:var(--muted)}
+
+/* workbench */
+.board{border-radius:24px;overflow:hidden;min-height:500px}
+.boardhead{height:58px;display:grid;grid-template-columns:minmax(260px,1.55fr) minmax(112px,.7fr) minmax(90px,.55fr) minmax(112px,.68fr) minmax(116px,.7fr) minmax(330px,2.15fr) 145px;min-width:0;align-items:center;padding:0 22px;border-bottom:1px solid var(--line);font-size:11px;color:var(--muted2);font-weight:700;letter-spacing:.25px}
+.boardhead>span:nth-last-child(1){text-align:right}.timescroll{min-width:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-inline:contain;scrollbar-width:none;cursor:grab}.timescroll:active{cursor:grabbing}.timescroll::-webkit-scrollbar{display:none}.timeheadwrap{position:relative;min-width:0;height:58px}.timeheadwrap .timescroll{height:58px}.timehead{display:grid;grid-template-columns:repeat(5,144px);align-items:center;text-align:center;width:720px;min-width:720px;height:58px;position:relative}.timehead::after{content:"";position:absolute;left:0;right:0;bottom:9px;height:2px;border-radius:999px;background:#DCE8E6}.timehead span{position:relative;z-index:1}.timehead span:nth-child(3){color:var(--ink2)}.timehead span:nth-child(3)::before{content:"";position:absolute;left:50%;top:-16px;width:1px;height:8px;background:#9DC8C1}.timeshift{position:absolute;z-index:4;bottom:-4px;width:28px;height:28px;display:grid;place-items:center;border:1px solid #D6E5E2;border-radius:10px;background:rgba(255,255,255,.94);color:var(--teal);box-shadow:0 8px 18px -11px rgba(15,49,50,.44);cursor:pointer;transition:.18s}.timeshift.prev{left:1px}.timeshift.next{right:1px}.timeshift svg{width:14px;height:14px;display:block}.timeshift:hover:not(:disabled){transform:translateY(-1px);border-color:#A9D4CB;background:#F4FBF9;box-shadow:0 11px 22px -12px rgba(15,49,50,.52)}.timeshift:disabled{opacity:.34;cursor:default;box-shadow:none}.timeheadwrap::before,.timeheadwrap::after{content:"";position:absolute;z-index:3;bottom:0;width:44px;height:24px;pointer-events:none}.timeheadwrap::before{left:0;background:linear-gradient(90deg,#F8FBFA 32%,rgba(248,251,250,0))}.timeheadwrap::after{right:0;background:linear-gradient(270deg,#F8FBFA 32%,rgba(248,251,250,0))}.rows{padding-bottom:4px}.rhythminner{width:720px;min-width:720px}
+.row{display:grid;grid-template-columns:minmax(260px,1.55fr) minmax(112px,.7fr) minmax(90px,.55fr) minmax(112px,.68fr) minmax(116px,.7fr) minmax(330px,2.15fr) 145px;min-width:0;align-items:center;min-height:100px;padding:14px 22px;border-bottom:1px solid rgba(232,239,239,.9);transition:.15s}.row:nth-child(even){background:rgba(255,255,255,.28)}.row:hover{background:rgba(0,138,168,.045)}
+.row.child{min-height:82px;background:rgba(255,255,255,.44)}.row.child .client{padding-left:92px;position:relative}.row.child .client::before{content:"";position:absolute;left:14px;top:-15px;bottom:-15px;width:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='18' viewBox='0 0 2 18'%3E%3Cline x1='1' y1='1' x2='1' y2='7' stroke='%23C7DDDA' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-y;background-position:center top;background-size:2px 18px}.row:not(.child)+.row.child .client::before{top:-62px}.row.child.last-child-row .client::before{bottom:50%}.row.child .client::after{content:"";position:absolute;left:14px;top:50%;width:67px;height:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='2' viewBox='0 0 18 2'%3E%3Cline x1='1' y1='1' x2='7' y2='1' stroke='%23C7DDDA' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:left center;background-size:18px 2px;transform:translateY(-1px)}
+.client{display:flex;align-items:flex-start;gap:11px;min-width:0}.exp,.exp-slot{width:28px;height:28px;flex:0 0 auto}.exp{border:0;border-radius:9px;background:rgba(0,138,168,.08);color:var(--teal2);display:grid;place-items:center;cursor:pointer}.exp svg{width:13px;height:13px;transition:.2s}.exp.closed svg{transform:rotate(-90deg)}
+.orglogo{width:42px;height:42px;border-radius:14px;background:#E9F2F1;border:1px solid rgba(255,255,255,.78);color:#9AAEB9;display:grid;place-items:center;font-weight:700;font-size:12.5px;letter-spacing:.3px;flex:0 0 auto}.clientmain{min-width:0}.clientline{display:flex;align-items:center;gap:7px;min-width:0}.cname{font-size:13.5px;font-weight:700;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tag{font-size:var(--micro);font-weight:700;padding:3px 7px;border-radius:7px;white-space:nowrap}.tag.neutral{color:var(--muted);background:rgba(148,163,184,.12)}.tag.green{color:#0b7a66;background:#E4F6EF}.tag.blue{color:#4c52b8;background:#EEF0FF}
+.desc{font-size:11px;color:var(--muted2);margin-top:5px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:440px}
+.ownercell{display:flex;align-items:center;gap:9px;min-width:0}.ownerav{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;color:#fff;font-family:var(--en);font-size:11px;font-weight:700;box-shadow:0 7px 15px -9px rgba(15,49,50,.65)}.ownername{font-size:12px;font-weight:650;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.typetag{display:inline-flex;align-items:center;justify-self:start;width:max-content;max-width:100%;min-height:25px;padding:0 8px;border-radius:8px;background:rgba(100,116,139,.09);color:var(--muted);font-size:var(--micro);font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.na{color:var(--muted2);font-size:12px}
+.stage{display:flex;flex-direction:column;gap:7px;align-items:flex-start}.stage strong{font-size:12.5px;color:var(--ink2)}.stagebar{display:flex;gap:5px}.stagebar i{width:15px;height:5px;border-radius:999px;background:#dfe9e8}.stagebar i.on{background:#35C7B2}.stage small{font-size:var(--micro);color:var(--muted2);line-height:1}.stage.done strong{color:var(--ink2)}.stage.done .stagebar i.on{background:#67CE5A;box-shadow:0 4px 10px -5px rgba(61,174,72,.65)}
+.amount{font-family:var(--en);font-size:16px;font-weight:600;color:var(--ink2)}
+.rhythm{padding:0 12px;min-width:0}.track{height:30px;display:flex;align-items:center;position:relative}.track::before{content:"";position:absolute;left:0;right:0;height:2px;background:#dce9e7}.track::after{pointer-events:none}.track.stall::before{height:1px;background:repeating-linear-gradient(90deg,#E6A33C 0 4px,transparent 4px 8px)}.track.future::before{right:auto;width:var(--event-pos,70%);background:#7BD2BC}.track.completed::before{right:50%;background:#7BD2BC}.track.future::after{content:"";position:absolute;left:var(--event-pos,70%);right:0;height:2px;background:repeating-linear-gradient(90deg,#A9CEC6 0 7px,transparent 7px 12px)}.trackevent{position:absolute;z-index:3;left:clamp(78px,var(--event-pos,70%),calc(100% - 78px));top:25px;max-width:178px;transform:translateX(-50%);color:var(--ink2);font-size:var(--micro);font-weight:600;line-height:1.45;text-align:center;white-space:normal}.rhythm-timeline{padding-bottom:25px}
+.approvalflow{display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap;overflow:hidden;border:0;background:none;padding:0;font:inherit;text-align:left;cursor:pointer}.approvaltag{padding:4px 7px;border-radius:7px;background:#E9F0FF;color:#315DB8;font-size:var(--micro);font-weight:700}.approvalperson{display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:8px;color:var(--muted);font-size:var(--micro);font-weight:650}.approvalperson.current{background:#FFF4E5;color:var(--ink2)}.apdot{width:8px;height:8px;border-radius:50%;border:1.5px solid #9EB1AE;background:#fff}.approvalperson.current .apdot{border-color:#164E48;background:#164E48;box-shadow:inset 0 0 0 2px #fff}.aparrow{color:#B7C7C4;font-size:var(--micro)}
+.node{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #a8c1bd;position:absolute;z-index:2}.node.early{left:0;border-radius:2px;transform:rotate(45deg)}.node.follow{left:36%;background:#8FD6C1;border-color:#8FD6C1}.node.latest{left:50%;width:15px;height:15px;background:#12B394;border:3px solid #E4F7F1;box-shadow:0 0 0 3px rgba(18,179,148,.12)}.node.event{left:var(--event-pos,70%);right:auto;transform:translateX(-50%)}.node.nextmark{border:2px dashed #D9962C}.node.delivery{border-radius:3px;border-color:#D9962C}.node.later{border-color:#EBCB94}.node.beyond{width:0;height:0;border:0;border-radius:0;background:transparent;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid #D9A34C}.rlabel{font-size:var(--micro);font-weight:500;line-height:1.4;margin-top:3px;color:var(--muted)}.rlabel.warn{color:var(--err);font-weight:700}.rlabel.next{color:var(--teal2)}
+.actions{display:flex;align-items:center;justify-content:flex-end;gap:8px}.action{height:36px;padding:0 14px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.7);color:var(--ink2);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:transform .16s,border-color .16s,background .16s,color .16s,box-shadow .16s}.action:hover{transform:translateY(-1px);background:#fff;border-color:rgba(0,138,168,.35);color:var(--teal2);box-shadow:0 10px 20px -12px rgba(0,138,168,.4)}.action.dark{background:var(--ink2);color:#fff;border-color:var(--ink2)}.action.dark:hover{background:#123E3A;color:#fff;border-color:#123E3A;box-shadow:0 12px 24px -13px rgba(15,49,50,.58)}.moredot{width:36px;height:36px;flex:0 0 auto;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.7);color:var(--muted);display:grid;place-items:center;cursor:pointer;transition:transform .16s,border-color .16s,background .16s,color .16s,box-shadow .16s}.moredot svg{width:16px;height:16px;display:block}.moredot:hover,.moredot.on{transform:translateY(-1px);background:#fff;border-color:rgba(0,138,168,.35);color:var(--teal2);box-shadow:0 10px 20px -12px rgba(0,138,168,.4)}
+.empty{padding:74px 24px;text-align:center}.emptyicon{width:50px;height:50px;margin:0 auto 13px;border-radius:18px;background:rgba(0,138,168,.08);display:grid;place-items:center;color:var(--teal)}.emptyicon svg{width:23px;height:23px}.empty h3{font-size:15px}.empty p{font-size:12px;color:var(--muted2);margin-top:7px;line-height:1.7}
+.boardfoot{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 22px;color:var(--muted2);font-size:11px}.rows+.boardfoot{min-width:1638px}.boardfoot b{font-family:var(--en);color:var(--muted)}.boardfoot.statusfoot{align-items:stretch;flex-direction:column;gap:11px;padding:13px 18px 15px;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,.58));border-top:1px solid rgba(219,232,230,.86)}.footmeta{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 4px}.legend{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.62);border:1px solid rgba(219,232,230,.88);box-shadow:0 9px 24px -22px rgba(15,49,50,.45)}.legenditem{display:inline-flex;align-items:center;gap:7px;min-height:20px;white-space:nowrap;color:#7F959D}.lgmark{position:relative;display:inline-block;width:12px;height:12px;flex:0 0 auto}.lgmark.early{width:9px;height:9px;border:1.5px solid #AFC2BC;border-radius:2px;transform:rotate(45deg)}.lgmark.follow{width:8px;height:8px;border-radius:50%;background:#8FD6C1}.lgmark.latest{width:9px;height:9px;border-radius:50%;background:#12B394;box-shadow:0 0 0 3px #E4F7F1}.lgmark.nextmark{width:11px;height:11px;border:2px dashed #D9962C;border-radius:50%}.lgmark.delivery{width:10px;height:10px;border:2px solid #D9962C;border-radius:3px}.lgmark.later{width:10px;height:10px;border:2px solid #EBCB94;border-radius:50%}.lgmark.beyond{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:8px solid #D9A34C}.lgmark.interval,.lgmark.stall{width:24px;height:0;border-top:2px dashed #A9CEC6}.lgmark.stall{border-top-width:1px;border-top-color:#E6A33C}.lgmark.detail{width:auto;height:auto;color:#8EA5AD;font-size:12px;line-height:1}.legend-note{color:var(--muted2)}
+
+/* rhythm board is fixed; only the nested time-axis viewport scrolls */
+.rows+.boardfoot{min-width:0}
+
+/* table view */
+.tablewrap{position:relative;isolation:isolate;overflow:auto;max-width:100%;background:#FBFDFC;scrollbar-color:#B9CCCA transparent;scrollbar-width:thin}.tablewrap::-webkit-scrollbar{height:10px}.tablewrap::-webkit-scrollbar-thumb{background:#B9CCCA;border:2px solid transparent;background-clip:padding-box;border-radius:999px}.simpletable{width:100%;border-collapse:separate;border-spacing:0;min-width:2500px}.simpletable th{position:sticky;top:0;z-index:4;height:54px;padding:0 15px;text-align:left;font-size:10.5px;white-space:nowrap;color:var(--muted2);background:#F7FBFA;border-bottom:1px solid var(--line)}.simpletable td{height:86px;padding:15px;border-bottom:1px solid rgba(232,239,239,.9);font-size:12px;vertical-align:middle;background:#FCFEFD}.simpletable tbody tr:nth-child(even) td{background:#F8FBFA}.simpletable tbody tr:hover td{background:#F4FAF8}.simpletable th:first-child,.simpletable td:first-child{position:sticky;left:0;z-index:3;width:250px;min-width:250px;max-width:250px;background:#FCFEFD;background-clip:padding-box;box-shadow:14px 0 22px -22px rgba(15,49,50,.55)}.simpletable tbody tr:nth-child(even) td:first-child{background:#F8FBFA}.simpletable tbody tr:hover td:first-child{background:#F4FAF8}.simpletable th:first-child{z-index:5;background:#F7FBFA}.simpletable th:last-child,.simpletable td:last-child{text-align:right;min-width:155px}.simpletable .w-owner{min-width:135px}.simpletable .w-source{min-width:112px}.simpletable .w-stage{min-width:125px}.simpletable .w-amount{min-width:125px}.simpletable .w-status{min-width:145px}.simpletable .w-status-wide{min-width:190px}.tablestage{font-size:12px;font-weight:700;color:var(--ink2)}.tablestage.done{color:var(--ink2)}.tableclient{display:flex;align-items:center;gap:11px}.tableclient .orglogo{width:38px;height:38px;border-radius:12px}.tableclient>span:last-child{min-width:0}.clientlink{max-width:175px;padding:0;border:0;background:none;color:var(--ink2);font:inherit;font-weight:700;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.clientlink:hover{color:var(--teal2);text-decoration:underline;text-underline-offset:3px}.tableactions{display:flex;align-items:center;justify-content:flex-end;gap:5px}.statuscell{display:flex;align-items:flex-start;gap:8px;max-width:190px;color:var(--ink2);font-size:10.5px;line-height:1.5}.statuscell .lgmark{margin-top:2px}.statuscell .statusdash{color:#A3B4B8}.statuscell.warn{color:#D9831F;font-weight:700}.statuscell .statuscopy{display:block;overflow-wrap:anywhere}.statussummary{max-width:190px;color:var(--muted);font-size:10.5px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.tableactions{gap:8px}
+
+/* row action menu */
+.rowmenu{display:none;position:fixed;z-index:66;width:260px;padding:9px;border:1px solid rgba(219,232,230,.95);border-radius:18px;background:rgba(255,255,255,.98);box-shadow:0 26px 70px -24px rgba(7,42,40,.48);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}.rowmenu.show{display:block;animation:menuIn .17s ease both}@keyframes menuIn{from{opacity:0;transform:translateY(-4px) scale(.985)}to{opacity:1;transform:none}}.rowmenulabel{padding:8px 10px 5px;font-family:var(--en);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#A2B4B1}.rowmenuitem{width:100%;display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:10px;min-height:50px;padding:0 10px;border:0;border-radius:11px;background:transparent;text-align:left;color:var(--ink2);cursor:pointer}.rowmenuitem:hover{background:#F1F8F6}.rowmenuicon{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.7);color:var(--muted);transition:transform .16s,border-color .16s,background .16s,color .16s,box-shadow .16s}.rowmenuicon svg{width:16px;height:16px;display:block;overflow:visible}.rowmenuitem:hover .rowmenuicon{transform:translateY(-1px);border-color:rgba(0,138,168,.35);background:#fff;color:var(--teal2);box-shadow:0 10px 20px -12px rgba(0,138,168,.4)}.rowmenuitem strong{font-size:11.5px;font-weight:700}.rowmenuitem small{font-size:9.5px;color:var(--muted2);white-space:nowrap}.rowmenudivider{height:1px;background:var(--line);margin:6px 5px}.rowmenuitem.danger{color:#D9544F}.rowmenuitem.danger .rowmenuicon{border-color:#F4D6D2;background:#FFF8F6;color:#E37A70}.rowmenuitem.danger:hover{background:#FFF2F0}.rowmenuitem.danger:hover .rowmenuicon{border-color:#ECA8A0;background:#fff;color:#D9544F;box-shadow:0 10px 20px -12px rgba(217,84,79,.42)}
+
+/* modal · strictly aligned with content_asset_modal_redesign.html */
+.scrim{display:none;position:fixed;inset:0;z-index:70;align-items:center;justify-content:center;padding:28px;background:rgba(231,240,238,.4);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}.scrim.show{display:flex;animation:scrimIn .35s ease both}@keyframes scrimIn{from{opacity:0}to{opacity:1}}
+.modal{position:relative;width:min(900px,100%);max-height:calc(100vh - 56px);display:flex;flex-direction:column;overflow:hidden;border-radius:28px;background:linear-gradient(168deg,rgba(255,255,255,.9),rgba(255,255,255,.8));backdrop-filter:blur(34px) saturate(1.25);-webkit-backdrop-filter:blur(34px) saturate(1.25);border:1px solid rgba(255,255,255,.78);box-shadow:0 44px 120px -34px rgba(15,49,50,.42),inset 0 1px 0 rgba(255,255,255,.65);animation:modalIn .52s cubic-bezier(.2,.7,.2,1) both}.modal.compact{width:min(680px,100%)}.modal.wide{width:min(900px,100%)}#modalContent{display:flex;flex:1;min-height:0;max-height:inherit;flex-direction:column}@keyframes modalIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+.mhead{display:flex;flex:0 0 auto;align-items:flex-start;justify-content:space-between;gap:18px;padding:30px 36px 20px;background:transparent}.meyebrow{display:none}.mhead h2{font-size:19px;font-weight:500;line-height:1.35;letter-spacing:.3px;color:var(--ink)}.mhead p{font-size:13px;font-weight:500;color:var(--muted2);margin-top:7px;line-height:1.6}.xbtn{width:38px;height:38px;flex:0 0 auto;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:.18s}.xbtn svg{width:18px;height:18px}.xbtn:hover{background:#fff;color:var(--ink)}.mbody{flex:1;min-height:0;padding:6px 36px 28px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(15,49,50,.14) transparent}.mbody::-webkit-scrollbar{width:8px}.mbody::-webkit-scrollbar-thumb{background:rgba(15,49,50,.14);border-radius:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.field{margin-bottom:20px}.lb{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:9px}.field:focus-within>.lb,.grid2>div:focus-within>.lb,.grid3>div:focus-within>.lb{color:var(--teal)}.req{color:#FF2741;font-size:13px}.help{font-size:11.5px;color:var(--muted2);line-height:1.55;margin-top:7px}.inp,.ta,.sel{width:100%;font-family:var(--cn);font-weight:500;font-size:14px;color:var(--ink);background:rgba(255,255,255,.62);border:1px solid var(--line);border-radius:14px;padding:13px 16px;outline:0;transition:.18s}.inp::placeholder,.ta::placeholder{color:var(--muted2)}.sel{min-height:50px;appearance:auto;cursor:pointer}.ta{min-height:78px;resize:vertical;line-height:1.55}.inp:focus,.ta:focus,.sel:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.16);background:#fff}.inp.err,.sel.err{border-color:#D6455B;box-shadow:0 0 0 4px rgba(214,69,91,.14);background:#fff}.errmsg{display:none;font-size:12px;color:#D6455B;margin-top:7px}.errmsg.show{display:block}
+.msection{padding:22px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.24);margin-bottom:20px}.msection:last-child{margin-bottom:0}.sectionhead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:20px}.sectiontitle{font-size:14px;font-weight:500;color:var(--ink)}.sectioncap{font-size:12px;font-weight:500;color:var(--muted2);margin-top:5px;line-height:1.55}.sectiontag{padding:6px 10px;border-radius:10px;border:1px solid rgba(73,182,216,.2);background:rgba(73,182,216,.10);color:var(--ink);font-size:11px;font-weight:500;white-space:nowrap}
+.datecontrol{position:relative}.datecontrol .inp{padding-right:48px;cursor:pointer;font-family:var(--en);font-variant-numeric:tabular-nums}.datecontrol .inp[readonly]{background:rgba(255,255,255,.62)}.datecontrol .inp:focus{background:#fff}.dateicon{position:absolute;right:8px;top:50%;width:34px;height:34px;transform:translateY(-50%);display:grid;place-items:center;border:0;border-radius:10px;background:transparent;color:var(--muted);cursor:pointer;transition:.18s}.dateicon:hover,.datecontrol.open .dateicon{background:#EEF7F5;color:var(--teal)}.dateicon svg{width:17px;height:17px;display:block}.datepicker{display:none;position:fixed;z-index:86;width:326px;padding:16px;border:1px solid rgba(210,226,224,.96);border-radius:20px;background:rgba(255,255,255,.98);box-shadow:0 26px 64px -24px rgba(12,48,47,.44),0 8px 24px -18px rgba(12,48,47,.28);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transform-origin:top right}.datepicker.show{display:block;animation:calendarIn .2s cubic-bezier(.2,.7,.2,1) both}@keyframes calendarIn{from{opacity:0;transform:translateY(-5px) scale(.985)}to{opacity:1;transform:none}}.calhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}.calmonth{display:flex;align-items:baseline;gap:5px;color:var(--ink);font-family:var(--en);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}.calmonth small{font-family:var(--cn);font-size:11px;font-weight:600;color:var(--muted2)}.calnavs{display:flex;gap:6px}.calnav{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--muted);cursor:pointer;transition:.16s}.calnav:hover{border-color:#B8D8D2;background:#F1F8F6;color:var(--teal)}.calnav svg{width:15px;height:15px}.calweek,.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.calweek{margin-bottom:5px}.calweek span{height:26px;display:grid;place-items:center;color:var(--muted2);font-size:10px;font-weight:650}.calday{position:relative;height:36px;display:grid;place-items:center;border:0;border-radius:11px;background:transparent;color:var(--ink2);font-family:var(--en);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;cursor:pointer;transition:.15s}.calday:hover{background:#EEF7F5;color:var(--teal)}.calday.out{color:#BBC8C7}.calday.today::after{content:"";position:absolute;bottom:4px;width:3px;height:3px;border-radius:50%;background:#49B6D8}.calday.selected{background:var(--ink);color:#fff;box-shadow:0 10px 22px -11px rgba(27,36,48,.6)}.calday.selected::after{background:#7FE5D5}.calfoot{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.calfoot button{height:32px;padding:0 10px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-size:11px;font-weight:650;cursor:pointer}.calfoot button:hover{background:#F1F8F6;color:var(--teal)}.calfoot .caltoday{color:var(--teal)}
+.selectcontrol{position:relative}.selectnative{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}.selecttrigger{width:100%;min-height:50px;display:grid;grid-template-columns:minmax(0,1fr) 32px;align-items:center;gap:12px;padding:0 8px 0 16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.62);color:var(--ink);font-family:var(--cn);font-size:14px;font-weight:500;text-align:left;cursor:pointer;outline:0;transition:.18s}.selecttrigger>span:first-child{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.selectchev{width:32px;height:32px;display:grid;place-items:center;border-radius:9px;color:var(--muted);transition:.18s}.selectchev svg{width:16px;height:16px;display:block}.selecttrigger:hover{background:#fff;border-color:#CFE0E0}.selectcontrol.open .selecttrigger,.selecttrigger:focus-visible{border-color:var(--blue);box-shadow:0 0 0 4px rgba(73,182,216,.16);background:#fff}.selectcontrol.open .selectchev{background:#EEF7F5;color:var(--teal);transform:rotate(180deg)}.selectcontrol.err .selecttrigger{border-color:#D6455B;box-shadow:0 0 0 4px rgba(214,69,91,.14);background:#fff}.selectmenu{display:none;position:fixed;z-index:87;min-width:220px;max-height:286px;padding:8px;overflow-y:auto;overscroll-behavior:contain;border:1px solid rgba(210,226,224,.96);border-radius:16px;background:rgba(255,255,255,.98);box-shadow:0 24px 60px -24px rgba(12,48,47,.44),0 8px 22px -18px rgba(12,48,47,.28);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);scrollbar-width:thin;scrollbar-color:#C3D5D2 transparent;transform-origin:top right}.selectmenu.show{display:block;animation:calendarIn .18s cubic-bezier(.2,.7,.2,1) both}.selectoption{width:100%;min-height:42px;display:grid;grid-template-columns:minmax(0,1fr) 22px;align-items:center;gap:10px;padding:0 11px;border:0;border-radius:11px;background:transparent;color:var(--ink2);font-family:var(--cn);font-size:12.5px;font-weight:550;text-align:left;cursor:pointer}.selectoption:hover{background:#F1F8F6;color:var(--teal)}.selectoption.selected{background:#EAF6F2;color:var(--teal);font-weight:700}.selectcheck{display:grid;place-items:center;color:transparent}.selectoption.selected .selectcheck{color:var(--teal)}.selectcheck svg{width:15px;height:15px}
+.choices{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.choice{min-height:42px;padding:0 15px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.62);color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:.18s}.choice.on{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 14px 28px -12px rgba(27,36,48,.5)}.choice.soft.on{background:rgba(73,182,216,.10);border-color:var(--blue);color:var(--ink);box-shadow:none}.choice:hover:not(.on){background:#fff;border-color:#cfe0e0;color:var(--ink)}
+.accordion{border:1px dashed var(--line);border-radius:16px;background:rgba(255,255,255,.28);margin-top:16px}.accordion>button{width:100%;display:flex;align-items:center;justify-content:space-between;padding:15px 16px;border:0;background:none;color:var(--ink);font-size:13px;font-weight:500;cursor:pointer}.accordion>button::after{content:"+";font-size:18px;color:var(--teal);font-weight:500}.accordion.open>button::after{content:"−"}.accordion-body{display:none;padding:0 16px 16px}.accordion.open .accordion-body{display:block}
+.summarycard{display:grid;grid-template-columns:1fr auto;align-items:center;gap:14px;margin-bottom:14px;padding:15px 17px;border-radius:16px;background:linear-gradient(135deg,#E9F7F2,#EDF6FA);border:1px solid rgba(73,182,216,.17)}.summarycard strong{display:block;font-size:12.5px;color:var(--ink2)}.summarycard span{display:block;margin-top:4px;font-size:10.5px;color:var(--muted)}.summarymetric{font-family:var(--en);font-size:18px!important;font-weight:700;color:var(--teal2)!important;text-align:right}
+.approvalcard{padding:16px 18px;border-radius:16px;background:#FFF7E9;border:1px solid #F2D8A8;color:#8A5912;margin-bottom:18px}.approvalcard strong{display:block;font-size:12px}.approvalcard div{display:flex;gap:24px;flex-wrap:wrap;margin-top:10px;font-family:var(--en);font-size:11px}.approvalsteps{position:relative;padding-left:8px}.approvalsteps::before{content:"";position:absolute;left:14px;top:19px;bottom:19px;width:2px;background:#D9E9E5}.approvalstep{position:relative;display:grid;grid-template-columns:18px 78px 1fr auto;align-items:center;gap:10px;min-height:54px;font-size:11.5px}.approvalstep i{width:10px;height:10px;border-radius:50%;border:2px solid #B3C8C4;background:#fff;z-index:1}.approvalstep.current i{border-color:#12B89D;background:#12B89D;box-shadow:0 0 0 5px #E0F5EF}.approvalstep .status{color:var(--muted2)}.approvalstep.current .status{color:var(--teal2);font-weight:700}.approvalstep .role{width:max-content;padding:4px 7px;border-radius:7px;background:#E6F7F2;color:#0C806D;font-size:10px;font-weight:700}.approvalstep .person{color:var(--ink2);font-weight:650}
+.dropzone{min-height:100px;border:1px dashed #BBD8E8;border-radius:14px;background:rgba(248,251,255,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#315DB8;cursor:pointer}.dropzone strong{font-size:13px;font-weight:500}.dropzone span{font-size:11.5px;color:var(--muted2);margin-top:5px}.mfoot{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 36px;border-top:1px solid rgba(15,49,50,.08);background:rgba(255,255,255,.4)}.mnote{font-size:11.5px;font-weight:500;color:var(--muted2);line-height:1.5;max-width:58%}.macts{display:flex;gap:12px}.cancel,.save{font-family:var(--cn);font-weight:500;font-size:14px;border-radius:14px;padding:12px 22px;cursor:pointer;transition:.18s}.cancel{background:rgba(255,255,255,.6);border:1px solid var(--line);color:var(--ink)}.cancel:hover{background:#fff}.save{border:0;background:var(--ink);color:#fff;box-shadow:0 14px 28px -12px rgba(27,36,48,.5)}.save:hover{transform:translateY(-1px)}
+.toast{position:fixed;left:50%;bottom:26px;z-index:90;transform:translateX(-50%) translateY(18px);max-width:620px;padding:11px 18px;border-radius:14px;background:var(--ink);color:#fff;box-shadow:0 20px 40px -15px rgba(0,0,0,.42);font-size:12px;line-height:1.6;text-align:center;opacity:0;pointer-events:none;transition:.26s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:1280px){.wrap{padding-left:24px;padding-right:24px}.kpis{grid-template-columns:repeat(2,1fr);row-gap:20px}.kpi:nth-child(3){padding-left:4px}.kpi:nth-child(3)::before{display:none}.morebar{grid-template-columns:repeat(2,minmax(180px,1fr))}}
+@media(min-width:1281px) and (max-width:1480px){.toolbar{flex-wrap:nowrap;gap:8px}.search{flex:0 1 200px;min-width:180px}.toolbar .dd-trig{height:42px;min-width:98px;padding:0 10px;font-size:11.5px}.toolbar #ddCustomerStatus .dd-trig{min-width:118px}.toolbar .morebtn,.toolbar .ghost{height:42px;padding:0 11px;font-size:11.5px}.toolbar .viewtoggle{height:42px}.toolbar .viewbtn{padding:0 9px;font-size:11px}.toolbar .primary{height:42px;padding:0 13px;font-size:11.5px}}
+@media(max-width:860px){.wrap{padding:18px 16px 40px}.mename,.bsub{display:none}.navrow{align-items:flex-start}.ctrlrow{width:100%}.viewbar{align-items:flex-start;flex-direction:column}.kpis,.morebar{grid-template-columns:1fr}.kpi{padding:16px 4px}.kpi+.kpi::before{display:none}.search{min-width:100%;}.viewtoggle{order:5}.leadguide{grid-template-columns:1fr}.leadrules{grid-template-columns:1fr}.grid2,.grid3{grid-template-columns:1fr}.scrim{padding:12px}.modal{max-height:calc(100vh - 24px);border-radius:22px}.mhead,.mbody,.mfoot{padding-left:20px;padding-right:20px}.mnote{display:none}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="topbar rv">
+    <div class="bcrumb"><span class="bdot"></span><span class="bmain">Customer_Management</span><span class="bsub">/ 客户资料</span></div>
+    <div class="tb-right">
+      <button class="bellbtn" id="bellBtn" aria-label="消息通知"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9z"/><path d="M10.3 20a2 2 0 003.4 0"/></svg></button>
+      <div class="me"><span class="avatar">FA</span><span class="mename">FansAI Admin</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+    </div>
+  </header>
+
+  <nav class="navrow rv" style="animation-delay:.02s">
+    <div class="tabs glass-lite"><button class="tab on" data-tab="customers">客户库<span class="ten">Customers · 39</span></button><button class="tab" data-tab="leads">线索池<span class="ten">Leads · 6</span></button></div>
+    <div class="ctrlrow"><div class="datepill">数据截至 <b>2026-08-18 23:59</b><small>每日更新至前一日</small></div></div>
+  </nav>
+
+  <section class="overview glass rv customer-only" id="customerOverview" style="animation-delay:.07s">
+    <div class="kpis">
+      <div class="kpi" style="--kc:#FF4F23"><div class="klabel"><span class="kname">停滞待唤醒</span><span class="ken">Stalled</span></div><div class="kvalue"><span class="knum">3</span><span class="kunit">个</span></div><span class="kcap">超两周没有新纪要，也没有下一步</span></div>
+      <div class="kpi" style="--kc:#FFA723"><div class="klabel"><span class="kname">七天内有安排</span><span class="ken">Next 7 Days</span></div><div class="kvalue"><span class="knum">2</span><span class="kunit">个</span></div><span class="kcap">已排期，需提前准备资料与议程</span></div>
+      <div class="kpi" style="--kc:#12B89D"><div class="klabel"><span class="kname">可发起立项</span><span class="ken">Ready to Start</span></div><div class="kvalue"><span class="knum">2</span><span class="kunit">个</span></div><span class="kcap">三项条件全部满足，等待转项目</span></div>
+      <div class="kpi" style="--kc:#74A3AB"><div class="klabel"><span class="kname">没有下一步</span><span class="ken">No Next Step</span></div><div class="kvalue"><span class="knum">13</span><span class="kunit">个</span></div><span class="kcap">还没排下一次动作，时间轴右半边为空</span></div>
+    </div>
+  </section>
+
+  <section class="leadguide glass-lite rv lead-only" id="leadGuide" hidden style="animation-delay:.07s">
+    <div class="leadguide-title"><span class="leadguide-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h11M4 18h8"/><path d="M18 10v8m-4-4h8"/></svg></span><div><h2>线索池规则</h2><p>Public Leads</p></div></div>
+    <div class="leadrules">
+      <div class="leadrule"><strong>公开待认领</strong><span>未认领前不归属 BD，不计停滞天数。</span></div>
+      <div class="leadrule"><strong>认领并建联</strong><span>转入客户库，时间轴从认领当天开始。</span></div>
+      <div class="leadrule"><strong>退回保留档案</strong><span>必须填写原因，跟进纪要和冷却信息完整保留。</span></div>
+    </div>
+  </section>
+
+  <section class="toolbar rv" style="animation-delay:.09s">
+    <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="searchInput" placeholder="搜索客户、项目或联系人"></label>
+    <div id="ddOwner" class="customer-only"></div><div id="ddCustomerStatus" class="customer-only"></div><div id="ddSource" class="customer-only"></div><div id="ddStage" class="customer-only"></div><div id="ddProgress" class="customer-only"></div>
+    <div id="ddLeadSource" class="lead-only" hidden></div><div id="ddLeadReason" class="lead-only" hidden></div>
+    <button class="morebtn customer-only" id="moreBtn"><span id="moreText">更多筛选</span><i class="chev"></i></button>
+    <button class="ghost" id="resetBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg>重置</button>
+    <div class="viewtoggle customer-only"><button class="viewbtn on" data-view="rhythm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h13"/><circle cx="18" cy="12" r="2"/></svg>节奏视图</button><button class="viewbtn" data-view="table"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4zM4 10h16M10 5v14"/></svg>表格</button></div>
+    <button class="primary" id="createBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg><span id="createText">新建客户</span></button>
+  </section>
+  <div class="morebar customer-only" id="moreBar">
+    <div class="morefield"><span class="mlabel">关系温度</span><div id="ddWarmth"></div></div>
+    <div class="morefield"><span class="mlabel">所属行业</span><div id="ddIndustry"></div></div>
+    <div class="morefield"><span class="mlabel">风险等级</span><div id="ddRisk"></div></div>
+    <div class="morefield"><span class="mlabel">ICP 评级</span><div id="ddIcp"></div></div>
+    <div class="morefield"><span class="mlabel">服务方向</span><div id="ddService"></div></div>
+    <div class="morefield"><span class="mlabel">需要支持</span><div id="ddSupport"></div></div>
+    <div class="morefield"><span class="mlabel">合同类型</span><div id="ddContract"></div></div>
+  </div>
+
+  <section class="board glass rv" id="board" style="animation-delay:.11s"></section>
+</main>
+
+<div class="rowmenu" id="rowMenu" role="menu" aria-hidden="true"></div>
+<div class="scrim" id="scrim" aria-hidden="true">
+  <section class="modal" id="modalPanel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div id="modalContent"></div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* 数据诚实声明：以用户截图为唯一页面数据源。
+   源页统计 39 个客户、34 个在跟项目；本原型只呈现截图中可完整识别的代表记录，不补造其余行。 */
+const ROWS=[
+ {id:'qinghe',name:'青禾食品',owner:'FansAI Admin',type:null,stage:'已推进完成',amount:2120000,count:3,action:'查看项目',rhythm:'done',next:'已立项 · 待发起合同审批',open:true,children:[
+   {id:'qh1',name:'【结算演示】青禾食品 门店快…',owner:'FansAI Admin',type:'新开发客户',stage:'已推进完成',amount:400000,tag:'立项',desc:'今年 Q3 · 毛利率 22%（低毛利样例）',rhythm:'done',next:'已立项 · 待发起合同审批',action:'查看项目'},
+   {id:'qh2',name:'【结算演示】青禾食品 渠道内…',owner:'FansAI Admin',type:'新开发客户',stage:'已推进完成',amount:520000,tag:'立项',desc:'今年 Q2 · 全额开票逾期未回（逾期样例）',rhythm:'done',next:'已立项 · 待发起合同审批',action:'查看项目'},
+   {id:'qh3',name:'【结算演示】青禾食品 新品上…',owner:'FansAI Admin',type:'新开发客户',stage:'已推进完成',amount:1200000,tag:'立项',desc:'去年 Q3 · 开票 90 万已收清，另有 30 万未开票',rhythm:'done',next:'已立项 · 待发起合同审批',action:'查看项目'}]},
+ {id:'runtu',name:'润图传媒',owner:'FansAI Admin',type:null,stage:'已推进完成',amount:1110000,count:2,action:'查看项目',rhythm:'done',next:'已立项 · 待发起合同审批',open:true,children:[
+   {id:'rt1',name:'【结算演示】润图传媒 达人短…',owner:'FansAI Admin',type:'新开发客户',stage:'已推进完成',amount:660000,tag:'立项',desc:'今年 Q3 · 首期票已收清，余 36 万未开票',rhythm:'done',next:'已立项 · 待发起合同审批',action:'查看项目'},
+   {id:'rt2',name:'【结算演示】润图传媒 短视频…',owner:'FansAI Admin',type:'新开发客户',stage:'已推进完成',amount:450000,tag:'立项',desc:'去年 Q2 · 全额开票，尾款 15 万未收',rhythm:'done',next:'已立项 · 待发起合同审批',action:'查看项目'}]},
+ {id:'xingye',name:'星野科技',owner:'FansAI Admin',type:null,stage:'已推进完成',amount:2560000,count:3,action:'展开项目',rhythm:'done',next:null,open:false,children:null},
+ {id:'wolf',name:'狼爪户外服饰',owner:'Rebecca',type:'直客',stage:'需求沟通',amount:100000,project:'WOLFSKIN 狼爪 拍摄项目',desc:'等待品牌更新品清单、拍摄场景',rhythm:'future',next:'2026-08-17 · 场景确认',action:'发起立项'},
+ {id:'gz',name:'广州智真品牌',owner:'Nico',type:'直客',stage:'需求沟通',amount:400000,project:'Chou & Friends（周同学）',desc:'先提案，根据策略确定内容制作框架',rhythm:'stall',stall:13,next:null,action:'安排下次接触'},
+ {id:'fibocom',name:'广和通 Fibocom',owner:'FansAI Admin',type:'直客',stage:'提案报价',amount:150000,project:'宠物智能项圈 Assets 制作',desc:'待确认报价',rhythm:'stall',stall:15,next:null,action:'安排下次接触'},
+ {id:'zhimeizhai',name:'致美斋',owner:'Nico',type:'三方',stage:'已推进完成',amount:200000,project:'致美斋 短剧项目',desc:'本周董事长会面，预计本月可以启动',rhythm:'done',next:'已立项 · 待发起合同审批',action:'查看项目'},
+ {id:'huimei',name:'汇美集团',owner:'Nico',type:'直客',stage:'提案报价',amount:450000,project:'汇美集团 IP 孵化项目',desc:'月底提案，等待集团内部反馈 · 2026-08-23 复谈',rhythm:'future',next:'2026-08-19 · 修改稿交付',action:'发起立项'},
+ {id:'xinxiu',name:'新秀丽',owner:'Rebecca',industry:'服装/时尚',type:'直客',stage:'提案报价',amount:430000,count:2,desc:'最近接触 8/22 大促排期沟通会',rhythm:'approval',approval:['Harrison','Jessie','Mia','ZZ'],next:'1 个项目审批中 · 1 个可立项',action:'查看审批',open:true,children:[
+   {id:'xxl1',name:'新秀丽 小红书品牌素材',owner:'Rebecca',industry:'服装/时尚',type:'直客',stage:'已推进完成',amount:250000,tag:'立项 · 审批中',desc:'AI 新品样片素材 brief 已收到，与品牌沟通报价中',rhythm:'approval',approval:['Harrison','Jessie','Mia','ZZ'],next:'立项审批中',action:'查看审批'},
+   {id:'xxl2',name:'新秀丽 双十一站外种草',owner:'Rebecca',industry:'服装/时尚',type:'直客',stage:'提案报价',amount:180000,desc:'等大促节奏出来后再报',rhythm:'future',next:'2026-08-22 · 大促排期沟通会',action:'发起立项'}]},
+ {id:'qizheng',name:'奇正藏药',owner:'Nico',type:null,stage:'提案报价',amount:1750000,count:2,project:'其他',desc:'无已排接触 · 1 个项目没排接触',rhythm:'future',next:'2026-08-28 · 年框方案初稿',action:'展开项目',open:false,children:[
+   {id:'qz1',name:'奇正藏药 年度内容陪跑…',owner:'Nico',type:'直客',relation:'新开发客户',tag:'合同',stage:'已推进完成',amount:1200000,desc:'竞标结果出来后再谈年框，对方口头提过',rhythm:'done',next:'合同阶段 · 进度见项目管理',action:'发起合同审批'},
+   {id:'qz2',name:'奇正藏药 短剧&TVC制作（竞…',owner:'Nico',type:'直客',relation:'新开发客户',stage:'提案报价',amount:550000,desc:'准备竞标文档，预计本月开标',rhythm:'stall',stall:9,next:null,action:'安排下次接触'}]},
+ {id:'mg',name:'MG汽车',owner:'ZZ',type:'三方',stage:'需求沟通',amount:null,project:'MG汽车 品牌短视频',desc:'跟核心代理接洽沟通需求中',rhythm:'stall',stall:28,next:null,action:'安排下次接触'},
+ {id:'heytea',name:'喜茶',owner:'Nico',type:'直客',stage:'需求沟通',amount:null,project:'喜茶 内容合作',desc:'等待组织 workshop',rhythm:'stall',stall:22,next:null,action:'安排下次接触'},
+ {id:'miniso',name:'名创优品 MINISO',owner:'FansAI Admin',type:null,stage:'提案报价',amount:280000,count:1,project:'本地生活 · 海外市场门店场景素材（Q2）',desc:'无已排接触 · 交付 2026-08-20',rhythm:'future',next:'2026-08-20 · 分镜脚本交付',action:'展开项目'}
+];
+
+/* 线索池数据来自用户本轮截图：共6条，不补造截图未展示的备注或纪要正文。 */
+const LEADS=[
+ {id:'lead1',name:'itest–1786520041439–vgodo2–lead–…',sourceType:null,sourceText:null,note:null,poolDate:'2026-08-12',reason:'无决策权',reasonDetail:'测试',history:'2 条 · FansAI Admin 退回',historyCount:2,cooling:'冷却期还剩 55 天'},
+ {id:'lead2',name:'元气森林',sourceType:'展会',sourceText:'糖酒会扫码留资，说下半年有内容需求',note:null,poolDate:'2026-08-05',reason:null,reasonDetail:null,history:'暂无',historyCount:0,cooling:'新线索'},
+ {id:'lead3',name:'谦玛广告（制作供应商）',sourceType:'官网留资',sourceText:'自称有短剧制作资源，想谈供应商合作',note:null,poolDate:'2026-07-31',reason:null,reasonDetail:null,history:'暂无',historyCount:0,cooling:'新线索'},
+ {id:'lead4',name:'维他柠檬茶',sourceType:'BD 退回',sourceText:null,note:null,poolDate:'2026-07-18',reason:'时机不对',reasonDetail:'今年内容预算已排满，明年 Q1 可再联系',history:'0 条 · Nico 退回',historyCount:0,cooling:'冷却期还剩 30 天'},
+ {id:'lead5',name:'宝矿力水特',sourceType:'BD 退回',sourceText:null,note:null,poolDate:'2026-07-04',reason:'已有其他供应商',reasonDetail:'与现有代理合作稳定，短期无更换意愿',history:'0 条 · Nico 退回',historyCount:0,cooling:'冷却期还剩 46 天'},
+ {id:'lead6',name:'某消费电子品牌',sourceType:'冷启外呼',sourceText:null,note:null,poolDate:'2026-06-20',reason:'联系不上',reasonDetail:'三次外呼无人接听，官网留的邮箱退信',history:'0 条 · ZZ 退回',historyCount:0,cooling:'冷却期已过'}
+];
+
+const state={tab:'customers',view:'rhythm',owner:'全部 BD',customerStatus:'全部客户状态',type:'全部来源',stage:'全部状态',progress:'进行中',leadSource:'全部来源',leadReason:'全部原因',q:''};
+const stageRank={'建联':1,'需求沟通':2,'提案报价':3,'已推进完成':4};
+
+function money(v){return v==null?'—':'¥'+v.toLocaleString('zh-CN')}
+function logo(n){return n.replace(/\s|\[|\]|\u3010|\u3011/g,'').slice(0,2)}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+const AVATAR_PALETTE=[['#7392FF','#99B0FF'],['#25B866','#62D58C'],['#F39A46','#FFBC69'],['#8A72E8','#B09CF4'],['#18A5B9','#64CBDA']];
+function hashStr(s){return [...String(s||'')].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7)}
+function avatarGradient(name){const p=AVATAR_PALETTE[hashStr(name)%AVATAR_PALETTE.length];return `linear-gradient(145deg,${p[1]},${p[0]})`}
+function toast(msg){const t=document.getElementById('toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),3100)}
+
+function dropdown(mount,opts,get,set,colors){
+ const wrap=document.createElement('div');wrap.className='dd';const trig=document.createElement('button');trig.className='dd-trig';trig.type='button';const pop=document.createElement('div');pop.className='dd-pop';
+ const paint=()=>{const v=get(),c=colors?.[v];trig.innerHTML=(c?`<i class="odot" style="background:${c}"></i>`:'')+`<span>${escapeHtml(v)}</span><i class="cv"></i>`};
+ opts.forEach(v=>{const o=document.createElement('div');o.className='dd-opt'+(v===get()?' on':'');o.dataset.v=v;const c=colors?.[v];o.innerHTML=(c?`<i class="odot" style="background:${c}"></i>`:'')+`<span>${escapeHtml(v)}</span>`;o.onclick=e=>{e.stopPropagation();set(v);pop.querySelectorAll('.dd-opt').forEach(x=>x.classList.toggle('on',x.dataset.v===v));paint();wrap.classList.remove('open')};pop.appendChild(o)});
+ trig.onclick=e=>{e.stopPropagation();const open=wrap.classList.contains('open');closePops();if(!open)wrap.classList.add('open')};paint();wrap.append(trig,pop);document.getElementById(mount).appendChild(wrap);wrap.repaint=()=>{paint();pop.querySelectorAll('.dd-opt').forEach(x=>x.classList.toggle('on',x.dataset.v===get()))};return wrap;
+}
+function closePops(){document.querySelectorAll('.dd.open').forEach(x=>x.classList.remove('open'))}
+document.addEventListener('click',closePops);
+
+const owners=['全部 BD','FansAI Admin','Nico','Rebecca','ZZ'];
+const stages=['全部状态','需求沟通','提案报价','已推进完成'];
+const types=['全部来源','直客','三方','新开发客户'];
+const ddOwner=dropdown('ddOwner',owners,()=>state.owner,v=>{state.owner=v;render()},null);
+const ddCustomerStatus=dropdown('ddCustomerStatus',['全部客户状态'],()=>state.customerStatus,v=>state.customerStatus=v,null);
+const ddSource=dropdown('ddSource',types,()=>state.type,v=>{state.type=v;render()},null);
+const ddStage=dropdown('ddStage',stages,()=>state.stage,v=>{state.stage=v;render()},{'需求沟通':'#35C7B2','提案报价':'#2563EB','已推进完成':'#67CE5A'});
+const ddProgress=dropdown('ddProgress',['进行中'],()=>state.progress,v=>state.progress=v,{'进行中':'#35C7B2'});
+const leadSources=['全部来源','未标记','展会','官网留资','BD 退回','冷启外呼'];
+const leadReasons=['全部原因','无退回原因','无决策权','时机不对','已有其他供应商','联系不上'];
+const ddLeadSource=dropdown('ddLeadSource',leadSources,()=>state.leadSource,v=>{state.leadSource=v;render()},null);
+const ddLeadReason=dropdown('ddLeadReason',leadReasons,()=>state.leadReason,v=>{state.leadReason=v;render()},{'无决策权':'#D6455B','时机不对':'#D6455B','已有其他供应商':'#D6455B','联系不上':'#D6455B'});
+const extraState={warmth:'全部关系',industry:'全部行业',risk:'全部风险等级',icp:'全部ICP评级',service:'全部服务方向',support:'全部支持状态',contract:'全部合同类型'};
+const extraDDs=[
+ dropdown('ddWarmth',['全部关系'],()=>extraState.warmth,v=>extraState.warmth=v,null),
+ dropdown('ddIndustry',['全部行业'],()=>extraState.industry,v=>extraState.industry=v,null),
+ dropdown('ddRisk',['全部风险等级'],()=>extraState.risk,v=>extraState.risk=v,null),
+ dropdown('ddIcp',['全部ICP评级'],()=>extraState.icp,v=>extraState.icp=v,null),
+ dropdown('ddService',['全部服务方向'],()=>extraState.service,v=>extraState.service=v,null),
+ dropdown('ddSupport',['全部支持状态'],()=>extraState.support,v=>extraState.support=v,null),
+ dropdown('ddContract',['全部合同类型'],()=>extraState.contract,v=>extraState.contract=v,null)
+];
+
+function matches(r){
+ const pool=[r.name,r.owner,r.type,r.stage,r.project,r.desc,r.next,...(r.children||[]).flatMap(c=>[c.name,c.desc,c.owner])].filter(Boolean).join(' ').toLowerCase();
+ if(state.q&&!pool.includes(state.q))return false;
+ if(state.owner!=='全部 BD'&&r.owner!==state.owner&&!(r.children||[]).some(c=>c.owner===state.owner))return false;
+ if(state.stage!=='全部状态'&&r.stage!==state.stage&&!(r.children||[]).some(c=>c.stage===state.stage))return false;
+ if(state.type!=='全部来源'&&r.type!==state.type&&!(r.children||[]).some(c=>c.type===state.type))return false;
+ return true;
+}
+function filtered(){return ROWS.filter(matches)}
+function leadMatches(l){
+ const pool=[l.name,l.sourceType,l.sourceText,l.note,l.poolDate,l.reason,l.reasonDetail,l.history,l.cooling].filter(Boolean).join(' ').toLowerCase();
+ if(state.q&&!pool.includes(state.q))return false;
+ if(state.leadSource!=='全部来源'&&(l.sourceType||'未标记')!==state.leadSource)return false;
+ if(state.leadReason!=='全部原因'&&(l.reason||'无退回原因')!==state.leadReason)return false;
+ return true;
+}
+function filteredLeads(){return LEADS.filter(leadMatches)}
+function leadSourceCell(l){if(!l.sourceType)return '<span class="na">—</span>';return `<div class="leadsource"><strong>${escapeHtml(l.sourceType)}</strong>${l.sourceText?`<span title="${escapeHtml(l.sourceText)}">${escapeHtml(l.sourceText)}</span>`:''}</div>`}
+function leadReturnCell(l){if(!l.reason)return '<span class="na">—</span>';return `<div class="returncell"><span class="returnpill">${escapeHtml(l.reason)}</span>${l.reasonDetail?`<div class="returndesc" title="${escapeHtml(l.reasonDetail)}">${escapeHtml(l.reasonDetail)}</div>`:''}</div>`}
+function leadRowHtml(l){const coolingClass=l.cooling==='新线索'?'fresh':l.cooling==='冷却期已过'?'expired':'';return `<div class="leadrow"><div class="leadnamecell"><span class="orglogo">${escapeHtml(logo(l.name))}</span><span class="leadnamecopy"><span class="leadname" title="${escapeHtml(l.name)}">${escapeHtml(l.name)}</span></span></div>${leadSourceCell(l)}<div class="leadnote">${escapeHtml(l.note||'—')}</div><time class="leaddate">${escapeHtml(l.poolDate)}</time>${leadReturnCell(l)}<div class="leadhistory">${escapeHtml(l.history)}<span class="cooling ${coolingClass}">${escapeHtml(l.cooling)}</span></div><div class="leadactions">${l.historyCount?`<button class="leadhistorybtn" data-lead-action="history" data-id="${l.id}">看历史</button>`:''}<button class="leadclaim" data-lead-action="claim" data-id="${l.id}">认领并建联</button></div></div>`}
+function leadView(rows){
+ if(!rows.length)return emptyHtml('没有符合当前筛选的线索','可以重置搜索或筛选条件。');
+ return `<div class="leadhead"><span>线索名称</span><span>来源</span><span>备注</span><span>进池日期</span><span>退回原因 / 说明</span><span>历史纪要</span><span>操作</span></div><div class="leadrows">${rows.map(leadRowHtml).join('')}</div><footer class="leadfoot"><span>认领后转入客户库；退回会释放归属权并保留历史档案。</span><span>源列表共 <b>${LEADS.length}</b> 条，当前显示 <b>${rows.length}</b> 条</span></footer>`;
+}
+function stageCell(s,meta=''){const n=stageRank[s]||1,done=s==='已推进完成';return `<div class="stage ${done?'done':''}"><strong>${escapeHtml(s||'—')}</strong><span class="stagebar">${[1,2,3,4].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span>${meta?`<small>${escapeHtml(meta)}</small>`:''}</div>`}
+function aggregateStage(r){if(!r.children?.length)return r.stage;const active=r.children.filter(c=>c.stage!=='已推进完成');if(!active.length)return '已推进完成';return active.reduce((best,c)=>(stageRank[c.stage]||0)>(stageRank[best]||0)?c.stage:best,active[0].stage)}
+function aggregateStageMeta(r,child=false){if(child||!r.children?.length)return '';const active=r.children.filter(c=>c.stage!=='已推进完成').length;return active?`${active} 个在跟`:`${r.children.length} 个已完成`}
+const SNAPSHOT_DATE=new Date(2026,7,17);
+const LEGEND_ITEMS=[
+ ['early','建联 / 更早的动态'],['follow','跟进动态'],['latest','最近动态'],['nextmark','下一步'],['delivery','我方交付'],
+ ['later','更远的安排'],['beyond','四周以外的安排'],['interval','已排接触区间'],['stall','距今停滞天数'],['detail','点客户名进详情页']
+];
+function legendMark(kind){return `<i class="lgmark ${kind}" aria-hidden="true">${kind==='detail'?'↗':''}</i>`}
+function legendHtml(){return `<div class="legend" aria-label="节奏状态图例">${LEGEND_ITEMS.map(([kind,label])=>`<span class="legenditem">${legendMark(kind)}${label}</span>`).join('')}</div>`}
+function dateFromText(text){const m=String(text||'').match(/(\d{4})[-\/]([01]?\d)[-\/]([0-3]?\d)/);return m?new Date(Number(m[1]),Number(m[2])-1,Number(m[3])):null}
+function daysFromSnapshot(text){const d=dateFromText(text);return d?Math.round((d-SNAPSHOT_DATE)/86400000):null}
+function futureKind(r){const days=daysFromSnapshot(r.next);if(days===null)return null;if(/交付|合同|开标/.test(r.next||''))return 'delivery';if(days>28)return 'beyond';if(days>7)return 'later';return 'nextmark'}
+function timelinePosition(r){const days=daysFromSnapshot(r.next);if(days===null)return 50;return Math.max(0,Math.min(100,((days+14)/28)*100))}
+function rhythmLabel(kind){return {nextmark:'已排期',delivery:'我方交付',later:'更远的安排',beyond:'四周以外的安排'}[kind]||'已排期'}
+function rhythmCell(r){
+ if(r.rhythm==='approval'){const people=r.approval||[];return `<div class="rhythm"><button type="button" class="approvalflow" data-approval-id="${escapeHtml(r.id)}" aria-label="查看立项审批进度"><span class="approvaltag">立项审批</span>${people.map((name,i)=>`${i?'<span class="aparrow">›</span>':''}<span class="approvalperson ${i===0?'current':''}"><i class="apdot"></i>${escapeHtml(name)}</span>`).join('')}</button><div class="rlabel">审批流程进行中</div></div>`}
+ if(r.rhythm==='stall')return `<div class="rhythm"><div class="track stall"><i class="node early"></i></div><div class="rlabel warn">停滞 ${r.stall} 天</div></div>`;
+ if(r.rhythm==='future'){const kind=futureKind(r)||'nextmark',pos=timelinePosition(r);return `<div class="rhythm rhythm-timeline" style="--event-pos:${pos.toFixed(2)}%"><div class="track future"><i class="node early"></i><i class="node follow"></i><i class="node latest"></i><i class="node event ${kind}"></i><span class="trackevent">${nextText(r.next)}</span></div><div class="rlabel next">${rhythmLabel(kind)}</div></div>`}
+ if(r.rhythm==='empty')return `<div class="rhythm"><div class="track"><i class="node early"></i></div><div class="rlabel">暂无节奏数据</div></div>`;
+ return `<div class="rhythm"><div class="track completed"><i class="node early"></i><i class="node follow"></i><i class="node latest"></i></div><div class="rlabel">已推进完成</div></div>`;
+}
+function nameCell(r,child=false){
+ const exp=r.count?`<button class="exp ${r.open?'':'closed'}" data-expand="${r.id}" aria-label="展开或收起"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>`:(child?'':'<span class="exp-slot" aria-hidden="true"></span>');
+ const customerLogo=child?'':`<span class="orglogo">${escapeHtml(logo(r.name))}</span>`;
+ return `<div class="client ${child?'childclient':''}">${exp}${customerLogo}<div class="clientmain"><div class="clientline"><span class="cname" title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</span>${r.count?`<span class="tag neutral">${r.count} 个项目</span>`:''}${r.relation?`<span class="tag green">${escapeHtml(r.relation)}</span>`:''}${r.tag?`<span class="tag blue">${escapeHtml(r.tag)}</span>`:''}</div>${r.project?`<div class="desc">${escapeHtml(r.project)}</div>`:''}${r.desc?`<div class="desc" title="${escapeHtml(r.desc)}">${escapeHtml(r.desc)}</div>`:''}</div></div>`;
+}
+function ownerCell(owner,child=false){if(child||!owner)return '<span class="na">—</span>';return `<div class="ownercell"><span class="ownerav" style="background:${avatarGradient(owner)}">${escapeHtml(String(owner).charAt(0).toUpperCase())}</span><span class="ownername">${escapeHtml(owner)}</span></div>`}
+function sourceCell(r){return r.type?`<span class="typetag">${escapeHtml(r.type)}</span>`:'<span class="na">—</span>'}
+function nextText(text){return escapeHtml(text||'—').replace(/·\s*/g,'·<br>')}
+const MORE_ICON='<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="12" cy="24" r="3" fill="currentColor"/><circle cx="24" cy="24" r="3" fill="currentColor"/><circle cx="36" cy="24" r="3" fill="currentColor"/></svg>';
+function moreButton(id){return `<button class="moredot" type="button" data-row-menu="${escapeHtml(id)}" aria-label="更多客户操作" aria-haspopup="menu">${MORE_ICON}</button>`}
+function statusCell(kind,text,extra=''){if(!text||text==='—')return '<span class="na">—</span>';return `<div class="statuscell ${extra}">${legendMark(kind)}<span class="statuscopy">${nextText(text)}</span></div>`}
+function statusSummary(r){if(r.rhythm==='approval')return '审批流程进行中';if(r.rhythm==='stall')return `停滞 ${r.stall} 天`;if(r.rhythm==='done')return '已推进完成';if(r.next)return r.next;return r.stage||'—'}
+function rhythmViewport(r){return `<div class="timescroll rhythm-scroll" data-time-scroll><div class="rhythminner">${rhythmCell(r)}</div></div>`}
+function rowHtml(r,child=false,lastChild=false){const shownStage=child?r.stage:aggregateStage(r);const primaryAction=['发起立项','发起合同审批'].includes(r.action);return `<div class="row ${child?'child':''} ${lastChild?'last-child-row':''}" data-id="${r.id}">${nameCell(r,child)}${ownerCell(r.owner,child)}${sourceCell(r)}${stageCell(shownStage,aggregateStageMeta(r,child))}<div class="amount tnum">${money(r.amount)}</div>${rhythmViewport(r)}<div class="actions"><button class="action ${primaryAction?'dark':''}" data-action="${escapeHtml(r.action||'查看')}" data-id="${escapeHtml(r.id)}" data-name="${escapeHtml(r.name)}">${escapeHtml(r.action||'查看')}</button>${moreButton(r.id)}</div></div>`}
+
+function rhythmView(rows){
+ if(!rows.length)return emptyHtml('没有符合当前筛选的客户','可以重置搜索或筛选条件。');
+ let html=`<div class="boardhead"><span>客户 / 项目</span><span>负责人</span><span>客户来源</span><span>阶段</span><span>预测金额</span><div class="timeheadwrap"><button class="timeshift prev" type="button" data-time-shift="-1" aria-label="向前查看时间轴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div class="timescroll time-scroll-head" data-time-scroll><div class="timehead"><span>两周前</span><span>上一周</span><span>今天</span><span>本周内</span><span>下一周</span></div></div><button class="timeshift next" type="button" data-time-shift="1" aria-label="向后查看时间轴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div><span>操作</span></div><div class="rows">`;
+ rows.forEach(r=>{html+=rowHtml(r);if(r.open&&r.children)r.children.forEach((c,i,a)=>html+=rowHtml(c,true,i===a.length-1))});
+ html+=`</div><footer class="boardfoot statusfoot">${legendHtml()}</footer>`;return html;
+}
+function tableView(rows){
+ if(!rows.length)return emptyHtml('没有符合当前筛选的客户','可以重置搜索或筛选条件。');
+ const body=rows.map(r=>{
+  const s=aggregateStage(r),recent=r.lastFollowup?`${r.lastFollowup.date} · ${r.lastFollowup.summary}`:(r.desc||'—');
+  const customerType=r.relation||r.type||'—',projectType=r.tag||'—',stall=r.rhythm==='stall'?`${r.stall} 天`:'—';
+  return `<tr><td><div class="tableclient"><span class="orglogo">${escapeHtml(logo(r.name))}</span><span><button class="clientlink" type="button" data-action="查看客户详情" data-id="${escapeHtml(r.id)}" data-name="${escapeHtml(r.name)}" title="点客户名进详情页">${escapeHtml(r.name)}</button></span></div></td><td><span class="typetag">客户</span></td><td>${customerType==='—'?'<span class="na">—</span>':`<span class="typetag">${escapeHtml(customerType)}</span>`}</td><td><div class="statussummary" title="${escapeHtml(r.project||'—')}">${escapeHtml(r.project||'—')}</div></td><td>${projectType==='—'?'<span class="na">—</span>':`<span class="typetag">${escapeHtml(projectType)}</span>`}</td><td>${ownerCell(r.owner)}</td><td><span class="tablestage ${s==='已推进完成'?'done':''}">${escapeHtml(s||'—')}</span></td><td class="tnum">${money(r.amount)}</td><td><span class="na">—</span></td><td><span class="na">—</span></td><td><div class="statussummary" title="${escapeHtml(recent)}">${nextText(recent)}</div></td><td><div class="statussummary" title="${escapeHtml(r.next||'—')}">${nextText(r.next||'—')}</div></td><td>${stall==='—'?'<span class="na">—</span>':`<span class="statuscell warn">${escapeHtml(stall)}</span>`}</td><td><span class="na">—</span></td><td><div class="statussummary" title="${escapeHtml(statusSummary(r))}">${nextText(statusSummary(r))}</div></td><td><div class="tableactions"><button class="action" data-action="${escapeHtml(r.action||'查看项目')}" data-id="${escapeHtml(r.id)}" data-name="${escapeHtml(r.name)}">${escapeHtml(r.action||'查看项目')}</button>${moreButton(r.id)}</div></td></tr>`;
+ }).join('');
+ return `<div class="tablewrap"><table class="simpletable"><thead><tr><th>客户</th><th class="w-source">状态</th><th class="w-source">客户类型</th><th class="w-status-wide">项目</th><th class="w-source">项目类型</th><th class="w-owner">BD</th><th class="w-stage">阶段</th><th class="w-amount">预测金额</th><th class="w-source">周期归属</th><th class="w-source">建联</th><th class="w-status-wide">最近动态</th><th class="w-status-wide">下一步</th><th class="w-source">停滞</th><th class="w-source">来源</th><th class="w-status-wide">跟进状态</th><th>操作</th></tr></thead><tbody>${body}</tbody></table></div><footer class="boardfoot statusfoot">${legendHtml()}<div class="footmeta"><span class="legend-note">表格视图字段与原页对齐；未采集字段统一保留“—”</span><span>当前结果 <b>${rows.length}</b> 条</span></div></footer>`;
+}
+function emptyHtml(title,cap){return `<div class="empty"><div class="emptyicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg></div><h3>${title}</h3><p>${cap}</p></div>`}
+function findRecord(id){for(const r of ROWS){if(r.id===id)return r;const child=(r.children||[]).find(c=>c.id===id);if(child)return child}return null}
+function findParentRecord(id){return ROWS.find(r=>r.id===id||(r.children||[]).some(c=>c.id===id))||null}
+const rowMenu=document.getElementById('rowMenu');
+let activeMenuRecord=null;
+function closeRowMenu(){rowMenu.classList.remove('show');rowMenu.setAttribute('aria-hidden','true');document.querySelectorAll('.moredot.on').forEach(x=>x.classList.remove('on'));activeMenuRecord=null}
+// IconPark outline SVG paths (Apache-2.0): https://github.com/bytedance/IconPark
+const ROW_MENU_ICONS={
+ log:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.32497 43.4996L13.81 43.4998L44.9227 12.3871L36.4374 3.90186L5.32471 35.0146L5.32497 43.4996Z"/><path d="M27.9521 12.3872L36.4374 20.8725"/></svg>',
+ stage:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M42 8V24"/><path d="M6 24V40"/><path d="M42 24C42 14.0589 33.9411 6 24 6C18.9145 6 14.3216 8.10896 11.0481 11.5M6 24C6 33.9411 14.0589 42 24 42C28.8556 42 33.2622 40.0774 36.5 36.9519"/></svg>',
+ contact:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z"/><path d="M24.0084 12.0001L24.0072 24.0089L32.4866 32.4883"/></svg>',
+ project:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8C5 6.89543 5.89543 6 7 6H19L24 12H41C42.1046 12 43 12.8954 43 14V40C43 41.1046 42.1046 42 41 42H7C5.89543 42 5 41.1046 5 40V8Z"/><path d="M18 27H30"/><path d="M24 21V33"/></svg>',
+ edit:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M29 4H9C7.89543 4 7 4.89543 7 6V42C7 43.1046 7.89543 44 9 44H37C38.1046 44 39 43.1046 39 42V20.0046"/><path d="M13 18H21"/><path d="M13 28H25"/><path d="M40.9991 6.00098L29.0044 17.9958"/></svg>',
+ return:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.9998 8L6 14L12.9998 21"/><path d="M6 14H28.9938C35.8768 14 41.7221 19.6204 41.9904 26.5C42.2739 33.7696 36.2671 40 28.9938 40H11.9984"/></svg>'
+};
+function rowMenuIcon(name){return '<span class="rowmenuicon">'+ROW_MENU_ICONS[name]+'</span>'}
+function rowMenuHtml(){
+ return '<div class="rowmenulabel">已发生</div><button class="rowmenuitem" type="button" data-row-command="log">'+rowMenuIcon('log')+'<strong>记一次跟进</strong><small>轴上加点</small></button><div class="rowmenulabel">当前</div><button class="rowmenuitem" type="button" data-row-command="stage">'+rowMenuIcon('stage')+'<strong>更新阶段</strong><small>走到哪了</small></button><div class="rowmenulabel">接下来</div><button class="rowmenuitem" type="button" data-row-command="contact">'+rowMenuIcon('contact')+'<strong>安排下次接触</strong><small>约见面</small></button><button class="rowmenuitem" type="button" data-row-command="project">'+rowMenuIcon('project')+'<strong>新增项目</strong><small>同一客户下</small></button><div class="rowmenudivider"></div><button class="rowmenuitem" type="button" data-row-command="edit">'+rowMenuIcon('edit')+'<strong>编辑客户信息</strong><small></small></button><div class="rowmenudivider"></div><button class="rowmenuitem danger" type="button" data-row-command="return">'+rowMenuIcon('return')+'<strong>退回线索池</strong><small></small></button>';
+}
+function openRowMenu(button,record){
+ if(!record)return;if(rowMenu.classList.contains('show')&&activeMenuRecord?.id===record.id){closeRowMenu();return}
+ closeRowMenu();activeMenuRecord=record;rowMenu.innerHTML=rowMenuHtml();rowMenu.classList.add('show');rowMenu.setAttribute('aria-hidden','false');button.classList.add('on');
+ const rect=button.getBoundingClientRect(),mw=rowMenu.offsetWidth,mh=rowMenu.offsetHeight,gap=8;
+ let left=Math.min(rect.right-mw,window.innerWidth-mw-12);left=Math.max(12,left);
+ let top=rect.bottom+gap;if(top+mh>window.innerHeight-12)top=Math.max(12,rect.top-mh-gap);
+ rowMenu.style.left=left+'px';rowMenu.style.top=top+'px';
+}
+function bindTimelineScroll(){
+ const scrollers=[...document.querySelectorAll('[data-time-scroll]')];
+ const head=document.querySelector('.time-scroll-head');
+ let syncing=false;
+ const updateControls=()=>{
+  if(!head)return;
+  const max=Math.max(0,head.scrollWidth-head.clientWidth);
+  const prev=document.querySelector('[data-time-shift="-1"]');
+  const next=document.querySelector('[data-time-shift="1"]');
+  if(prev)prev.disabled=head.scrollLeft<=2;
+  if(next)next.disabled=head.scrollLeft>=max-2;
+ };
+ scrollers.forEach(el=>el.addEventListener('scroll',()=>{
+  if(syncing)return;syncing=true;
+  scrollers.forEach(other=>{if(other!==el)other.scrollLeft=el.scrollLeft});
+  requestAnimationFrame(()=>{syncing=false;updateControls()});
+ },{passive:true}));
+ document.querySelectorAll('[data-time-shift]').forEach(button=>button.addEventListener('click',()=>{
+  if(!head)return;
+  head.scrollBy({left:Number(button.dataset.timeShift)*144,behavior:'smooth'});
+ }));
+ updateControls();
+}
+function bindBoard(){
+ document.querySelectorAll('[data-expand]').forEach(b=>b.onclick=()=>{const r=ROWS.find(x=>x.id===b.dataset.expand);if(!r)return;if(!r.children){toast(`源截图未展示「${r.name}」的项目明细，因此不补造子行`);return}r.open=!r.open;render()});
+ document.querySelectorAll('[data-approval-id]').forEach(b=>b.onclick=()=>openApprovalModal(findRecord(b.dataset.approvalId)));
+ document.querySelectorAll('[data-row-menu]').forEach(b=>b.onclick=e=>{e.stopPropagation();openRowMenu(b,findRecord(b.dataset.rowMenu))});
+ document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{const r=findRecord(b.dataset.id)||{id:b.dataset.id,name:b.dataset.name,action:b.dataset.action};const action=b.dataset.action;if(action==='查看审批'){openApprovalModal(r);return}if(action==='发起立项'){openProjectModal(r);return}if(action==='安排下次接触'){openContactModal(r);return}if(action==='展开项目'){const parent=ROWS.find(x=>x.id===r.id);if(parent?.children){parent.open=true;render();return}}toast(`${action}「${b.dataset.name}」为本地原型操作，未写入真实业务系统`)});
+ document.querySelectorAll('[data-lead-action]').forEach(b=>b.onclick=()=>{const lead=LEADS.find(x=>x.id===b.dataset.id);if(!lead)return;if(b.dataset.leadAction==='history'){toast(`「${escapeHtml(lead.name)}」的截图仅显示 ${lead.historyCount} 条历史数量，未提供纪要正文，不做编造展示。`);return}toast(`已模拟认领「${escapeHtml(lead.name)}」并进入建联。原型演示，仅本地生效，不会写入实际系统。`) });
+}
+function syncModeUI(){
+ const leads=state.tab==='leads';
+ document.querySelector('.toolbar').classList.toggle('lead-mode',leads);
+ document.querySelectorAll('.customer-only').forEach(el=>el.hidden=leads);
+ document.querySelectorAll('.lead-only').forEach(el=>el.hidden=!leads);
+ document.getElementById('searchInput').placeholder=leads?'搜索线索名称、来源或退回原因':'搜索客户、项目或联系人';
+ document.getElementById('createText').textContent=leads?'录入线索':'新建客户';
+ if(leads){document.getElementById('moreBar').classList.remove('show');document.getElementById('moreBtn').classList.remove('on');document.getElementById('moreText').textContent='更多筛选'}
+}
+function render(){
+ const board=document.getElementById('board');
+ syncModeUI();
+ if(state.tab==='leads'){board.innerHTML=leadView(filteredLeads());bindBoard();return}
+ const rows=filtered();board.innerHTML=state.view==='rhythm'?rhythmView(rows):tableView(rows);bindBoard();if(state.view==='rhythm')bindTimelineScroll();
+}
+
+document.getElementById('searchInput').oninput=e=>{state.q=e.target.value.trim().toLowerCase();render()};
+document.getElementById('moreBtn').onclick=()=>{const on=document.getElementById('moreBar').classList.toggle('show');document.getElementById('moreBtn').classList.toggle('on',on);document.getElementById('moreText').textContent=on?'收起筛选':'更多筛选'};
+document.getElementById('resetBtn').onclick=()=>{if(state.tab==='leads'){Object.assign(state,{leadSource:'全部来源',leadReason:'全部原因',q:''});[ddLeadSource,ddLeadReason].forEach(d=>d.repaint())}else{Object.assign(state,{owner:'全部 BD',customerStatus:'全部客户状态',type:'全部来源',stage:'全部状态',progress:'进行中',q:''});[ddOwner,ddCustomerStatus,ddSource,ddStage,ddProgress,...extraDDs].forEach(d=>d.repaint())}document.getElementById('searchInput').value='';render();toast('已重置搜索与筛选条件')};
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{state.tab=t.dataset.tab;state.q='';document.getElementById('searchInput').value='';document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));render()});
+document.querySelectorAll('.viewbtn').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;document.querySelectorAll('.viewbtn').forEach(x=>x.classList.toggle('on',x===b));render()});
+document.getElementById('bellBtn').onclick=()=>toast('截图仅显示通知入口与 1 条未读标记，未提供通知正文');
+
+/* unified centered dialogs */
+const scrim=document.getElementById('scrim');
+const modalPanel=document.getElementById('modalPanel');
+const modalContent=document.getElementById('modalContent');
+let activeModalRecord=null;
+
+function optionHtml(values,selected){return values.map(v=>'<option value="'+escapeHtml(v)+'"'+(v===selected?' selected':'')+'>'+escapeHtml(v)+'</option>').join('')}
+function choiceHtml(group,values,selected,soft){return '<div class="choices">'+values.map(v=>'<button type="button" class="choice '+(soft?'soft ':'')+(v===selected?'on':'')+'" data-choice-group="'+group+'" data-value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</button>').join('')+'</div>'}
+function selectedChoice(group){const el=modalContent.querySelector('[data-choice-group="'+group+'"].on');return el?el.dataset.value:''}
+function fieldValue(id){const el=document.getElementById(id);return el?el.value.trim():''}
+function requireField(id,message){const el=document.getElementById(id);if(!el||el.value.trim())return true;el.classList.add('err');el.closest('.selectcontrol')?.classList.add('err');const msg=el.closest('.field')?.querySelector('.errmsg');if(msg){msg.textContent=message;msg.classList.add('show')}const visual=el.closest('.selectcontrol')?.querySelector('.selecttrigger')||el;visual.focus();return false}
+const calendarState={input:null,view:new Date(2026,7,1)};
+const calendarIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="2.5"/><path d="M7.5 3.5v4M16.5 3.5v4M3.5 9.5h17"/></svg>';
+const calendarPanel=document.createElement('div');calendarPanel.className='datepicker';calendarPanel.setAttribute('role','dialog');calendarPanel.setAttribute('aria-label','选择日期');document.body.appendChild(calendarPanel);
+const selectState={select:null,trigger:null};
+const selectPanel=document.createElement('div');selectPanel.className='selectmenu';selectPanel.setAttribute('role','listbox');document.body.appendChild(selectPanel);
+const selectChevron='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';
+const selectCheck='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4 4L19 7"/></svg>';
+function parseCalendarDate(value){const m=String(value||'').match(/(\d{4})[-\/]([01]?\d)[-\/]([0-3]?\d)/);return m?new Date(Number(m[1]),Number(m[2])-1,Number(m[3])):null}
+function formatCalendarDate(date){return date.getFullYear()+'/'+String(date.getMonth()+1).padStart(2,'0')+'/'+String(date.getDate()).padStart(2,'0')}
+function sameCalendarDay(a,b){return !!a&&!!b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
+function calendarDays(){const y=calendarState.view.getFullYear(),m=calendarState.view.getMonth(),first=new Date(y,m,1),start=new Date(y,m,1-first.getDay()),selected=parseCalendarDate(calendarState.input?.value),today=new Date();let html='';for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const out=d.getMonth()!==m,iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');html+='<button type="button" class="calday '+(out?'out ':'')+(sameCalendarDay(d,today)?'today ':'')+(sameCalendarDay(d,selected)?'selected':'')+'" data-cal-date="'+iso+'" aria-label="'+formatCalendarDate(d)+'">'+d.getDate()+'</button>'}return html}
+function renderCalendar(){const y=calendarState.view.getFullYear(),m=calendarState.view.getMonth()+1;calendarPanel.innerHTML='<div class="calhead"><div class="calmonth"><span>'+y+'</span><small>年</small><span>'+String(m).padStart(2,'0')+'</span><small>月</small></div><div class="calnavs"><button type="button" class="calnav" data-cal-nav="prev" aria-label="上个月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="calnav" data-cal-nav="next" aria-label="下个月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></div><div class="calweek"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div><div class="calgrid">'+calendarDays()+'</div><div class="calfoot"><button type="button" data-cal-action="clear">清除</button><button type="button" class="caltoday" data-cal-action="today">今天</button></div>'}
+function positionCalendar(){if(!calendarState.input)return;const r=calendarState.input.getBoundingClientRect(),w=326,h=390,gap=8;let left=Math.min(window.innerWidth-w-12,Math.max(12,r.right-w)),top=r.bottom+gap;if(top+h>window.innerHeight-12)top=Math.max(12,r.top-h-gap);calendarPanel.style.left=left+'px';calendarPanel.style.top=top+'px'}
+function openCalendar(input){if(!input)return;closeSelect();calendarState.input?.closest('.datecontrol')?.classList.remove('open');calendarState.input=input;const chosen=parseCalendarDate(input.value)||new Date(2026,7,18);calendarState.view=new Date(chosen.getFullYear(),chosen.getMonth(),1);input.closest('.datecontrol')?.classList.add('open');renderCalendar();calendarPanel.classList.add('show');positionCalendar()}
+function closeCalendar(){calendarPanel.classList.remove('show');calendarState.input?.closest('.datecontrol')?.classList.remove('open');calendarState.input=null}
+function setCalendarValue(date){if(!calendarState.input)return;calendarState.input.value=date?formatCalendarDate(date):'';calendarState.input.dispatchEvent(new Event('input',{bubbles:true}));calendarState.input.dispatchEvent(new Event('change',{bubbles:true}));closeCalendar()}
+function initDatePickers(){modalContent.querySelectorAll('input[type="date"],input[data-date-picker]').forEach(input=>{if(input.parentElement?.classList.contains('datecontrol'))return;const originalValue=input.value;input.type='text';input.dataset.datePicker='true';input.readOnly=true;input.setAttribute('inputmode','none');input.setAttribute('autocomplete','off');input.placeholder=input.placeholder||'年 / 月 / 日';if(originalValue)input.value=originalValue.replaceAll('-','/');const wrap=document.createElement('div');wrap.className='datecontrol';input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);const button=document.createElement('button');button.type='button';button.className='dateicon';button.setAttribute('aria-label','打开日历');button.innerHTML=calendarIcon;wrap.appendChild(button);input.addEventListener('click',()=>openCalendar(input));input.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openCalendar(input)}});button.addEventListener('click',()=>openCalendar(input))})}
+calendarPanel.onclick=e=>{e.stopPropagation();const nav=e.target.closest('[data-cal-nav]');if(nav){calendarState.view.setMonth(calendarState.view.getMonth()+(nav.dataset.calNav==='next'?1:-1));renderCalendar();return}const day=e.target.closest('[data-cal-date]');if(day){const [y,m,d]=day.dataset.calDate.split('-').map(Number);setCalendarValue(new Date(y,m-1,d));return}const action=e.target.closest('[data-cal-action]');if(action){setCalendarValue(action.dataset.calAction==='today'?new Date():null)}};
+function updateSelectTrigger(select){const trigger=select.closest('.selectcontrol')?.querySelector('.selecttrigger'),option=select.options[select.selectedIndex];if(trigger)trigger.querySelector('[data-select-label]').textContent=option?.textContent||'请选择'}
+function renderSelectMenu(){const select=selectState.select;if(!select)return;selectPanel.innerHTML=[...select.options].map((option,index)=>'<button type="button" class="selectoption '+(option.selected?'selected':'')+'" data-select-index="'+index+'" role="option" aria-selected="'+(option.selected?'true':'false')+'"><span>'+escapeHtml(option.textContent)+'</span><span class="selectcheck">'+selectCheck+'</span></button>').join('')}
+function positionSelectMenu(){if(!selectState.trigger)return;const r=selectState.trigger.getBoundingClientRect(),width=Math.max(220,r.width),estimated=Math.min(286,selectPanel.scrollHeight||240),gap=8;let left=Math.min(window.innerWidth-width-12,Math.max(12,r.left)),top=r.bottom+gap;if(top+estimated>window.innerHeight-12)top=Math.max(12,r.top-estimated-gap);selectPanel.style.width=width+'px';selectPanel.style.left=left+'px';selectPanel.style.top=top+'px'}
+function openSelect(select,trigger){closeCalendar();closeSelect();selectState.select=select;selectState.trigger=trigger;trigger.closest('.selectcontrol')?.classList.add('open');trigger.setAttribute('aria-expanded','true');renderSelectMenu();selectPanel.classList.add('show');positionSelectMenu();selectPanel.querySelector('.selected')?.scrollIntoView({block:'nearest'})}
+function closeSelect(){selectPanel.classList.remove('show');selectState.trigger?.closest('.selectcontrol')?.classList.remove('open');selectState.trigger?.setAttribute('aria-expanded','false');selectState.select=null;selectState.trigger=null}
+function initCustomSelects(){modalContent.querySelectorAll('select.sel').forEach(select=>{if(select.parentElement?.classList.contains('selectcontrol'))return;const wrap=document.createElement('div');wrap.className='selectcontrol';select.parentNode.insertBefore(wrap,select);wrap.appendChild(select);select.classList.add('selectnative');const button=document.createElement('button');button.type='button';button.className='selecttrigger';button.setAttribute('aria-haspopup','listbox');button.setAttribute('aria-expanded','false');button.innerHTML='<span data-select-label></span><span class="selectchev">'+selectChevron+'</span>';wrap.appendChild(button);updateSelectTrigger(select);button.addEventListener('click',()=>selectState.select===select?closeSelect():openSelect(select,button));button.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){e.preventDefault();openSelect(select,button)}})})}
+selectPanel.onclick=e=>{e.stopPropagation();const option=e.target.closest('[data-select-index]');if(!option||!selectState.select)return;selectState.select.selectedIndex=Number(option.dataset.selectIndex);selectState.select.dispatchEvent(new Event('input',{bubbles:true}));selectState.select.dispatchEvent(new Event('change',{bubbles:true}));updateSelectTrigger(selectState.select);closeSelect()};
+function dialogShell(o){
+ modalPanel.className='modal '+(o.size||'');
+ modalContent.innerHTML='<header class="mhead"><div><h2 id="modalTitle">'+escapeHtml(o.title)+'</h2><p>'+escapeHtml(o.subtitle||'')+'</p></div><button class="xbtn" type="button" data-modal-close aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><div class="mbody">'+o.body+'</div><footer class="mfoot"><span class="mnote">'+escapeHtml(o.note||'本地交互原型，不会写入真实业务系统。')+'</span><div class="macts"><button class="cancel" type="button" data-modal-close>'+escapeHtml(o.secondary||'取消')+'</button>'+(o.primary?'<button class="save" type="button" '+(o.primaryAttr||'')+'>'+escapeHtml(o.primary)+'</button>':'')+'</div></footer>';
+ initDatePickers();
+ initCustomSelects();
+}
+function showDialog(o,focusId){closeRowMenu();dialogShell(o);scrim.classList.add('show');scrim.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';if(focusId)setTimeout(()=>document.getElementById(focusId)?.focus(),90)}
+function closeDialog(){closeCalendar();closeSelect();scrim.classList.remove('show');scrim.setAttribute('aria-hidden','true');document.body.style.overflow='';activeModalRecord=null}
+
+function openApprovalModal(record){
+ if(!record)return;
+ activeModalRecord=record;
+ const people=record.approval?.length?record.approval:['Harrison','Jessie','Mia','ZZ'];
+ const steps=people.map((name,i)=>'<div class="approvalstep '+(i===0?'current':'')+'"><i></i><span class="status">'+(i===0?'处理中':'待处理')+'</span><span class="role">'+(i===0?'当前节点':'审批节点')+'</span><span class="person">'+escapeHtml(name)+'</span></div>').join('');
+ const body='<div class="summarycard"><div><strong>'+escapeHtml(record.name)+'</strong><span>立项审批仅展示进度，审批操作仍在审批中心完成</span></div><span class="summarymetric">0 / '+people.length+'</span></div><div class="approvalcard"><strong>当前卡在 Harrison</strong><div><span>已提交 6 天</span><span>已通过 0 / '+people.length+' 个节点</span></div></div><section class="msection"><div class="sectionhead"><div><div class="sectiontitle">审批路径</div><div class="sectioncap">按流程顺序展示当前节点与后续处理人</div></div><span class="sectiontag">进行中</span></div><div class="approvalsteps">'+steps+'</div></section>';
+ showDialog({size:'compact',eyebrow:'Approval Progress',title:'立项审批进度',subtitle:record.name,body,note:'催办只在本地显示反馈，不会向审批人发送消息。',secondary:'关闭',primary:'催办',primaryAttr:'data-modal-action="remind"'});
+}
+
+function openCustomerModal(){
+ activeModalRecord=null;
+ const ownerOptions=optionHtml(owners.slice(1),'FansAI Admin');
+ const stageOptions=optionHtml(['建联','需求沟通','提案报价'],'建联');
+ const body='<section class="msection"><div class="sectionhead"><div><div class="sectiontitle">客户基本信息</div><div class="sectioncap">先建立可归属、可追踪的最小客户档案</div></div><span class="sectiontag">前 4 项必填</span></div><div class="field"><label class="lb">客户名称 <span class="req">*</span></label><input class="inp" id="newName" placeholder="例如：奇正藏药"><p class="errmsg">请填写客户名称</p></div><div class="grid2"><div class="field"><label class="lb">负责 BD <span class="req">*</span></label><select class="sel" id="newOwner">'+ownerOptions+'</select></div><div class="field"><label class="lb">建联日期 <span class="req">*</span></label><input class="inp" id="newConnectDate" type="date" value="2026-08-17"></div></div><div class="field"><label class="lb">客户类型 <span class="req">*</span></label>'+choiceHtml('customer-type',['新开发客户','老客户续约'],'新开发客户')+'</div><div class="field"><label class="lb">客户来源 <span class="req">*</span></label>'+choiceHtml('customer-source',['朋友推荐','自己开发','展会','官网留资','老客转介'],'自己开发',true)+'</div><div class="grid2"><div class="field"><label class="lb">所属行业</label><select class="sel" id="newIndustry">'+optionHtml(['未选择','快消/美妆','餐饮','文旅','服装/时尚','医药健康','出海品牌'],'未选择')+'</select></div><div class="field"><label class="lb">公司规模 / 市场地位</label><input class="inp" id="newPosition" placeholder="可留空"></div></div><div class="field"><label class="lb">公司摘要</label><textarea class="ta" id="newSummary" placeholder="概括公司定位、主营业务与主要产品"></textarea></div></section><div class="accordion"><button type="button" data-accordion>主要联系人</button><div class="accordion-body"><div class="grid2"><div class="field"><label class="lb">联系人姓名</label><input class="inp" id="newContact" placeholder="可稍后补充"></div><div class="field"><label class="lb">职务 / 联系方式</label><input class="inp" id="newContactRole" placeholder="例如：品牌负责人"></div></div></div></div><div class="accordion open"><button type="button" data-accordion>项目与下一步</button><div class="accordion-body"><div class="field"><label class="lb">项目名称</label><input class="inp" id="newProject" placeholder="品牌 + 项目内容，例如：奇正藏药 短剧&TVC制作"></div><div class="grid2"><div class="field"><label class="lb">预测合同金额</label><input class="inp" id="newAmount" type="number" min="0" placeholder="0"></div><div class="field"><label class="lb">当前阶段</label><select class="sel" id="newStage">'+stageOptions+'</select></div></div><div class="grid2"><div class="field"><label class="lb">下一步行动</label><input class="inp" id="newNextAction" placeholder="例如：提案会 / 报价确认"></div><div class="field"><label class="lb">下一步日期</label><input class="inp" id="newNextDate" type="date"></div></div></div></div>';
+ showDialog({size:'wide',eyebrow:'New Customer',title:'新建客户',subtitle:'客户先建档，联系人和项目可按真实信息逐步补充。',body,note:'带 * 为必填；保存后只在当前 HTML 中生效。',primary:'保存并继续跟进',primaryAttr:'data-modal-submit="customer"'},'newName');
+}
+
+function openProjectModal(record){
+ if(!record)return;
+ activeModalRecord=record;
+ const body='<div class="summarycard"><div><strong>'+escapeHtml(record.name)+'</strong><span>'+escapeHtml(record.project||'待建立项目')+' / 当前阶段 '+escapeHtml(record.stage||'建联')+'</span></div><span class="summarymetric">'+escapeHtml(money(record.amount))+'</span></div><section class="msection"><div class="sectionhead"><div><div class="sectiontitle">项目配置</div><div class="sectioncap">先明确责任、周期和协作方式，再进入审批</div></div><span class="sectiontag">立项前置</span></div><div class="grid2"><div class="field"><label class="lb">立项部门 <span class="req">*</span></label><select class="sel" id="projectDept">'+optionHtml(['品牌内容部','整合营销部','创意制作部'],'品牌内容部')+'</select></div><div class="field"><label class="lb">执行负责人 AE <span class="req">*</span></label><select class="sel" id="projectAE"><option value="">请选择</option>'+optionHtml(['Harrison','Jessie','Mia','ZZ'],'')+'</select><p class="errmsg">请选择执行负责人</p></div></div><div class="grid3"><div class="field"><label class="lb">预计启动日期</label><input class="inp" id="projectStart" type="date" value="2026-08-20"></div><div class="field"><label class="lb">预计交付日期</label><input class="inp" id="projectDelivery" type="date"></div><div class="field"><label class="lb">项目制作类型</label><select class="sel" id="projectType">'+optionHtml(['未设置','短视频','TVC','整合内容','线下活动'],'未设置')+'</select></div></div><div class="field"><label class="lb">项目成员</label><input class="inp" id="projectMembers" placeholder="输入姓名，以顿号分隔"></div><div class="field"><label class="lb">BD 是否继续参与</label>'+choiceHtml('bd-participation',['仅客户关系维护','参与到首次交付','全程参与'],'仅客户关系维护')+'</div><div class="field"><label class="lb">项目背景 <span class="req">*</span></label><textarea class="ta" id="projectBackground" placeholder="客户想解决什么问题、我们承诺了什么、有哪些限制"></textarea><p class="errmsg">请填写项目背景</p></div><div class="field"><label class="lb">背景附件</label><div class="dropzone" data-modal-action="file"><strong>拖入或点击上传</strong><span>客户 brief、招标文件、提案与报价单、会议纪要</span></div></div><div class="field"><label class="lb">外部供应商</label>'+choiceHtml('supplier',['不需要，内部消化','需要，已有意向供应商','需要，待寻源'],'不需要，内部消化',true)+'</div></section>';
+ showDialog({size:'wide',eyebrow:'Project Initiation',title:'发起立项',subtitle:record.name+' / '+(record.project||'新项目'),body,note:'提交后进入立项审批，通过后由项目管理接管。',primary:'提交立项审批',primaryAttr:'data-modal-submit="project"'});
+}
+
+function openContactModal(record){
+ if(!record)return;
+ activeModalRecord=record;
+ const body='<section class="msection"><div class="sectionhead"><div><div class="sectiontitle">接触安排</div><div class="sectioncap">创建明确动作，时间轴会同步出现下一节点</div></div><span class="sectiontag">下一步</span></div><div class="field"><label class="lb">动作类型 <span class="req">*</span></label>'+choiceHtml('contact-type',['面谈','提案会','报价确认','开标','签约','电话回访'],'面谈')+'</div><div class="grid2"><div class="field"><label class="lb">日期 <span class="req">*</span></label><input class="inp" id="contactDate" type="date" value="2026-08-18"><p class="errmsg">请选择日期</p></div><div class="field"><label class="lb">时间 / 地点</label><input class="inp" id="contactPlace" placeholder="例如：14:00 客户公司 / 线上"></div></div><div class="field"><label class="lb">一句话说明 <span class="req">*</span></label><input class="inp" id="contactSummary" value="需求沟通" placeholder="尽量短，轴上会完整展示"><p class="errmsg">请填写一句话说明</p><div class="help">建议不超过 12 个字，确保在节奏视图中易读。</div></div><div class="field"><label class="lb">需要谁参与</label>'+choiceHtml('participants',['我方 BD','制作团队','Harrison','客户决策人'],'我方 BD',true)+'</div><div class="field"><label class="lb">提醒</label>'+choiceHtml('reminder',['提前 1 天','提前 3 天','当天早上','不提醒'],'提前 1 天')+'</div><div class="field"><label class="lb">准备事项</label><textarea class="ta" id="contactNotes" placeholder="见面前要准备的资料、要问清的问题"></textarea></div></section>';
+ showDialog({size:'compact',eyebrow:'Next Touchpoint',title:'安排下次接触',subtitle:record.name+' / '+(record.project||record.stage||'客户跟进'),body,note:'保存后将更新此客户的时间轴和下一步字段。',primary:'保存安排',primaryAttr:'data-modal-submit="contact"'},'contactDate');
+}
+
+function openLogModal(record){
+ if(!record)return;activeModalRecord=record;
+ const body='<section class="msection"><div class="sectionhead"><div><div class="sectiontitle">已发生的跟进</div><div class="sectioncap">记录事实，不改变下一步安排</div></div><span class="sectiontag">轴上加点</span></div><div class="field"><label class="lb">跟进类型 <span class="req">*</span></label>'+choiceHtml('log-type',['面谈','电话','微信','邮件','提案会'],'面谈')+'</div><div class="grid2"><div class="field"><label class="lb">发生日期 <span class="req">*</span></label><input class="inp" id="followDate" type="date" value="2026-08-17"><p class="errmsg">请选择发生日期</p></div><div class="field"><label class="lb">参与人</label><input class="inp" id="followPeople" placeholder="例如：Nico、客户品牌负责人"></div></div><div class="field"><label class="lb">一句话纪要 <span class="req">*</span></label><input class="inp" id="followSummary" placeholder="例如：已确认预算区间"><p class="errmsg">请填写一句话纪要</p></div><div class="field"><label class="lb">补充说明</label><textarea class="ta" id="followNotes" placeholder="记录事实、结论与待确认事项"></textarea></div></section>';
+ showDialog({size:'compact',eyebrow:'Follow-up Log',title:'记一次跟进',subtitle:record.name,body,note:'保存后在当前客户的历史摘要中留下本次跟进。',primary:'保存纪要',primaryAttr:'data-modal-submit="log"'},'followSummary');
+}
+
+function openStageModal(record){
+ if(!record)return;activeModalRecord=record;
+ const selected=record.stage||'建联';
+ const body='<div class="summarycard"><div><strong>'+escapeHtml(record.name)+'</strong><span>当前阶段 '+escapeHtml(selected)+'</span></div><span class="summarymetric">'+escapeHtml(selected)+'</span></div><section class="msection"><div class="sectionhead"><div><div class="sectiontitle">更新客户阶段</div><div class="sectioncap">只选择已真实到达的阶段，避免提前标记完成</div></div><span class="sectiontag">当前状态</span></div><div class="field"><label class="lb">阶段 <span class="req">*</span></label>'+choiceHtml('stage-update',['建联','需求沟通','提案报价','已推进完成'],selected)+'</div><div class="field"><label class="lb">阶段说明</label><textarea class="ta" id="stageNote" placeholder="说明进入该阶段的依据"></textarea></div></section>';
+ showDialog({size:'compact',eyebrow:'Customer Stage',title:'更新阶段',subtitle:record.name,body,note:'阶段变化会同步更新列表中的阶段文案与进度条。',primary:'保存阶段',primaryAttr:'data-modal-submit="stage"'});
+}
+
+function openAddProjectModal(record){
+ const parent=findParentRecord(record?.id);if(!parent)return;activeModalRecord=parent;
+ const body='<div class="summarycard"><div><strong>'+escapeHtml(parent.name)+'</strong><span>在同一客户下新增独立项目，不重复创建客户</span></div><span class="summarymetric">'+escapeHtml(String(parent.count||1))+' 项</span></div><section class="msection"><div class="sectionhead"><div><div class="sectiontitle">项目基本信息</div><div class="sectioncap">项目拥有独立阶段、金额和下一步</div></div><span class="sectiontag">新增项目</span></div><div class="field"><label class="lb">项目名称 <span class="req">*</span></label><input class="inp" id="addProjectName" placeholder="例如：年度内容陪跑"><p class="errmsg">请填写项目名称</p></div><div class="grid2"><div class="field"><label class="lb">预测金额</label><input class="inp" id="addProjectAmount" type="number" min="0" placeholder="0"></div><div class="field"><label class="lb">当前阶段</label><select class="sel" id="addProjectStage">'+optionHtml(['建联','需求沟通','提案报价'],'需求沟通')+'</select></div></div><div class="field"><label class="lb">项目说明</label><textarea class="ta" id="addProjectDesc" placeholder="记录项目目标、范围或当前信息"></textarea></div></section>';
+ showDialog({size:'compact',eyebrow:'New Project',title:'新增项目',subtitle:parent.name,body,note:'保存后展开客户即可看到新的项目子行。',primary:'保存项目',primaryAttr:'data-modal-submit="add-project"'},'addProjectName');
+}
+
+function openEditCustomerModal(record){
+ const parent=findParentRecord(record?.id);if(!parent)return;activeModalRecord=parent;
+ const sourceValues=['直客','三方','朋友推荐','自己开发','展会','官网留资','老客转介'];if(parent.type&&!sourceValues.includes(parent.type))sourceValues.unshift(parent.type);
+ const body='<section class="msection"><div class="sectionhead"><div><div class="sectiontitle">客户档案</div><div class="sectioncap">这里只编辑客户级信息，不覆盖项目子行</div></div><span class="sectiontag">编辑</span></div><div class="field"><label class="lb">客户名称 <span class="req">*</span></label><input class="inp" id="editCustomerName" value="'+escapeHtml(parent.name)+'"><p class="errmsg">请填写客户名称</p></div><div class="grid2"><div class="field"><label class="lb">负责人</label><select class="sel" id="editCustomerOwner">'+optionHtml(owners.slice(1),parent.owner)+'</select></div><div class="field"><label class="lb">客户来源</label><select class="sel" id="editCustomerSource">'+optionHtml(sourceValues,parent.type||sourceValues[0])+'</select></div></div><div class="grid2"><div class="field"><label class="lb">客户阶段</label><select class="sel" id="editCustomerStage">'+optionHtml(['建联','需求沟通','提案报价','已推进完成'],aggregateStage(parent))+'</select></div><div class="field"><label class="lb">预测金额</label><input class="inp" id="editCustomerAmount" type="number" min="0" value="'+escapeHtml(parent.amount||'')+'"></div></div><div class="field"><label class="lb">客户摘要</label><textarea class="ta" id="editCustomerDesc">'+escapeHtml(parent.desc||'')+'</textarea></div></section>';
+ showDialog({size:'compact',eyebrow:'Customer Profile',title:'编辑客户信息',subtitle:parent.name,body,note:'客户级信息保存后同步更新节奏视图和表格视图。',primary:'保存修改',primaryAttr:'data-modal-submit="edit-customer"'},'editCustomerName');
+}
+
+function openReturnModal(record){
+ const parent=findParentRecord(record?.id);if(!parent)return;activeModalRecord=parent;
+ const body='<div class="summarycard"><div><strong>'+escapeHtml(parent.name)+'</strong><span>退回后释放归属权，历史纪要仍保留在线索池</span></div><span class="summarymetric" style="color:#D9544F!important">退回</span></div><section class="msection"><div class="sectionhead"><div><div class="sectiontitle">退回原因</div><div class="sectioncap">原因用于下一位认领者理解前因后果</div></div><span class="sectiontag">必须填写</span></div><div class="field">'+choiceHtml('return-reason',['暂无明确需求','预算不匹配','时机不对','已有其他供应商','联系不上'],'时机不对',true)+'</div><div class="field"><label class="lb">补充说明 <span class="req">*</span></label><textarea class="ta" id="returnNote" placeholder="说明当前情况、建议冷却时间与后续机会"></textarea><p class="errmsg">请填写退回说明</p></div></section>';
+ showDialog({size:'compact',eyebrow:'Return to Lead Pool',title:'退回线索池',subtitle:parent.name,body,note:'确认后仅在当前本地原型中移动记录。',primary:'确认退回',primaryAttr:'data-modal-submit="return-lead"'},'returnNote');
+}
+
+function saveCustomerFromDialog(){
+ if(!requireField('newName','请填写客户名称')||!requireField('newOwner','请选择负责 BD')||!requireField('newConnectDate','请选择建联日期'))return;
+ const name=fieldValue('newName'),owner=fieldValue('newOwner'),source=selectedChoice('customer-source')||'未标记',relation=selectedChoice('customer-type')||'新开发客户',project=fieldValue('newProject'),stage=fieldValue('newStage')||'建联',amount=Number(fieldValue('newAmount'))||null,nextAction=fieldValue('newNextAction'),nextDate=fieldValue('newNextDate'),summary=fieldValue('newSummary');
+ ROWS.unshift({id:'local-'+Date.now(),name,owner,type:source,relation,stage,amount,project:project||null,desc:summary||('建联日期 '+fieldValue('newConnectDate')),rhythm:nextDate?'future':'empty',next:nextDate?(nextDate.replaceAll('-','/')+' · '+(nextAction||'待安排跟进')):null,action:project?'发起立项':'安排下次接触'});
+ closeDialog();state.tab='customers';document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.tab==='customers'));render();toast('已在本地原型新建「'+escapeHtml(name)+'」');
+}
+function submitProjectFromDialog(){
+ if(!requireField('projectAE','请选择执行负责人')||!requireField('projectBackground','请填写项目背景'))return;
+ const r=activeModalRecord;if(r){r.rhythm='approval';r.approval=['Harrison','Jessie','Mia','ZZ'];r.next='立项审批中';r.action='查看审批';render()}closeDialog();toast('已在本地原型提交立项审批，可点击“查看审批”跟踪进度');
+}
+function saveContactFromDialog(){
+ if(!requireField('contactDate','请选择日期')||!requireField('contactSummary','请填写一句话说明'))return;
+ const r=activeModalRecord,date=fieldValue('contactDate').replaceAll('-','/'),summary=fieldValue('contactSummary');if(r){r.rhythm='future';r.next=date+' · '+summary;delete r.stall;render()}closeDialog();toast('已更新「'+escapeHtml(r?.name||'客户')+'」的下一次接触');
+}
+function saveFollowupFromDialog(){
+ if(!requireField('followDate','请选择发生日期')||!requireField('followSummary','请填写一句话纪要'))return;
+ const r=activeModalRecord,date=fieldValue('followDate').replaceAll('-','/'),summary=fieldValue('followSummary'),notes=fieldValue('followNotes'),people=fieldValue('followPeople'),kind=selectedChoice('log-type')||'跟进';
+ if(r){r.lastFollowup={date,summary,notes,people,kind};r.desc='最近跟进 '+date+' · '+summary+(notes?'；'+notes:'');render()}
+ closeDialog();toast('已为「'+escapeHtml(r?.name||'客户')+'」记录一次跟进');
+}
+function saveStageFromDialog(){
+ const r=activeModalRecord,stage=selectedChoice('stage-update');if(!r||!stage)return;
+ r.stage=stage;r.stageNote=fieldValue('stageNote');
+ if(stage==='已推进完成'){r.rhythm='done';r.next=r.next||'已推进完成'}else if(r.rhythm==='done'){r.rhythm='empty';r.next=null}
+ const parent=findParentRecord(r.id);if(parent&&parent!==r&&parent.children?.length){parent.stage=aggregateStage(parent);parent.amount=parent.children.reduce((sum,item)=>sum+(Number(item.amount)||0),0)}
+ render();closeDialog();toast('已将「'+escapeHtml(r.name)+'」更新为「'+escapeHtml(stage)+'」');
+}
+function saveAddedProjectFromDialog(){
+ if(!requireField('addProjectName','请填写项目名称'))return;
+ const parent=activeModalRecord;if(!parent)return;
+ if(!parent.children){
+  parent.children=[];
+  if(parent.project){parent.children.push({id:parent.id+'-base',name:parent.project,owner:parent.owner,type:parent.type,relation:parent.relation,stage:parent.stage,amount:parent.amount,desc:parent.desc,rhythm:parent.rhythm,next:parent.next,action:parent.action});parent.project=null;parent.desc=null}
+ }
+ const rawName=fieldValue('addProjectName'),amount=Number(fieldValue('addProjectAmount'))||null,stage=fieldValue('addProjectStage')||'需求沟通',desc=fieldValue('addProjectDesc');
+ parent.children.push({id:'local-project-'+Date.now(),name:rawName.startsWith(parent.name)?rawName:parent.name+' '+rawName,owner:parent.owner,type:parent.type,relation:parent.relation,stage,amount,desc:desc||null,rhythm:'empty',next:null,action:'安排下次接触'});
+ parent.count=parent.children.length;parent.amount=parent.children.reduce((sum,item)=>sum+(Number(item.amount)||0),0);parent.stage=aggregateStage(parent);parent.action='展开项目';parent.open=true;
+ render();closeDialog();toast('已在「'+escapeHtml(parent.name)+'」下新增项目「'+escapeHtml(rawName)+'」');
+}
+function saveEditCustomerFromDialog(){
+ if(!requireField('editCustomerName','请填写客户名称'))return;
+ const parent=activeModalRecord;if(!parent)return;
+ parent.name=fieldValue('editCustomerName');parent.owner=fieldValue('editCustomerOwner')||parent.owner;parent.type=fieldValue('editCustomerSource')||parent.type;parent.stage=fieldValue('editCustomerStage')||parent.stage;parent.amount=Number(fieldValue('editCustomerAmount'))||null;parent.desc=fieldValue('editCustomerDesc')||null;
+ if(parent.stage==='已推进完成')parent.rhythm='done';
+ render();closeDialog();toast('已更新「'+escapeHtml(parent.name)+'」的客户资料');
+}
+function returnToLeadPoolFromDialog(){
+ if(!requireField('returnNote','请填写退回说明'))return;
+ const parent=activeModalRecord;if(!parent)return;
+ const reason=selectedChoice('return-reason')||'未标记',note=fieldValue('returnNote'),index=ROWS.findIndex(r=>r.id===parent.id);
+ LEADS.unshift({id:'returned-'+Date.now(),name:parent.name,sourceType:'BD 退回',sourceText:null,note:null,poolDate:'2026/08/17',reason,reasonDetail:note,history:'1 条 · '+(parent.owner||'未分配')+' 退回',historyCount:1,cooling:'冷却期还剩 30 天'});
+ if(index>=0)ROWS.splice(index,1);
+ closeDialog();render();toast('已在本地原型将「'+escapeHtml(parent.name)+'」退回线索池');
+}
+
+modalContent.onclick=e=>{
+ const close=e.target.closest('[data-modal-close]');if(close){closeDialog();return}
+ const choice=e.target.closest('[data-choice-group]');if(choice){modalContent.querySelectorAll('[data-choice-group="'+choice.dataset.choiceGroup+'"]').forEach(x=>x.classList.remove('on'));choice.classList.add('on');return}
+ const accordion=e.target.closest('[data-accordion]');if(accordion){accordion.parentElement.classList.toggle('open');return}
+ const action=e.target.closest('[data-modal-action]');if(action){if(action.dataset.modalAction==='remind')toast('已在本地原型记录催办，未向审批人发送消息');if(action.dataset.modalAction==='file')toast('附件上传为视觉原型，未读取或上传本地文件');return}
+ const submit=e.target.closest('[data-modal-submit]');if(submit){const kind=submit.dataset.modalSubmit;if(kind==='customer')saveCustomerFromDialog();if(kind==='project')submitProjectFromDialog();if(kind==='contact')saveContactFromDialog();if(kind==='log')saveFollowupFromDialog();if(kind==='stage')saveStageFromDialog();if(kind==='add-project')saveAddedProjectFromDialog();if(kind==='edit-customer')saveEditCustomerFromDialog();if(kind==='return-lead')returnToLeadPoolFromDialog()}
+};
+modalContent.oninput=e=>{if(e.target.classList.contains('err'))e.target.classList.remove('err');e.target.closest('.selectcontrol')?.classList.remove('err');e.target.closest('.field')?.querySelector('.errmsg')?.classList.remove('show')};
+rowMenu.onclick=e=>{
+ e.stopPropagation();const item=e.target.closest('[data-row-command]');if(!item||!activeMenuRecord)return;
+ const record=activeMenuRecord,command=item.dataset.rowCommand;closeRowMenu();
+ if(command==='log')openLogModal(record);if(command==='stage')openStageModal(record);if(command==='contact')openContactModal(record);if(command==='project')openAddProjectModal(record);if(command==='edit')openEditCustomerModal(record);if(command==='return')openReturnModal(record);
+};
+document.getElementById('createBtn').onclick=()=>{if(state.tab==='leads'){toast('“录入线索”为原型入口：截图未提供表单字段，因此不补造录入弹窗。');return}openCustomerModal()};
+scrim.onclick=e=>{if(e.target===scrim)closeDialog()};
+document.addEventListener('click',e=>{closeRowMenu();if(calendarPanel.classList.contains('show')&&!e.target.closest('.datepicker')&&!e.target.closest('.datecontrol'))closeCalendar();if(selectPanel.classList.contains('show')&&!e.target.closest('.selectmenu')&&!e.target.closest('.selectcontrol'))closeSelect()});
+window.addEventListener('resize',()=>{closeRowMenu();closeCalendar();closeSelect()});
+window.addEventListener('scroll',()=>{closeRowMenu();closeCalendar();closeSelect()},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(calendarPanel.classList.contains('show'))closeCalendar();else if(selectPanel.classList.contains('show'))closeSelect();else if(scrim.classList.contains('show'))closeDialog();else closeRowMenu()}});
+
+render();
+</script>
+</body>
+</html>

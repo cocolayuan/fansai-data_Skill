@@ -1,0 +1,124 @@
+/* FansAI V3 custom dropdown. Geometry and value are managed by the companion JS. */
+.dd {
+  display: inline-block;
+  max-width: 100%;
+}
+.dd-trig {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 140px;
+  height: 42px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--line, #e8efef);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink, #1b2430);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.dd-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dd-trig .cv {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  margin: -3px 2px 0 auto;
+  border-right: 1.7px solid var(--muted, #64748b);
+  border-bottom: 1.7px solid var(--muted, #64748b);
+  transform: rotate(45deg);
+}
+.dd-trig[aria-expanded="true"] {
+  border-color: #49B6D8;
+  box-shadow: 0 0 0 3px rgba(73,182,216,.12);
+}
+.dd-trig[aria-expanded="true"] .cv {
+  margin-top: 3px;
+  transform: rotate(225deg);
+}
+.dd-pop {
+  position: fixed;
+  z-index: 10000;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  pointer-events: auto;
+  box-shadow: 0 14px 36px -12px rgba(27, 36, 48, .22);
+}
+.dd-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--dd-columns, 1), minmax(0, 1fr));
+  gap: 8px;
+}
+.dd-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 9px 12px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 8px;
+  background: var(--dd-option-bg, #F0F3F8);
+  color: var(--muted, #64748b);
+  font: inherit;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+.dd-opt:not(:disabled):hover {
+  background: var(--dd-hover-bg, #E8EEF5);
+  color: var(--ink, #1b2430);
+}
+.dd-opt.on,
+.dd-opt.on:not(:disabled):hover {
+  background: var(--dd-selected-bg, #DFEEF7);
+  color: var(--ink, #1b2430);
+  font-weight: 600;
+}
+.dd-option-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* A single decorative check; aria-selected carries the accessible state. */
+.dd-opt::after {
+  content: "";
+  width: 5px;
+  height: 9px;
+  flex: none;
+  margin-left: auto;
+  border-right: 1.7px solid var(--accent, #008aa8);
+  border-bottom: 1.7px solid var(--accent, #008aa8);
+  transform: rotate(45deg);
+  visibility: hidden;
+}
+.dd-opt.on::after { visibility: visible; }
+.dd-dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+.dd-trig:focus-visible,
+.dd-opt:focus-visible {
+  outline: 2px solid #49B6D8;
+  outline-offset: 2px;
+}
+.dd-trig:disabled,
+.dd-opt:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
